@@ -10,9 +10,7 @@ var HistoriasAPI = (function () {
 
   function fallbackImage(src) {
     if (!src || !String(src).trim()) return FALLBACK_IMAGE;
-    var s = String(src);
-    if (s.indexOf('assets/images/') === 0) return '../' + s;
-    return s;
+    return String(src);
   }
   function normalize(data) {
     return { site: data && data.site ? data.site : {}, posts: data && Array.isArray(data.posts) ? data.posts : [] };
