@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Donación por Bizum">
+  <rect x="58" y="20" width="84" height="160" rx="14" fill="#ffffff" stroke="#525252" stroke-width="4"/>
+  <rect x="70" y="44" width="60" height="96" rx="6" fill="#eef8f2" stroke="#525252" stroke-width="2"/>
+  <circle cx="100" cy="156" r="6" fill="#525252"/>
+  <rect x="88" y="30" width="24" height="4" rx="2" fill="#525252"/>
+  <path d="M82 78h18c7 0 12 4 12 10 0 4-2 7-6 8 5 1 8 5 8 10 0 7-5 12-13 12H82V78zm10 16h7c3 0 5-2 5-4s-2-4-5-4h-7v8zm0 16h8c3 0 6-2 6-5s-3-5-6-5h-8v10z" fill="#05c46b"/>
+  <path d="M122 86c-4 2-7 6-7 11 0 7 6 13 13 13 3 0 6-1 8-3l-5-5c-1 1-2 1-3 1-3 0-6-3-6-6 0-2 1-4 3-5l-3-6z" fill="#05c46b" opacity="0.9"/>
+</svg>
