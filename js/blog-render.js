@@ -42,6 +42,20 @@
           history.replaceState(null, '', 'post.html?' + params.toString());
         }
       }
+      // La ficha estática es la canónica: evita que el SPA compita en buscadores.
+      if (post && post.urlEstatica) {
+        var estatica = post.urlEstatica;
+        if (!/^https?:\/\//i.test(estatica)) {
+          try { estatica = new URL(estatica, window.location.href).href; } catch (e) { estatica = post.urlEstatica; }
+        }
+        var canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+          canonical = document.createElement('link');
+          canonical.rel = 'canonical';
+          document.head.appendChild(canonical);
+        }
+        canonical.href = estatica;
+      }
       document.title = post.title + ' · Grupo Nebak';
       root.innerHTML = PostTemplate.renderArticle(post, {
         from: fromParam,

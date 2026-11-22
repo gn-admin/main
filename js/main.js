@@ -5,6 +5,13 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
+  // La canónica de una ficha es su página estática; si aún no existe, se usa
+  // el enlace dinámico antiguo.
+  function fichaUrl(p, from) {
+    if (p && p.urlEstatica) return p.urlEstatica;
+    return 'post.html?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from || 'historias');
+  }
+
   // Year
   $$('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 
@@ -158,7 +165,7 @@
           root.innerHTML = filtered.map(function(p){
             var cNorm = norm(cat);
             var from = (cNorm.indexOf('gatos') !== -1) ? 'gatos' : (cNorm.indexOf('perros') !== -1 ? 'perros' : 'historias');
-            var href = 'post.html?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from);
+            var href = fichaUrl(p, from);
             var img = imgPath(p.image);
             var flags = tagFlags(p);
             var badges = [];
@@ -583,7 +590,7 @@
           var img = imgPath(p.image);
           var c = normalize(p.category);
           var from = (c.indexOf('gatos') !== -1) ? 'gatos' : (c.indexOf('perros') !== -1 ? 'perros' : 'historias');
-          var href = 'post.html?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from);
+          var href = fichaUrl(p, from);
           return '<div class="chat-result">'+(img?('<img src="'+img+'" alt="">'):'<div></div>')+'<div><h4>'+p.title+'</h4><p>'+ (p.category||'') +'</p><a href="'+href+'">Ver ficha →</a></div></div>';
         }).join('') + '</div>';
       });

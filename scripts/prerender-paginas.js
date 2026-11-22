@@ -151,6 +151,9 @@ function generarHtml(post, pagina, shell, siteUrl) {
     /<meta name="description" content="[^"]*">/,
     '<meta name="description" content="' + esc(descripcionSeo(post)) + '">'
   );
+  // La shell ahora declara noindex por defecto (SPA); la ficha estática decide
+  // sus metas en cabeceraSeo, así que se elimina la de la shell.
+  html = html.replace(/<meta name="robots" content="[^"]*">\s*/g, '');
   html = html.replace('</head>', '  ' + cabeceraSeo(post, pagina, siteUrl) + '\n</head>');
   html = html.replace(/<noscript>[\s\S]*?<\/noscript>\s*/g, '');
 
@@ -182,6 +185,7 @@ function htmlBase(shell, titulo, descripcion) {
   let html = shell
     .replace(/<title>[^<]*<\/title>/, '<title>' + esc(titulo) + '</title>')
     .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="' + esc(descripcion) + '">')
+    .replace(/<meta name="robots" content="[^"]*">\s*/g, '')
     .replace(/<noscript>[\s\S]*?<\/noscript>\s*/g, '');
   return html.replace(
     /<script src="js\/(?:data-source|canal-publico|publicaciones-api|blog-api|blog-render|post-template)\.js[^"]*"><\/script>\s*/g,

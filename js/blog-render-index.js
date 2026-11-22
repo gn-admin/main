@@ -17,10 +17,17 @@
     var text = String(post.excerpt || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     var limit = max || 140;
     if (text.length <= limit) return text;
-    return text.slice(0, limit).replace(/\s+\S*$/, '') + '…';
+    return text.slice(0, limit).replace(/\s+\S*$/, '') + 'ï¿½';
   }
 
   function postUrl(slug, from) { return 'post.html?slug=' + encodeURIComponent(slug) + '&from=' + encodeURIComponent(from || 'historias'); }
+
+  // Preferimos la ficha estÃ¡tica cuando el prerender la generÃ³ (urlEstatica);
+  // si no existe, mantenemos el enlace dinÃ¡mico antiguo.
+  function urlFicha(post, from) {
+    if (post && post.urlEstatica) return post.urlEstatica;
+    return postUrl(post && post.slug, from);
+  }
 
   function categoryTone(cat) {
     var c = norm(cat);
@@ -34,7 +41,7 @@
   }
 
   function card(post) {
-    var url = postUrl(post.slug, 'historias');
+    var url = urlFicha(post, 'historias');
     var image = (typeof HistoriasAPI !== 'undefined' && HistoriasAPI.fallbackImage)
       ? HistoriasAPI.fallbackImage(post.image)
       : (post.image || 'assets/images/logo.jpg');
@@ -89,7 +96,7 @@
     var tools = document.getElementById('historiasTools');
     if ((!featured && !all) || typeof HistoriasAPI === 'undefined') return;
 
-    if (all) all.innerHTML = '<div class="listing-empty">Cargando historias…</div>';
+    if (all) all.innerHTML = '<div class="listing-empty">Cargando historiasï¿½</div>';
 
     HistoriasAPI.load().then(function () {
       var posts = HistoriasAPI.getAllPosts().filter(function (p) {
@@ -127,7 +134,7 @@
         var list = filtered();
         var meta = document.getElementById('historiasMeta');
         if (meta) meta.textContent = list.length + ' de ' + posts.length + (posts.length === 1 ? ' historia' : ' historias');
-        renderList(all, list, 'No hay resultados con esos filtros. Prueba con otra categoría o búsqueda.');
+        renderList(all, list, 'No hay resultados con esos filtros. Prueba con otra categorï¿½a o bï¿½squeda.');
       }
 
       if (tools) {
@@ -140,19 +147,19 @@
         tools.innerHTML =
           '<div class="adoption-filters-top">' +
             '<label class="filter-field filter-field--search"><span class="filter-label">Buscar historias</span>' +
-              '<input type="search" id="historiasSearch" placeholder="Nombre, tema, categoría..." autocomplete="off">' +
+              '<input type="search" id="historiasSearch" placeholder="Nombre, tema, categorï¿½a..." autocomplete="off">' +
             '</label>' +
             '<label class="filter-field filter-field--sort"><span class="filter-label">Ordenar</span>' +
               '<select id="historiasSort" aria-label="Ordenar historias">' +
-                '<option value="recent">Más recientes</option>' +
-                '<option value="old">Más antiguas</option>' +
-                '<option value="az">Título (A-Z)</option>' +
+                '<option value="recent">Mï¿½s recientes</option>' +
+                '<option value="old">Mï¿½s antiguas</option>' +
+                '<option value="az">Tï¿½tulo (A-Z)</option>' +
               '</select>' +
             '</label>' +
           '</div>' +
           '<div class="adoption-filters-bottom">' +
-            '<div class="filter-group" role="group" aria-label="Filtrar por categoría">' +
-              '<span class="filter-label">Categorías</span>' +
+            '<div class="filter-group" role="group" aria-label="Filtrar por categorï¿½a">' +
+              '<span class="filter-label">Categorï¿½as</span>' +
               '<div class="filter-chips" id="historiasCats">' + catChips + '</div>' +
             '</div>' +
             '<div class="results-meta" id="historiasMeta" aria-live="polite"></div>' +
@@ -182,7 +189,7 @@
 
       update();
     }).catch(function () {
-      if (all) all.innerHTML = '<div class="listing-empty">No se han podido cargar las historias. Inténtalo de nuevo más tarde.</div>';
+      if (all) all.innerHTML = '<div class="listing-empty">No se han podido cargar las historias. Intï¿½ntalo de nuevo mï¿½s tarde.</div>';
     });
   });
 })();

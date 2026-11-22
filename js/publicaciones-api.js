@@ -123,7 +123,10 @@ var PublicacionesAPI = (function () {
 
   // Acepta tanto el formato local como el payload del canal y devuelve el
   // `Post` interno que ya esperan los renderizadores.
-  function normalizePost(raw) {
+  // `opciones.canal` marca que la fila proviene del canal público y, por tanto,
+  // tiene página estática generada: se añade `urlEstatica`.
+  function normalizePost(raw, opciones) {
+    var deCanal = !!(opciones && opciones.canal);
     if (!raw || typeof raw !== 'object') return null;
     var post = {};
     for (var key in raw) {
@@ -142,6 +145,11 @@ var PublicacionesAPI = (function () {
         pub.schema = 'nebak-post-v1';
         post.publication = pub;
       }
+    }
+    // Solo las publicaciones que existen en el canal tienen página estática
+    // generada por el prerender; las fichas locales mantienen su enlace dinámico.
+    if (deCanal && post.slug) {
+      post.urlEstatica = 'publicaciones/' + encodeURIComponent(String(post.slug)) + '.html';
     }
     return post;
   }
@@ -293,7 +301,7 @@ var PublicacionesAPI = (function () {
       throw err;
     }
     var rows = Array.isArray(res.data) ? res.data : (res.data ? [res.data] : []);
-    return rows.map(normalizePost).filter(Boolean);
+    return rows.map(function (fila) { return normalizePost(fila, { canal: true }); }).filter(Boolean);
   }
 
   function sectionQuery(section) {
@@ -514,7 +522,7 @@ var PublicacionesAPI = (function () {
           return { post: null, notFound: true, message: (res && res.error) || '' };
         });
       }
-      var post = normalizePost(res.data);
+      var post = normalizePost(res.data, { canal: true });
       if (post && post.slug) {
         post.url = 'post.html?slug=' + encodeURIComponent(post.slug);
         realBySlug[post.slug] = 'detalle';
@@ -580,6 +588,11 @@ var PublicacionesAPI = (function () {
     loadPost: loadPost,
     getSiteConfig: getSiteConfig,
     getSource: getSource,
-    fallbackImage: fallbackImage
+    fallbackImage: fallbackImage,
+    urlEstatica: function (slug) {
+      var s = String(slug == null ? '' : slug).trim();
+      if (!s) return '';
+      return 'publicaciones/' + encodeURIComponent(s) + '.html';
+    }
   };
 })();
