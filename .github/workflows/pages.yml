@@ -37,6 +37,8 @@ jobs:
         env:
           SITE_URL: https://gn-admin.github.io/main
         run: node scripts/prerender.js --site-url "$SITE_URL"
+      - name: Check links
+        run: node scripts/check-links.js .
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
@@ -44,3 +46,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Notify search engines
+        run: |
+          curl -sS -o /dev/null "https://www.google.com/ping?sitemap=https://gn-admin.github.io/main/sitemap.xml" || true
+          curl -sS -o /dev/null "https://www.bing.com/ping?sitemap=https://gn-admin.github.io/main/sitemap.xml" || true
