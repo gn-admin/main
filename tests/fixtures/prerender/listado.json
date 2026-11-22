@@ -1,0 +1,645 @@
+{
+  "status": "success",
+  "endpoint": "GET /api/publicaciones",
+  "generatedAt": "2026-11-22T00:00:00.000Z",
+  "filters": {
+    "type": [
+      "animal",
+      "animal_grupo",
+      "evento",
+      "historia"
+    ],
+    "category": [
+      "Perros en adopción",
+      "Gatos en adopción",
+      "Eventos",
+      "Historias"
+    ],
+    "status": [
+      "en_adopcion",
+      "reservado",
+      "en_acogida",
+      "programado",
+      "publicado"
+    ],
+    "species": [
+      "perro",
+      "gato"
+    ],
+    "q": ""
+  },
+  "applied": {
+    "type": "",
+    "category": "",
+    "status": "",
+    "featured": "",
+    "sponsor": "",
+    "species": "",
+    "q": "",
+    "desde": ""
+  },
+  "pagination": {
+    "page": 1,
+    "pageSize": 50,
+    "total": 7,
+    "totalPages": 1
+  },
+  "data": [
+    {
+      "id": "web_1220f701-f31b-469e-816d-34a2ca62731b",
+      "slug": "demo-nube",
+      "type": "animal",
+      "category": "Perros en adopción",
+      "status": "en_adopcion",
+      "title": "Nube, mestizo de 2 años",
+      "excerpt": "Nube es sociable, pasea bien con correa y busca una familia activa que le dedique tiempo.",
+      "publishedAt": "2026-11-20T09:44:52.247Z",
+      "updatedAt": "2026-11-20T09:44:52.247Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/nube/1200/800",
+        "alt": "Nube en el parque"
+      },
+      "contentHtml": "<p>Nube apareció en una finca de la comarca en septiembre de 2026. Pesa 12 kg, está castrado y al día de vacunas.</p><p>Es cariñoso con las personas y se lleva bien con otros perros. Buscamos una familia sin gatos y con algo de jardín o muchas salidas.</p>",
+      "author": "",
+      "tags": [
+        "sociable",
+        "activo",
+        "sin gatos"
+      ],
+      "icons": [],
+      "gallery": [
+        {
+          "src": "https://picsum.photos/seed/nube-2/1200/800",
+          "alt": "Nube corriendo",
+          "caption": "Nube en el parque",
+          "order": 0
+        },
+        {
+          "src": "https://picsum.photos/seed/nube-3/1200/800",
+          "alt": "Nube sentado",
+          "caption": "Esperando su paseo",
+          "order": 1
+        }
+      ],
+      "videos": [],
+      "featured": true,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/demo-nube",
+      "canonical": "",
+      "urgent": true,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Nube, perro mestizo en adopción",
+        "metaDescription": "Nube, mestizo de 2 años, sociable y activo. En adopción en Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/nube/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/nube/1200/800",
+      "imageAlt": "Nube en el parque",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "animal": {
+        "names": [
+          "Nube"
+        ],
+        "species": "perro",
+        "breed": "Mestizo",
+        "sex": [
+          "macho"
+        ],
+        "age": {
+          "value": "2 años",
+          "unit": "",
+          "label": "2 años"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {
+          "email": "nebakadopciones@gmail.com"
+        }
+      },
+      "sponsor": {
+        "available": true,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "web_1f23975c-207e-47fc-8831-b4e581128212",
+      "slug": "demo-un-ano-de-adopciones",
+      "type": "historia",
+      "category": "Historias",
+      "status": "publicado",
+      "title": "Un año de adopciones",
+      "excerpt": "Balance del año: dos adopciones cerradas, dos acogidas activas y una camada en marcha.",
+      "publishedAt": "2026-11-20T09:58:54.753Z",
+      "updatedAt": "2026-11-20T09:58:54.753Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/historia/1200/800",
+        "alt": "Animales del año"
+      },
+      "contentHtml": "<p>Entre noviembre de 2025 y noviembre de 2026 hemos cerrado dos adopciones (Lua y Kira), mantenido dos acogidas y acompañado una camada de tres meses. Gracias a socios, padrinos y voluntarias.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/historias/demo-un-ano-de-adopciones",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Un año de adopciones",
+        "metaDescription": "Balance del año en Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/historia/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/historia/1200/800",
+      "imageAlt": "Animales del año",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1
+    },
+    {
+      "id": "web_5c753033-c949-48d6-bc63-2b1dc511ce8f",
+      "slug": "demo-jornada-puertas-abiertas",
+      "type": "evento",
+      "category": "Eventos",
+      "status": "programado",
+      "title": "Jornada de Puertas Abiertas",
+      "excerpt": "Una mañana para conocer a los animales en acogida y resolver dudas sobre la adopción.",
+      "publishedAt": "2026-11-20T09:58:35.297Z",
+      "updatedAt": "2026-11-20T09:58:35.297Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/jornada/1200/800",
+        "alt": "Jornada de puertas abiertas"
+      },
+      "contentHtml": "<p>El 21 de marzo de 2027 abrimos las puertas del albergue: visitas guiadas, charla de adopción responsable y merienda solidaria.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/eventos/demo-jornada-puertas-abiertas",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Jornada de Puertas Abiertas",
+        "metaDescription": "Jornada de puertas abiertas el 21 de marzo de 2027.",
+        "ogImage": "https://picsum.photos/seed/jornada/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/jornada/1200/800",
+      "imageAlt": "Jornada de puertas abiertas",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "event": {
+        "kind": "jornada",
+        "startDate": "2027-03-21T00:00:00.000Z",
+        "endDate": "2027-03-21T00:00:00.000Z",
+        "timezone": "Europe/Madrid",
+        "location": {
+          "name": "Albergue Grupo Nebak",
+          "address": "Camino Demo 4, Madrid"
+        },
+        "organizer": {},
+        "audience": [],
+        "agenda": [],
+        "registration": {},
+        "milestone": {},
+        "pasado": false
+      }
+    },
+    {
+      "id": "web_ea3bca65-7f89-4f3a-b667-c80a94fe7656",
+      "slug": "demo-camada-otono-2026",
+      "type": "animal_grupo",
+      "category": "Perros en adopción",
+      "status": "en_acogida",
+      "title": "Camada Otoño 2026",
+      "excerpt": "Dos cachorros de tres meses que buscan familia por separado o juntos; están en acogida en Valencia.",
+      "publishedAt": "2026-11-20T09:58:27.506Z",
+      "updatedAt": "2026-11-20T09:58:27.506Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/camada/1200/800",
+        "alt": "Rumba y Tango"
+      },
+      "contentHtml": "<p>Rumba y Tango llegaron en octubre de 2026 con tres meses. Están en acogida con Javier, en Valencia, y ya tienen la primera vacuna.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/demo-camada-otono-2026",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": true,
+      "seo": {
+        "metaTitle": "Camada Otoño 2026",
+        "metaDescription": "Dos cachorros de tres meses en adopción.",
+        "ogImage": "https://picsum.photos/seed/camada/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/camada/1200/800",
+      "imageAlt": "Rumba y Tango",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "group": {
+        "groupName": "Camada Otoño 2026",
+        "count": 2,
+        "members": [
+          {
+            "nombre": "Rumba",
+            "especie": "perro",
+            "raza": "Mestizo",
+            "sexo": "hembra",
+            "edad": "3 meses",
+            "size": "",
+            "foto": "https://picsum.photos/seed/rumba/1200/800"
+          },
+          {
+            "nombre": "Tango",
+            "especie": "perro",
+            "raza": "Mestizo",
+            "sexo": "macho",
+            "edad": "3 meses",
+            "size": "",
+            "foto": "https://picsum.photos/seed/tango/1200/800"
+          }
+        ],
+        "species": "perro",
+        "sex": [
+          "hembra",
+          "macho"
+        ],
+        "age": {
+          "value": "",
+          "unit": "",
+          "label": "3 meses"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {}
+      },
+      "animal": {
+        "groupName": "Camada Otoño 2026",
+        "count": 2,
+        "members": [
+          {
+            "nombre": "Rumba",
+            "especie": "perro",
+            "raza": "Mestizo",
+            "sexo": "hembra",
+            "edad": "3 meses",
+            "size": "",
+            "foto": "https://picsum.photos/seed/rumba/1200/800"
+          },
+          {
+            "nombre": "Tango",
+            "especie": "perro",
+            "raza": "Mestizo",
+            "sexo": "macho",
+            "edad": "3 meses",
+            "size": "",
+            "foto": "https://picsum.photos/seed/tango/1200/800"
+          }
+        ],
+        "species": "perro",
+        "sex": [
+          "hembra",
+          "macho"
+        ],
+        "age": {
+          "value": "",
+          "unit": "",
+          "label": "3 meses"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {}
+      }
+    },
+    {
+      "id": "web_e47240e2-529c-430c-b697-51050204af07",
+      "slug": "demo-bo",
+      "type": "animal",
+      "category": "Perros en adopción",
+      "status": "reservado",
+      "title": "Bo, labrador de 5 años",
+      "excerpt": "Bo está reservado y a la espera de la firma del contrato de adopción.",
+      "publishedAt": "2026-11-20T09:57:22.839Z",
+      "updatedAt": "2026-11-20T09:57:22.839Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/bo/1200/800",
+        "alt": "Bo sentado"
+      },
+      "contentHtml": "<p>Bo llegó en noviembre de 2025. Es tranquilo, obediente y está reservado por una familia de Madrid.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/demo-bo",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Bo, labrador reservado",
+        "metaDescription": "Bo, labrador de 5 años, reservado. Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/bo/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/bo/1200/800",
+      "imageAlt": "Bo sentado",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "animal": {
+        "names": [
+          "Bo"
+        ],
+        "species": "perro",
+        "breed": "Labrador",
+        "sex": [
+          "macho"
+        ],
+        "age": {
+          "value": "5 años",
+          "unit": "",
+          "label": "5 años"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {
+          "email": "nebakadopciones@gmail.com"
+        }
+      },
+      "sponsor": {
+        "available": false,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "web_a5def7e8-0489-43f7-afdc-7f7523250802",
+      "slug": "demo-trufa",
+      "type": "animal",
+      "category": "Gatos en adopción",
+      "status": "en_adopcion",
+      "title": "Trufa, gata de 1 año",
+      "excerpt": "Trufa es juguetona y cariñosa; convive bien con otros gatos y con niños.",
+      "publishedAt": "2026-11-20T09:45:03.892Z",
+      "updatedAt": "2026-11-20T09:45:03.892Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/trufa/1200/800",
+        "alt": "Trufa en el sofá"
+      },
+      "contentHtml": "<p>Trufa llegó en octubre de 2026 desde una colonia controlada. Está esterilizada, vacunada y prueba negativa a leucemia e inmunodeficiencia.</p>",
+      "author": "",
+      "tags": [
+        "juguetona",
+        "con niños"
+      ],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/demo-trufa",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Trufa, gata en adopción",
+        "metaDescription": "Trufa, gata de 1 año, juguetona y sociable. En adopción en Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/trufa/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/trufa/1200/800",
+      "imageAlt": "Trufa en el sofá",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "animal": {
+        "names": [
+          "Trufa"
+        ],
+        "species": "gato",
+        "breed": "Común europeo",
+        "sex": [
+          "hembra"
+        ],
+        "age": {
+          "value": "1 año",
+          "unit": "",
+          "label": "1 año"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {
+          "email": "nebakadopciones@gmail.com"
+        }
+      },
+      "sponsor": {
+        "available": true,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "web_86aef7e2-3aa3-45e0-936f-493048972d18",
+      "slug": "laia",
+      "type": "animal",
+      "category": "Perros en adopción",
+      "status": "en_adopcion",
+      "title": "Laia",
+      "excerpt": "Border collie de 4 años, busca familia sin niños pequeños.",
+      "publishedAt": "2026-11-16T21:59:06.746Z",
+      "updatedAt": "2026-11-16T22:00:50.349Z",
+      "coverImage": {
+        "src": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+        "alt": "Laia, border collie"
+      },
+      "contentHtml": "<p>Laia es una border collie sociable y activa de 4 años. Busca una familia sin niños pequeños.</p><ul><li>Sociable</li><li>Activa</li></ul>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [
+        {
+          "title": "Presentación de Laia",
+          "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+          "provider": "youtube",
+          "note": ""
+        }
+      ],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/laia",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Laia, border collie en adopción",
+        "metaDescription": "Laia, border collie de 4 años, busca familia sin niños pequeños.",
+        "ogImage": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+      "imageAlt": "Laia, border collie",
+      "dateFormatted": "16 de noviembre de 2026",
+      "readTime": 1,
+      "cta": {
+        "label": "Quiero adoptar",
+        "url": "https://gn-admin.github.io/admin-dashboard/#contacto",
+        "kind": "adopcion"
+      },
+      "animal": {
+        "names": [
+          "Laia"
+        ],
+        "species": "Perro",
+        "breed": "Border Collie",
+        "sex": [
+          "hembra"
+        ],
+        "age": {
+          "value": "4 años",
+          "unit": "",
+          "label": "4 años"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": false,
+          "microchipped": false,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {
+          "dogs": "",
+          "cats": "",
+          "kids": ""
+        },
+        "adoption": {
+          "mode": "",
+          "feeEur": "",
+          "requirements": ""
+        },
+        "foster": {
+          "temporary": false,
+          "durationLabel": ""
+        },
+        "location": {
+          "city": "",
+          "province": ""
+        },
+        "contact": {
+          "email": "nebakadopciones@gmail.com",
+          "phone": ""
+        }
+      },
+      "sponsor": {
+        "available": false,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    }
+  ]
+}

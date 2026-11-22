@@ -1,0 +1,60 @@
+{
+  "status": "success",
+  "data": {
+    "id": "web_5c753033-c949-48d6-bc63-2b1dc511ce8f",
+    "slug": "demo-jornada-puertas-abiertas",
+    "type": "evento",
+    "category": "Eventos",
+    "status": "programado",
+    "title": "Jornada de Puertas Abiertas",
+    "excerpt": "Una mañana para conocer a los animales en acogida y resolver dudas sobre la adopción.",
+    "publishedAt": "2026-11-20T09:58:35.297Z",
+    "updatedAt": "2026-11-20T09:58:35.297Z",
+    "coverImage": {
+      "src": "https://picsum.photos/seed/jornada/1200/800",
+      "alt": "Jornada de puertas abiertas"
+    },
+    "contentHtml": "<p>El 21 de marzo de 2027 abrimos las puertas del albergue: visitas guiadas, charla de adopción responsable y merienda solidaria.</p>",
+    "author": "",
+    "tags": [],
+    "icons": [],
+    "gallery": [],
+    "videos": [],
+    "featured": false,
+    "orden": 0,
+    "listed": true,
+    "url": "/eventos/demo-jornada-puertas-abiertas",
+    "canonical": "",
+    "urgent": false,
+    "isGroup": false,
+    "seo": {
+      "metaTitle": "Jornada de Puertas Abiertas",
+      "metaDescription": "Jornada de puertas abiertas el 21 de marzo de 2027.",
+      "ogImage": "https://picsum.photos/seed/jornada/1200/800",
+      "canonical": "",
+      "robots": "index,follow",
+      "og": null,
+      "twitter": null
+    },
+    "image": "https://picsum.photos/seed/jornada/1200/800",
+    "imageAlt": "Jornada de puertas abiertas",
+    "dateFormatted": "20 de noviembre de 2026",
+    "readTime": 1,
+    "event": {
+      "kind": "jornada",
+      "startDate": "2027-03-21T00:00:00.000Z",
+      "endDate": "2027-03-21T00:00:00.000Z",
+      "timezone": "Europe/Madrid",
+      "location": {
+        "name": "Albergue Grupo Nebak",
+        "address": "Camino Demo 4, Madrid"
+      },
+      "organizer": {},
+      "audience": [],
+      "agenda": [],
+      "registration": {},
+      "milestone": {},
+      "pasado": false
+    }
+  }
+}

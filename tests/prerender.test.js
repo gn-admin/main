@@ -1,0 +1,254 @@
+/*
+ * Pruebas de F1 del prerender: plan en memoria, fixtures reales y CLI --dry.
+ *
+ * Ejecutar: node --test
+ */
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+
+const RAIZ = path.join(__dirname, '..');
+const FIXTURES = path.join(__dirname, 'fixtures', 'prerender');
+
+const prerender = require(path.join(RAIZ, 'scripts', 'prerender.js'));
+
+function fixture(nombre) {
+  return JSON.parse(fs.readFileSync(path.join(FIXTURES, nombre), 'utf8'));
+}
+
+function datos() {
+  return {
+    publicaciones: fixture('listado.json').data,
+    retiradas: fixture('retiradas.json').data,
+    redirects: fixture('redirects.json').data,
+    sitemap: fixture('sitemap.json')
+  };
+}
+
+const SITE = 'https://gn-admin.github.io/main';
+
+test('slugSeguro acepta slugs normales y rechaza rutas', () => {
+  assert.equal(prerender.slugSeguro('demo-nube'), 'demo-nube');
+  assert.equal(prerender.slugSeguro('demo_nube.2'), 'demo_nube.2');
+  assert.equal(prerender.slugSeguro('../fuera'), null);
+  assert.equal(prerender.slugSeguro('a/b'), null);
+  assert.equal(prerender.slugSeguro('a b'), null);
+  assert.equal(prerender.slugSeguro('..'), null);
+  assert.equal(prerender.slugSeguro(''), null);
+  assert.equal(prerender.slugSeguro(null), null);
+});
+
+test('urlEstatica genera la URL uniforme con o sin barra final', () => {
+  assert.equal(
+    prerender.urlEstatica(SITE, 'demo-nube'),
+    'https://gn-admin.github.io/main/publicaciones/demo-nube.html'
+  );
+  assert.equal(
+    prerender.urlEstatica(SITE + '/', 'demo-nube'),
+    'https://gn-admin.github.io/main/publicaciones/demo-nube.html'
+  );
+});
+
+test('cargarConfig usa el endpointBase de js/data-source.js', () => {
+  const config = prerender.cargarConfig();
+  assert.match(config.endpointBase, /^https:\/\/script\.google\.com\/macros\/s\//);
+  assert.equal(config.pageSize, 24);
+  assert.ok(config.timeoutMs > 0);
+});
+
+test('plan con fixtures: 7 fichas, sin redirects y 15 URLs de sitemap', () => {
+  const plan = prerender.construirPlan(datos(), { siteUrl: SITE });
+
+  assert.equal(plan.errores.length, 0);
+  assert.equal(plan.paginas.length, 7);
+  assert.equal(plan.paginas.filter(p => p.indexable).length, 7);
+  assert.equal(plan.retiradas.length, 5);
+  assert.equal(plan.redirects.length, 0);
+  assert.equal(plan.sitemap.length, 15);
+
+  const nube = plan.paginas.find(p => p.slug === 'demo-nube');
+  assert.equal(nube.canonical, SITE + '/publicaciones/demo-nube.html');
+  assert.equal(nube.lastmod, '2026-11-20T09:44:52.247Z');
+  assert.ok(plan.sitemap.some(u => u.loc === nube.canonical));
+});
+
+test('el sitemap avisa del endpoint vacío sin tratarlo como error', () => {
+  const plan = prerender.construirPlan(datos(), { siteUrl: SITE });
+  assert.equal(plan.errores.length, 0);
+  assert.ok(plan.avisos.some(a => a.indexOf('sitemap del canal vacío') !== -1));
+  assert.ok(plan.avisos.some(a => a.indexOf('Sin dominio público') !== -1));
+});
+
+test('una retirada no se indexa ni entra en el sitemap', () => {
+  const entrada = datos();
+  entrada.retiradas = [{ slug: 'demo-nube', tipo: 'animal', retiradoEn: '2026-11-21T10:00:00.000Z' }];
+  const plan = prerender.construirPlan(entrada, { siteUrl: SITE });
+
+  const nube = plan.paginas.find(p => p.slug === 'demo-nube');
+  assert.equal(nube.indexable, false);
+  assert.ok(!plan.sitemap.some(u => u.loc === nube.canonical));
+  assert.equal(plan.sitemap.length, 14);
+  assert.ok(plan.retiradas.some(r => r.slug === 'demo-nube'));
+});
+
+test('normalizarRetirada acepta retiradoEn y retirado_en', () => {
+  assert.deepEqual(
+    prerender.normalizarRetirada({ slug: 'a', tipo: 'animal', retiradoEn: '2026-01-01' }),
+    { slug: 'a', tipo: 'animal', fecha: '2026-01-01' }
+  );
+  assert.deepEqual(
+    prerender.normalizarRetirada({ slug: 'b', tipo: 'evento', retirado_en: '2026-02-02' }),
+    { slug: 'b', tipo: 'evento', fecha: '2026-02-02' }
+  );
+  assert.equal(prerender.normalizarRetirada({ slug: '../x' }), null);
+});
+
+test('redirects: destino por slug o URL y error si falta', () => {
+  assert.deepEqual(
+    prerender.normalizarRedirect({ slug: 'viejo', to: 'nuevo' }),
+    { slug: 'viejo', destino: 'nuevo' }
+  );
+  assert.deepEqual(
+    prerender.normalizarRedirect({ slug: 'viejo', destino: 'https://x.test/ficha' }),
+    { slug: 'viejo', destino: 'https://x.test/ficha' }
+  );
+
+  const plan = prerender.construirPlan({
+    publicaciones: datos().publicaciones,
+    retiradas: [],
+    redirects: [{ slug: 'demo-nube', nuevoSlug: 'demo-nube-2027' }]
+  }, { siteUrl: SITE });
+
+  assert.equal(plan.paginas.find(p => p.slug === 'demo-nube').indexable, false);
+  assert.equal(plan.redirects[0].destino, SITE + '/publicaciones/demo-nube-2027.html');
+  assert.ok(!plan.sitemap.some(u => u.loc.endsWith('/demo-nube.html')));
+
+  const roto = prerender.construirPlan({
+    publicaciones: [],
+    retiradas: [],
+    redirects: [{ slug: 'sin-destino' }]
+  }, { siteUrl: SITE });
+  assert.ok(roto.errores.some(e => e.indexOf('Redirect sin destino') !== -1));
+});
+
+test('descargarListado pagina hasta totalPages y deduplica', async () => {
+  const paginas = {
+    1: fixture('listado-p1.json'),
+    2: fixture('listado-p2.json'),
+    3: fixture('listado-p3.json')
+  };
+  const llamadas = [];
+  const consultar = async (endpoint, params) => {
+    llamadas.push(params.page);
+    assert.equal(endpoint, 'publicaciones');
+    return paginas[params.page];
+  };
+
+  const resultado = await prerender.descargarListado(consultar, 3);
+  assert.equal(llamadas.length, 3);
+  assert.equal(resultado.paginas, 3);
+  const slugs = resultado.items.map(p => p.slug);
+  assert.equal(slugs.length, 7);
+  assert.equal(new Set(slugs).size, 7);
+});
+
+test('CLI --dry con fixtures resume el plan y sale 0', () => {
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender'
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /publicaciones: 7 \(7 indexables\)/);
+  assert.match(res.stdout, /retiradas: 5/);
+  assert.match(res.stdout, /sitemap: 15 URLs/);
+  assert.match(res.stdout, /SITE_URL: https:\/\/gn-admin\.github\.io\/main/);
+});
+
+test('CLI sin --dry no escribe y explica que llega en F2/F3', () => {
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender'
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 1);
+  assert.match(res.stderr, /F2\/F3/);
+});
+
+test('CLI con fixture inexistente falla con mensaje claro', () => {
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/no-existe'
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 1);
+  assert.match(res.stderr, /Falta listado\.json/);
+});
+
+
+test('descargarListado deduplica páginas solapadas', async () => {
+  const p1 = fixture('listado-p1.json');
+  const consultar = async () => p1;
+  const resultado = await prerender.descargarListado(consultar, 3);
+
+  assert.equal(resultado.paginas, 3);
+  assert.equal(resultado.items.length, 3);
+  assert.equal(resultado.duplicados, 6);
+  assert.equal(new Set(resultado.items.map(p => p.slug)).size, 3);
+});
+
+test('un duplicado en el listado no bloquea el plan', () => {
+  const entrada = datos();
+  entrada.publicaciones = entrada.publicaciones.concat([entrada.publicaciones[0]]);
+  const plan = prerender.construirPlan(entrada, { siteUrl: SITE });
+
+  assert.equal(plan.errores.length, 0);
+  assert.equal(plan.paginas.length, 7);
+  assert.ok(plan.avisos.some(a => a.indexOf('Slug duplicado') !== -1));
+});
+
+test('resolverDestino rechaza protocolos y rutas no seguras', () => {
+  assert.match(prerender.resolverDestino(SITE, 'javascript:alert(1)').error, /protocolo no permitido: javascript/);
+  assert.match(prerender.resolverDestino(SITE, 'data:text/html,x').error, /protocolo no permitido: data/);
+  assert.match(prerender.resolverDestino(SITE, '//evil.test/x').error, /URL sin protocolo/);
+  assert.match(prerender.resolverDestino(SITE, '../fuera').error, /destino no válido/);
+  assert.match(prerender.resolverDestino(SITE, 'http://').error, /URL no válida|destino/);
+  assert.match(prerender.resolverDestino(SITE, 'https://user:pass@x.test/a').error, /credenciales/);
+
+  const absoluta = prerender.resolverDestino(SITE, 'https://gn-admin.github.io/main/publicaciones/demo-trufa.html');
+  assert.equal(absoluta.error, undefined);
+  assert.equal(absoluta.destinoSlug, null);
+
+  const porSlug = prerender.resolverDestino(SITE, 'demo-trufa');
+  assert.equal(porSlug.url, SITE + '/publicaciones/demo-trufa.html');
+  assert.equal(porSlug.destinoSlug, 'demo-trufa');
+});
+
+test('un redirect con destino inválido no se publica y da error', () => {
+  const plan = prerender.construirPlan({
+    publicaciones: [],
+    retiradas: [],
+    redirects: [
+      { slug: 'malo-js', to: 'javascript:alert(1)' },
+      { slug: 'malo-ruta', to: '../fuera' },
+      { slug: 'bueno', to: 'https://gn-admin.github.io/main/publicaciones/demo-trufa.html' }
+    ]
+  }, { siteUrl: SITE });
+
+  assert.equal(plan.errores.length, 2);
+  assert.equal(plan.redirects.length, 1);
+  assert.equal(plan.redirects[0].slug, 'bueno');
+  assert.equal(plan.redirects[0].destino, 'https://gn-admin.github.io/main/publicaciones/demo-trufa.html');
+});
+
+test('redirect a un slug no publicado avisa pero no falla', () => {
+  const plan = prerender.construirPlan({
+    publicaciones: datos().publicaciones,
+    retiradas: [],
+    redirects: [{ slug: 'demo-nube', nuevoSlug: 'demo-nube-2027' }]
+  }, { siteUrl: SITE });
+
+  assert.equal(plan.errores.length, 0);
+  assert.ok(plan.avisos.some(a => a.indexOf('slug no publicado') !== -1));
+});

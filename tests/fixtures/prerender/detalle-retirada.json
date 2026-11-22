@@ -1,0 +1,10 @@
+{
+  "status": "gone",
+  "code": "gone",
+  "error": "Esta publicación se ha retirado",
+  "data": {
+    "slug": "demo-lua",
+    "tipo": "animal",
+    "retirado_en": "2026-11-20T09:57:37.863Z"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "slug": "prueba-retirada-playwright",
+      "tipo": "evento",
+      "retiradoEn": "2026-11-20T08:48:44.172Z"
+    },
+    {
+      "slug": "demo-lua",
+      "tipo": "animal",
+      "retiradoEn": "2026-11-20T09:57:37.863Z"
+    },
+    {
+      "slug": "demo-kira",
+      "tipo": "animal",
+      "retiradoEn": "2026-11-20T09:57:49.451Z"
+    },
+    {
+      "slug": "demo-simba",
+      "tipo": "animal",
+      "retiradoEn": "2026-11-20T09:58:11.823Z"
+    },
+    {
+      "slug": "demo-mercadillo-primavera",
+      "tipo": "evento",
+      "retiradoEn": "2026-11-20T09:58:47.386Z"
+    }
+  ]
+}

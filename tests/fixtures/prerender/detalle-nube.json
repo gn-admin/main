@@ -1,0 +1,163 @@
+{
+  "status": "success",
+  "data": {
+    "id": "web_1220f701-f31b-469e-816d-34a2ca62731b",
+    "slug": "demo-nube",
+    "type": "animal",
+    "category": "Perros en adopción",
+    "status": "en_adopcion",
+    "title": "Nube, mestizo de 2 años",
+    "excerpt": "Nube es sociable, pasea bien con correa y busca una familia activa que le dedique tiempo.",
+    "publishedAt": "2026-11-20T09:44:52.247Z",
+    "updatedAt": "2026-11-20T09:44:52.247Z",
+    "coverImage": {
+      "src": "https://picsum.photos/seed/nube/1200/800",
+      "alt": "Nube en el parque"
+    },
+    "contentHtml": "<p>Nube apareció en una finca de la comarca en septiembre de 2026. Pesa 12 kg, está castrado y al día de vacunas.</p><p>Es cariñoso con las personas y se lleva bien con otros perros. Buscamos una familia sin gatos y con algo de jardín o muchas salidas.</p>",
+    "author": "",
+    "tags": [
+      "sociable",
+      "activo",
+      "sin gatos"
+    ],
+    "icons": [],
+    "gallery": [
+      {
+        "src": "https://picsum.photos/seed/nube-2/1200/800",
+        "alt": "Nube corriendo",
+        "caption": "Nube en el parque",
+        "order": 0
+      },
+      {
+        "src": "https://picsum.photos/seed/nube-3/1200/800",
+        "alt": "Nube sentado",
+        "caption": "Esperando su paseo",
+        "order": 1
+      }
+    ],
+    "videos": [],
+    "featured": true,
+    "orden": 0,
+    "listed": true,
+    "url": "/animales/demo-nube",
+    "canonical": "",
+    "urgent": true,
+    "isGroup": false,
+    "seo": {
+      "metaTitle": "Nube, perro mestizo en adopción",
+      "metaDescription": "Nube, mestizo de 2 años, sociable y activo. En adopción en Grupo Nebak.",
+      "ogImage": "https://picsum.photos/seed/nube/1200/800",
+      "canonical": "",
+      "robots": "index,follow",
+      "og": null,
+      "twitter": null
+    },
+    "image": "https://picsum.photos/seed/nube/1200/800",
+    "imageAlt": "Nube en el parque",
+    "dateFormatted": "20 de noviembre de 2026",
+    "readTime": 1,
+    "animal": {
+      "names": [
+        "Nube"
+      ],
+      "species": "perro",
+      "breed": "Mestizo",
+      "sex": [
+        "macho"
+      ],
+      "age": {
+        "value": "2 años",
+        "unit": "",
+        "label": "2 años"
+      },
+      "size": "",
+      "color": "",
+      "health": {
+        "vaccinated": true,
+        "dewormed": false,
+        "neutered": true,
+        "microchipped": true,
+        "specialNeeds": false
+      },
+      "temperament": [],
+      "compatibility": {},
+      "adoption": {},
+      "foster": {},
+      "location": {},
+      "contact": {
+        "email": "nebakadopciones@gmail.com"
+      }
+    },
+    "sponsor": {
+      "available": true,
+      "monthlyEur": null,
+      "notes": ""
+    },
+    "ficha": {
+      "plantilla": "ficha",
+      "bloques": {
+        "datos": true,
+        "etiquetas": true,
+        "contenido": true,
+        "galeria": true,
+        "videos": true,
+        "fichaAnimal": true,
+        "cta": true
+      },
+      "orden": [
+        "datos",
+        "etiquetas",
+        "contenido",
+        "galeria",
+        "videos",
+        "fichaAnimal",
+        "cta"
+      ],
+      "videoModo": "enlace",
+      "mostrarLectura": true,
+      "icons": [
+        {
+          "icon": "edad",
+          "label": "Edad",
+          "value": "2 años"
+        },
+        {
+          "icon": "peso",
+          "label": "Peso",
+          "value": "12 kg"
+        },
+        {
+          "icon": "sexo",
+          "label": "Sexo",
+          "value": "Macho"
+        }
+      ],
+      "gallery": [
+        {
+          "src": "https://picsum.photos/seed/nube-2/1200/800",
+          "alt": "Nube corriendo",
+          "caption": "Nube en el parque",
+          "order": 0
+        }
+      ],
+      "videos": [
+        {
+          "title": "Nube jugando",
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "provider": "youtube",
+          "note": ""
+        }
+      ],
+      "tags": [
+        "sociable",
+        "activo"
+      ],
+      "cta": {
+        "label": "Escribir para adoptar",
+        "url": "mailto:demo.adopciones@example.test",
+        "kind": "url"
+      }
+    }
+  }
+}

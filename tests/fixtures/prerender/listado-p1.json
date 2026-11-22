@@ -1,0 +1,242 @@
+{
+  "status": "success",
+  "endpoint": "GET /api/publicaciones",
+  "generatedAt": "2026-11-22T00:00:00.000Z",
+  "filters": {
+    "type": [
+      "animal",
+      "animal_grupo",
+      "evento",
+      "historia"
+    ],
+    "category": [
+      "Perros en adopción",
+      "Gatos en adopción",
+      "Eventos",
+      "Historias"
+    ],
+    "status": [
+      "en_adopcion",
+      "reservado",
+      "en_acogida",
+      "programado",
+      "publicado"
+    ],
+    "species": [
+      "perro",
+      "gato"
+    ],
+    "q": ""
+  },
+  "applied": {
+    "type": "",
+    "category": "",
+    "status": "",
+    "featured": "",
+    "sponsor": "",
+    "species": "",
+    "q": "",
+    "desde": ""
+  },
+  "pagination": {
+    "page": 1,
+    "pageSize": 3,
+    "total": 7,
+    "totalPages": 3
+  },
+  "data": [
+    {
+      "id": "web_1220f701-f31b-469e-816d-34a2ca62731b",
+      "slug": "demo-nube",
+      "type": "animal",
+      "category": "Perros en adopción",
+      "status": "en_adopcion",
+      "title": "Nube, mestizo de 2 años",
+      "excerpt": "Nube es sociable, pasea bien con correa y busca una familia activa que le dedique tiempo.",
+      "publishedAt": "2026-11-20T09:44:52.247Z",
+      "updatedAt": "2026-11-20T09:44:52.247Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/nube/1200/800",
+        "alt": "Nube en el parque"
+      },
+      "contentHtml": "<p>Nube apareció en una finca de la comarca en septiembre de 2026. Pesa 12 kg, está castrado y al día de vacunas.</p><p>Es cariñoso con las personas y se lleva bien con otros perros. Buscamos una familia sin gatos y con algo de jardín o muchas salidas.</p>",
+      "author": "",
+      "tags": [
+        "sociable",
+        "activo",
+        "sin gatos"
+      ],
+      "icons": [],
+      "gallery": [
+        {
+          "src": "https://picsum.photos/seed/nube-2/1200/800",
+          "alt": "Nube corriendo",
+          "caption": "Nube en el parque",
+          "order": 0
+        },
+        {
+          "src": "https://picsum.photos/seed/nube-3/1200/800",
+          "alt": "Nube sentado",
+          "caption": "Esperando su paseo",
+          "order": 1
+        }
+      ],
+      "videos": [],
+      "featured": true,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/demo-nube",
+      "canonical": "",
+      "urgent": true,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Nube, perro mestizo en adopción",
+        "metaDescription": "Nube, mestizo de 2 años, sociable y activo. En adopción en Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/nube/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/nube/1200/800",
+      "imageAlt": "Nube en el parque",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "animal": {
+        "names": [
+          "Nube"
+        ],
+        "species": "perro",
+        "breed": "Mestizo",
+        "sex": [
+          "macho"
+        ],
+        "age": {
+          "value": "2 años",
+          "unit": "",
+          "label": "2 años"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": true,
+          "microchipped": true,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {},
+        "adoption": {},
+        "foster": {},
+        "location": {},
+        "contact": {
+          "email": "nebakadopciones@gmail.com"
+        }
+      },
+      "sponsor": {
+        "available": true,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "web_1f23975c-207e-47fc-8831-b4e581128212",
+      "slug": "demo-un-ano-de-adopciones",
+      "type": "historia",
+      "category": "Historias",
+      "status": "publicado",
+      "title": "Un año de adopciones",
+      "excerpt": "Balance del año: dos adopciones cerradas, dos acogidas activas y una camada en marcha.",
+      "publishedAt": "2026-11-20T09:58:54.753Z",
+      "updatedAt": "2026-11-20T09:58:54.753Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/historia/1200/800",
+        "alt": "Animales del año"
+      },
+      "contentHtml": "<p>Entre noviembre de 2025 y noviembre de 2026 hemos cerrado dos adopciones (Lua y Kira), mantenido dos acogidas y acompañado una camada de tres meses. Gracias a socios, padrinos y voluntarias.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/historias/demo-un-ano-de-adopciones",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Un año de adopciones",
+        "metaDescription": "Balance del año en Grupo Nebak.",
+        "ogImage": "https://picsum.photos/seed/historia/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/historia/1200/800",
+      "imageAlt": "Animales del año",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1
+    },
+    {
+      "id": "web_5c753033-c949-48d6-bc63-2b1dc511ce8f",
+      "slug": "demo-jornada-puertas-abiertas",
+      "type": "evento",
+      "category": "Eventos",
+      "status": "programado",
+      "title": "Jornada de Puertas Abiertas",
+      "excerpt": "Una mañana para conocer a los animales en acogida y resolver dudas sobre la adopción.",
+      "publishedAt": "2026-11-20T09:58:35.297Z",
+      "updatedAt": "2026-11-20T09:58:35.297Z",
+      "coverImage": {
+        "src": "https://picsum.photos/seed/jornada/1200/800",
+        "alt": "Jornada de puertas abiertas"
+      },
+      "contentHtml": "<p>El 21 de marzo de 2027 abrimos las puertas del albergue: visitas guiadas, charla de adopción responsable y merienda solidaria.</p>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/eventos/demo-jornada-puertas-abiertas",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Jornada de Puertas Abiertas",
+        "metaDescription": "Jornada de puertas abiertas el 21 de marzo de 2027.",
+        "ogImage": "https://picsum.photos/seed/jornada/1200/800",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://picsum.photos/seed/jornada/1200/800",
+      "imageAlt": "Jornada de puertas abiertas",
+      "dateFormatted": "20 de noviembre de 2026",
+      "readTime": 1,
+      "event": {
+        "kind": "jornada",
+        "startDate": "2027-03-21T00:00:00.000Z",
+        "endDate": "2027-03-21T00:00:00.000Z",
+        "timezone": "Europe/Madrid",
+        "location": {
+          "name": "Albergue Grupo Nebak",
+          "address": "Camino Demo 4, Madrid"
+        },
+        "organizer": {},
+        "audience": [],
+        "agenda": [],
+        "registration": {},
+        "milestone": {},
+        "pasado": false
+      }
+    }
+  ]
+}

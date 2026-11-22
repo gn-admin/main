@@ -1,0 +1,154 @@
+{
+  "status": "success",
+  "endpoint": "GET /api/publicaciones",
+  "generatedAt": "2026-11-22T00:00:00.000Z",
+  "filters": {
+    "type": [
+      "animal",
+      "animal_grupo",
+      "evento",
+      "historia"
+    ],
+    "category": [
+      "Perros en adopción",
+      "Gatos en adopción",
+      "Eventos",
+      "Historias"
+    ],
+    "status": [
+      "en_adopcion",
+      "reservado",
+      "en_acogida",
+      "programado",
+      "publicado"
+    ],
+    "species": [
+      "perro",
+      "gato"
+    ],
+    "q": ""
+  },
+  "applied": {
+    "type": "",
+    "category": "",
+    "status": "",
+    "featured": "",
+    "sponsor": "",
+    "species": "",
+    "q": "",
+    "desde": ""
+  },
+  "pagination": {
+    "page": 3,
+    "pageSize": 3,
+    "total": 7,
+    "totalPages": 3
+  },
+  "data": [
+    {
+      "id": "web_86aef7e2-3aa3-45e0-936f-493048972d18",
+      "slug": "laia",
+      "type": "animal",
+      "category": "Perros en adopción",
+      "status": "en_adopcion",
+      "title": "Laia",
+      "excerpt": "Border collie de 4 años, busca familia sin niños pequeños.",
+      "publishedAt": "2026-11-16T21:59:06.746Z",
+      "updatedAt": "2026-11-16T22:00:50.349Z",
+      "coverImage": {
+        "src": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+        "alt": "Laia, border collie"
+      },
+      "contentHtml": "<p>Laia es una border collie sociable y activa de 4 años. Busca una familia sin niños pequeños.</p><ul><li>Sociable</li><li>Activa</li></ul>",
+      "author": "",
+      "tags": [],
+      "icons": [],
+      "gallery": [],
+      "videos": [
+        {
+          "title": "Presentación de Laia",
+          "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+          "provider": "youtube",
+          "note": ""
+        }
+      ],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/animales/laia",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Laia, border collie en adopción",
+        "metaDescription": "Laia, border collie de 4 años, busca familia sin niños pequeños.",
+        "ogImage": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg",
+      "imageAlt": "Laia, border collie",
+      "dateFormatted": "16 de noviembre de 2026",
+      "readTime": 1,
+      "cta": {
+        "label": "Quiero adoptar",
+        "url": "https://gn-admin.github.io/admin-dashboard/#contacto",
+        "kind": "adopcion"
+      },
+      "animal": {
+        "names": [
+          "Laia"
+        ],
+        "species": "Perro",
+        "breed": "Border Collie",
+        "sex": [
+          "hembra"
+        ],
+        "age": {
+          "value": "4 años",
+          "unit": "",
+          "label": "4 años"
+        },
+        "size": "",
+        "color": "",
+        "health": {
+          "vaccinated": true,
+          "dewormed": false,
+          "neutered": false,
+          "microchipped": false,
+          "specialNeeds": false
+        },
+        "temperament": [],
+        "compatibility": {
+          "dogs": "",
+          "cats": "",
+          "kids": ""
+        },
+        "adoption": {
+          "mode": "",
+          "feeEur": "",
+          "requirements": ""
+        },
+        "foster": {
+          "temporary": false,
+          "durationLabel": ""
+        },
+        "location": {
+          "city": "",
+          "province": ""
+        },
+        "contact": {
+          "email": "nebakadopciones@gmail.com",
+          "phone": ""
+        }
+      },
+      "sponsor": {
+        "available": false,
+        "monthlyEur": null,
+        "notes": ""
+      }
+    }
+  ]
+}
