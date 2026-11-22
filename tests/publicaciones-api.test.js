@@ -271,3 +271,26 @@ test('canal caÃ­do en el detalle: usa la ficha local', async () => {
   assert.ok(resultado.post);
   assert.equal(resultado.post.slug, 'gato-local');
 });
+
+test('listado excluye publicaciones retiradas o redirigidas', async () => {
+  const base = FIXTURES.gatos;
+  const conGone = JSON.parse(JSON.stringify(base));
+  conGone.data = conGone.data.concat([
+    { slug: 'gato-gone', title: 'Gato gone', category: 'Gatos en adopción', status: 'gone' },
+    { slug: 'gato-redirect', title: 'Gato redirect', category: 'Gatos en adopción', redirect: { to: 'otro' } }
+  ]);
+  const { api } = entorno({
+    responder(url) {
+      if (url.indexOf(CANAL) === 0) {
+        const u = new URL(url);
+        if (u.searchParams.get('endpoint') === 'animales-publicos') return conGone;
+        return responderPorDefecto(url);
+      }
+      return responderPorDefecto(url);
+    }
+  });
+  await api.load(['gatos']);
+  const slugs = api.getPostsFor('gatos').map(function (p) { return p.slug; });
+  assert.ok(slugs.indexOf('gato-gone') === -1, 'gone excluido');
+  assert.ok(slugs.indexOf('gato-redirect') === -1, 'redirect excluido');
+});

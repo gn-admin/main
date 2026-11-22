@@ -148,8 +148,9 @@
         var filterSel = document.querySelector('[data-adoption-filter="'+cat+'"]');
         var chipsWrap = document.querySelector('[data-adoption-chips="'+cat+'"]');
         var meta = document.querySelector('[data-adoption-meta="'+cat+'"]');
-        var state = { q:'', chip:'all', taxStatus:'all', sort:'recent' };
+        var state = { q:'', filter:'all', sort:'recent' };
         var taxonomyStatuses = null; // null = no cargado; [] = sin taxonomías
+        var CHIP_KEYS = ['urgente','cachorro','adulto','especial'];
 
         // Carga las taxonomías del canal para este tipo y pinta los filtros.
         var tipoTax = /grupo/i.test(cat) ? 'animal_grupo' : 'animal';
@@ -160,44 +161,29 @@
             if (Array.isArray(statuses) && statuses.length) {
               taxonomyStatuses = statuses;
               renderChips();
+              render();
             }
           }).catch(function () { taxonomyStatuses = []; });
         }
 
         function renderChips() {
           if (!chipsWrap) return;
-          var chips = ['<button type="button" class="filter-chip is-active" data-chip="all" aria-pressed="true">Todos</button>'];
-          if (taxonomyStatuses && taxonomyStatuses.length) {
+          var isTax = !!(taxonomyStatuses && taxonomyStatuses.length);
+          var chips = ['<button type="button" class="filter-chip is-active" data-filter="all" aria-pressed="true">Todos</button>'];
+          if (isTax) {
             taxonomyStatuses.forEach(function (st) {
               var val = (typeof st === 'string') ? st : (st.value || st.slug || st.label || '');
               var lab = (typeof st === 'string') ? st : (st.label || st.value || st.slug || '');
               if (!val) return;
-              chips.push('<button type="button" class="filter-chip" data-chip-tax="' + escAttr(val) + '" aria-pressed="false">' + esc(lab) + '</button>');
+              chips.push('<button type="button" class="filter-chip" data-filter="' + escAttr(val) + '" aria-pressed="false">' + esc(lab) + '</button>');
             });
           } else {
-            chips.push('<button type="button" class="filter-chip" data-chip="urgente" aria-pressed="false">Urgente</button>');
-            chips.push('<button type="button" class="filter-chip" data-chip="cachorro" aria-pressed="false">Cachorros</button>');
-            chips.push('<button type="button" class="filter-chip" data-chip="adulto" aria-pressed="false">Adultos / Senior</button>');
-            chips.push('<button type="button" class="filter-chip" data-chip="especial" aria-pressed="false">Necesidades especiales</button>');
+            chips.push('<button type="button" class="filter-chip" data-filter="urgente" aria-pressed="false">Urgente</button>');
+            chips.push('<button type="button" class="filter-chip" data-filter="cachorro" aria-pressed="false">Cachorros</button>');
+            chips.push('<button type="button" class="filter-chip" data-filter="adulto" aria-pressed="false">Adultos / Senior</button>');
+            chips.push('<button type="button" class="filter-chip" data-filter="especial" aria-pressed="false">Necesidades especiales</button>');
           }
           chipsWrap.innerHTML = chips.join('');
-          // Re-bind click handlers
-          $$( '[data-chip], [data-chip-tax]', chipsWrap).forEach(function (btn) {
-            btn.addEventListener('click', function () {
-              if (btn.hasAttribute('data-chip-tax')) {
-                state.taxStatus = btn.getAttribute('data-chip-tax');
-                state.chip = 'all';
-              } else {
-                state.chip = btn.getAttribute('data-chip');
-                state.taxStatus = 'all';
-              }
-              $$( '[data-chip], [data-chip-tax]', chipsWrap).forEach(function (b) { b.classList.remove('is-active'); });
-              btn.classList.add('is-active');
-              render();
-            });
-          });
-          var first = chipsWrap.querySelector('.chip');
-          if (first) first.classList.add('is-active');
         }
 
         function render(){
@@ -207,12 +193,18 @@
             if (p && (p.status === 'gone' || p.redirect)) return false;
             var text = norm([p.title,p.excerpt,p.category,(p.tags||[]).join(' ')].join(' '));
             if (q && text.indexOf(q) === -1) return false;
-            if (state.taxStatus && state.taxStatus !== 'all' && p.status !== state.taxStatus) return false;
-            var f = tagFlags(p);
-            if (state.chip === 'urgente' && !f.urgente) return false;
-            if (state.chip === 'cachorro' && !f.cachorro) return false;
-            if (state.chip === 'adulto' && !f.adulto) return false;
-            if (state.chip === 'especial' && !f.especial) return false;
+            var isTax = !!(taxonomyStatuses && taxonomyStatuses.length);
+            if (state.filter !== 'all') {
+              if (isTax) {
+                if (p.status !== state.filter) return false;
+              } else {
+                var f = tagFlags(p);
+                if (state.filter === 'urgente' && !f.urgente) return false;
+                if (state.filter === 'cachorro' && !f.cachorro) return false;
+                if (state.filter === 'adulto' && !f.adulto) return false;
+                if (state.filter === 'especial' && !f.especial) return false;
+              }
+            }
             return true;
           });
           if (state.sort === 'name') filtered.sort(function(a,b){ return (a.title||'').localeCompare(b.title||'', 'es'); });
@@ -247,17 +239,11 @@
         // Delegación para chips (estáticos o dinámicos por taxonomías).
         if (chipsWrap) {
           chipsWrap.addEventListener('click', function (e) {
-            var btn = e.target && e.target.closest ? e.target.closest('[data-chip], [data-chip-tax]') : null;
+            var btn = e.target && e.target.closest ? e.target.closest('[data-filter]') : null;
             if (!btn || !chipsWrap.contains(btn)) return;
-            $$('.filter-chip, .chip', chipsWrap).forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
+            $$('.filter-chip', chipsWrap).forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
             btn.classList.add('is-active'); btn.setAttribute('aria-pressed', 'true');
-            if (btn.hasAttribute('data-chip-tax')) {
-              state.taxStatus = btn.getAttribute('data-chip-tax');
-              state.chip = 'all';
-            } else {
-              state.chip = btn.getAttribute('data-chip') || 'all';
-              state.taxStatus = 'all';
-            }
+            state.filter = btn.getAttribute('data-filter') || 'all';
             render();
           });
         }

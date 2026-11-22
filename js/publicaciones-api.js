@@ -379,6 +379,7 @@ var PublicacionesAPI = (function () {
     realSections().forEach(function (section) {
       (realPosts[section] || []).forEach(function (post) {
         if (!post || !post.slug || seen[post.slug]) return;
+        if (post.status === 'gone' || post.redirect) return;
         seen[post.slug] = true;
         out.push(post);
       });
@@ -404,7 +405,9 @@ var PublicacionesAPI = (function () {
     var def = SECTIONS[section];
     if (!def) return getAllPosts();
     if (modeFor(section) === 'real') {
-      if (realServed[section]) return (realPosts[section] || []).slice();
+      if (realServed[section]) return (realPosts[section] || []).filter(function (p) {
+        return !(p && (p.status === 'gone' || p.redirect));
+      }).slice();
       // Canal caído con fallback: la sección se queda con su fake, igual que
       // el feed, en vez de devolver una lista vacía.
       if (!options().fallbackOnError) return [];
