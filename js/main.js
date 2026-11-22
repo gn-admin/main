@@ -143,7 +143,11 @@
         var cat = root.getAttribute('data-adoption-list');
         var seccion = /gatos/i.test(cat) ? 'gatos'
           : (/perros/i.test(cat) ? 'perros'
-          : (/evento/i.test(cat) ? 'eventos' : ''));
+          : (/acogid/i.test(cat) ? 'acogidas'
+          : (/adoptad/i.test(cat) ? 'adoptados'
+          : (/caso externo/i.test(cat) ? 'casosExternos'
+          : (/grupo/i.test(cat) ? 'grupos'
+          : (/evento/i.test(cat) ? 'eventos' : ''))))));
         var list = (seccion && typeof api.getPostsFor === 'function')
           ? api.getPostsFor(seccion)
           : posts.filter(function(p){ return sameCat(p.category, cat); });
