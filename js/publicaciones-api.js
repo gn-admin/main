@@ -61,6 +61,11 @@ var PublicacionesAPI = (function () {
       categories: ['Grupo', 'Grupos'],
       query: { endpoint: 'publicaciones', type: 'animal_grupo' }
     },
+    eventos: {
+      scope: 'category',
+      categories: ['Evento', 'Eventos'],
+      query: { endpoint: 'publicaciones', category: 'Evento' }
+    },
     apadrinamiento: {
       scope: 'category',
       categories: ['Apadrinamiento'],

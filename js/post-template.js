@@ -192,7 +192,7 @@
       '<article class="post-sheet ' + (ficha ? 'post-sheet--ficha' : 'post-sheet--story') + '">' +
         hero +
         renderIcons(pub, post) +
-        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<a class="tag" href="historias.html?q=' + encodeURIComponent(t) + '">' + esc(t) + '</a>'; }).join('') + '</div>' : '') +
         '<section class="post-section post-section--desc">' + descHead + '<div class="post-body">' + content + '</div></section>' +
         mediaBlocks +
         '<div class="actions actions-center post-actions">' + ctaHtml + ' <a class="btn btn-secondary" href="' + esc(back.href) + '">' + esc(back.label) + '</a></div>' +

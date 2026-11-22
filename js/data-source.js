@@ -34,6 +34,7 @@
       adoptados:      { mode: 'real' },
       casosExternos:  { mode: 'real' },
       grupos:         { mode: 'real' },
+      eventos:        { mode: 'real' },
       apadrinamiento: { mode: 'fake' }, // el canal aún no expone este dato
       home:           { mode: 'real' },
       detalle:        { mode: 'real' }

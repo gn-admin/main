@@ -132,7 +132,8 @@
         : (/acogid/i.test(c) ? 'acogidas'
         : (/adoptad/i.test(c) ? 'adoptados'
         : (/caso externo/i.test(c) ? 'casosExternos'
-        : (/grupo/i.test(c) ? 'grupos' : '')))));
+        : (/grupo/i.test(c) ? 'grupos'
+        : (/evento/i.test(c) ? 'eventos' : ''))))));
       if (!s) faltaSeccion = true;
       else if (secciones.indexOf(s) === -1) secciones.push(s);
     });
@@ -140,7 +141,9 @@
       var posts = api.getAllPosts();
       containers.forEach(function(root){
         var cat = root.getAttribute('data-adoption-list');
-        var seccion = /gatos/i.test(cat) ? 'gatos' : (/perros/i.test(cat) ? 'perros' : '');
+        var seccion = /gatos/i.test(cat) ? 'gatos'
+          : (/perros/i.test(cat) ? 'perros'
+          : (/evento/i.test(cat) ? 'eventos' : ''));
         var list = (seccion && typeof api.getPostsFor === 'function')
           ? api.getPostsFor(seccion)
           : posts.filter(function(p){ return sameCat(p.category, cat); });

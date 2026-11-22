@@ -104,6 +104,8 @@ function entorno(opciones) {
       acogidas: { mode: 'fake' },
       adoptados: { mode: 'fake' },
       casosExternos: { mode: 'fake' },
+      grupos: { mode: 'fake' },
+      eventos: { mode: 'fake' },
       apadrinamiento: { mode: 'fake' },
       home: { mode: 'real' },
       detalle: { mode: 'real' }
@@ -276,8 +278,8 @@ test('listado excluye publicaciones retiradas o redirigidas', async () => {
   const base = FIXTURES.gatos;
   const conGone = JSON.parse(JSON.stringify(base));
   conGone.data = conGone.data.concat([
-    { slug: 'gato-gone', title: 'Gato gone', category: 'Gatos en adopción', status: 'gone' },
-    { slug: 'gato-redirect', title: 'Gato redirect', category: 'Gatos en adopción', redirect: { to: 'otro' } }
+    { slug: 'gato-gone', title: 'Gato gone', category: 'Gatos en adopciï¿½n', status: 'gone' },
+    { slug: 'gato-redirect', title: 'Gato redirect', category: 'Gatos en adopciï¿½n', redirect: { to: 'otro' } }
   ]);
   const { api } = entorno({
     responder(url) {
