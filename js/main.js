@@ -224,7 +224,13 @@
           }
           root.innerHTML = filtered.map(function(p){
             var cNorm = norm(cat);
-            var from = (cNorm.indexOf('gatos') !== -1) ? 'gatos' : (cNorm.indexOf('perros') !== -1 ? 'perros' : 'historias');
+            var from = (cNorm.indexOf('gatos') !== -1) ? 'gatos'
+              : (cNorm.indexOf('perros') !== -1 ? 'perros'
+              : (cNorm.indexOf('grupo') !== -1 ? 'grupos'
+              : (cNorm.indexOf('evento') !== -1 ? 'eventos'
+              : (cNorm.indexOf('acogid') !== -1 ? 'acogidas'
+              : (cNorm.indexOf('adoptad') !== -1 ? 'adoptados'
+              : (cNorm.indexOf('caso externo') !== -1 ? 'casosExternos' : 'historias'))))));
             var href = fichaUrl(p, from);
             var img = imgPath(p.image);
             var flags = tagFlags(p);

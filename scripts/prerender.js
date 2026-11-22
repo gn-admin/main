@@ -681,6 +681,31 @@ function validarFichaHtml(html, esperado) {
 }
 
 
+
+function validarLapidaHtml(html) {
+  var texto = String(html || '');
+  var errores = [];
+  if (!/<meta name="robots" content="noindex,nofollow">/.test(texto)) errores.push('falta robots noindex,nofollow');
+  if (/<link rel="canonical"/.test(texto)) errores.push('no debe llevar canonical');
+  if (/application\/ld\+json/.test(texto)) errores.push('no debe llevar JSON-LD');
+  return errores;
+}
+
+function validarRedirectHtml(html, destino) {
+  var texto = String(html || '');
+  var errores = [];
+  if (!/<meta name="robots" content="noindex,follow">/.test(texto)) errores.push('falta robots noindex,follow');
+  var canonicals = texto.match(/<link rel="canonical" href="[^"]*">/g) || [];
+  if (canonicals.length !== 1) errores.push('se esperaba 1 canonical y hay ' + canonicals.length);
+  else if (destino) {
+    var href = canonicals[0].match(/href="([^"]*)"/);
+    if (!href || href[1] !== String(destino)) errores.push('canonical no apunta al destino');
+  }
+  if (/application\/ld\+json/.test(texto)) errores.push('no debe llevar JSON-LD');
+  return errores;
+}
+
+
 module.exports = {
   PAGINAS_FIJAS,
   SITE_POR_DEFECTO,
@@ -693,6 +718,9 @@ module.exports = {
   robotsTxt,
   sitemapXml,
   validarSalida,
+  validarFichaHtml,
+  validarLapidaHtml,
+  validarRedirectHtml,
   validarFichaHtml,
   xmlEscape,
   normalizarRedirect,

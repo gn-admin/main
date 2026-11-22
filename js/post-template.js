@@ -60,9 +60,19 @@
     var cat = String(post.category || '');
     if (from === 'gatos') return { href: 'gatos-en-adopcion.html', label: 'Volver a gatos en adopción' };
     if (from === 'perros') return { href: 'perros-en-adopcion.html', label: 'Volver a perros en adopción' };
+    if (from === 'grupos') return { href: 'grupos.html', label: 'Volver a grupos' };
+    if (from === 'eventos') return { href: 'index.html', label: 'Volver al inicio' };
+    if (from === 'acogidas') return { href: 'acogidas.html', label: 'Volver a acogidas' };
+    if (from === 'adoptados') return { href: 'adoptados.html', label: 'Volver a adoptados' };
+    if (from === 'casosExternos') return { href: 'casos-externos.html', label: 'Volver a casos externos' };
     if (from === 'historias') return { href: 'historias.html', label: 'Volver a historias' };
     if (cat === 'Gatos en adopción') return { href: 'gatos-en-adopcion.html', label: 'Volver a gatos en adopción' };
     if (cat === 'Perros en adopción') return { href: 'perros-en-adopcion.html', label: 'Volver a perros en adopción' };
+    if (/grupo/i.test(cat)) return { href: 'grupos.html', label: 'Volver a grupos' };
+    if (/evento/i.test(cat)) return { href: 'index.html', label: 'Volver al inicio' };
+    if (/acogid/i.test(cat)) return { href: 'acogidas.html', label: 'Volver a acogidas' };
+    if (/adoptad/i.test(cat)) return { href: 'adoptados.html', label: 'Volver a adoptados' };
+    if (/caso externo/i.test(cat)) return { href: 'casos-externos.html', label: 'Volver a casos externos' };
     return { href: 'historias.html', label: 'Volver a historias' };
   }
 

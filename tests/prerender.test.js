@@ -510,3 +510,19 @@ test('validarFichaHtml exige canonical único y un JSON-LD coherente', () => {
 
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('validarLapidaHtml y validarRedirectHtml validan SEO', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+
+  const lapida = fs.readFileSync(path.join(dir, 'demo-lua.html'), 'utf8');
+  assert.deepEqual(prerender.validarLapidaHtml(lapida), []);
+
+  const redirectHtml = paginasMod.paginaRedirect('https://gn-admin.github.io/main/publicaciones/demo-nube.html');
+  assert.deepEqual(prerender.validarRedirectHtml(redirectHtml, 'https://gn-admin.github.io/main/publicaciones/demo-nube.html'), []);
+
+  fs.rmSync(dir, { recursive: true, force: true });
+});
