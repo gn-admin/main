@@ -112,11 +112,16 @@
         especial: /especial|ciego|ciega|tuert|neuron|cuidados/.test(t)
       };
     }
-    fetch('data/blog-posts.json').then(function(r){ return r.json(); }).then(function(data){
-      var posts = (data && data.posts) ? data.posts : [];
+    var api = (typeof PublicacionesAPI !== 'undefined') ? PublicacionesAPI : null;
+    if (!api) return;
+    api.load().then(function(){
+      var posts = api.getAllPosts();
       containers.forEach(function(root){
         var cat = root.getAttribute('data-adoption-list');
-        var list = posts.filter(function(p){ return sameCat(p.category, cat); });
+        var seccion = /gatos/i.test(cat) ? 'gatos' : (/perros/i.test(cat) ? 'perros' : '');
+        var list = (seccion && typeof api.getPostsFor === 'function')
+          ? api.getPostsFor(seccion)
+          : posts.filter(function(p){ return sameCat(p.category, cat); });
         var search = document.querySelector('[data-adoption-search="'+cat+'"]');
         var filterSel = document.querySelector('[data-adoption-filter="'+cat+'"]');
         var chipsWrap = document.querySelector('[data-adoption-chips="'+cat+'"]');
@@ -486,8 +491,9 @@
     var blogCache = null;
     function loadPosts(cb) {
       if (blogCache) { cb(blogCache); return; }
-      fetch('data/blog-posts.json').then(function (r) { return r.json(); }).then(function (d) {
-        blogCache = d && d.posts ? d.posts : [];
+      if (typeof PublicacionesAPI === 'undefined') { cb([]); return; }
+      PublicacionesAPI.load().then(function () {
+        blogCache = PublicacionesAPI.getAllPosts();
         cb(blogCache);
       }).catch(function () { cb([]); });
     }

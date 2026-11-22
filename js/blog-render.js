@@ -137,9 +137,27 @@
     var slug = params.get('slug');
     var fromParam = params.get('from');
     if (!slug) { renderError(root, 'El enlace no incluye el identificador de la publicación.'); return; }
-    HistoriasAPI.load().then(function () {
-      var post = HistoriasAPI.getPostBySlug(slug);
-      if (!post) { renderError(root, 'Puede que la publicación se haya movido o ya no esté disponible.'); return; }
+    HistoriasAPI.loadPost(slug).then(function (resultado) {
+      var post = resultado && resultado.post;
+      if (!post) {
+        if (resultado && resultado.gone) {
+          var meta = document.createElement('meta');
+          meta.name = 'robots';
+          meta.content = 'noindex,nofollow';
+          document.head.appendChild(meta);
+        }
+        renderError(root, (resultado && resultado.gone)
+          ? (resultado.message || 'Esta publicación se ha retirado.')
+          : 'Puede que la publicación se haya movido o ya no esté disponible.');
+        return;
+      }
+      // Slug histórico: misma ficha, URL nueva (sin recargar).
+      if (resultado.redirect && resultado.redirect.slug && resultado.redirect.slug !== post.slug) {
+        params.set('slug', resultado.redirect.slug);
+        if (window.history && history.replaceState) {
+          history.replaceState(null, '', 'post.html?' + params.toString());
+        }
+      }
       var ficha = isFichaPost(post);
       document.title = post.title + ' · Grupo Nebak';
       var image = HistoriasAPI.fallbackImage(post.image);
