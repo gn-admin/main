@@ -650,6 +650,37 @@ if (require.main === module) {
   });
 }
 
+
+function validarFichaHtml(html, esperado) {
+  var errores = [];
+  var texto = String(html || '');
+  var canonEsperada = (esperado && esperado.canonical) ? String(esperado.canonical) : '';
+  var scripts = texto.match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g) || [];
+  if (scripts.length !== 1) errores.push('se esperaba 1 bloque JSON-LD y hay ' + scripts.length);
+  else {
+    var jsonLd = scripts[0].replace(/^<script[^>]*>|<\/script>$/g, '');
+    try {
+      var data = JSON.parse(jsonLd);
+      if (!data || data['@context'] !== 'https://schema.org') errores.push('JSON-LD sin @context schema.org');
+      if (!data || !data['@type']) errores.push('JSON-LD sin @type');
+      if (canonEsperada) {
+        var id = data && data.mainEntityOfPage && data.mainEntityOfPage['@id'];
+        if (id !== canonEsperada) errores.push('JSON-LD mainEntityOfPage no coincide con canonical');
+      }
+    } catch (e) {
+      errores.push('JSON-LD no parseable: ' + e.message);
+    }
+  }
+  var canonicals = texto.match(/<link rel="canonical" href="[^"]*">/g) || [];
+  if (canonicals.length !== 1) errores.push('se esperaba 1 canonical y hay ' + canonicals.length);
+  if (canonEsperada && canonicals.length === 1) {
+    var href = canonicals[0].match(/href="([^"]*)"/);
+    if (!href || href[1] !== canonEsperada) errores.push('canonical no coincide con la URL esperada');
+  }
+  return errores;
+}
+
+
 module.exports = {
   PAGINAS_FIJAS,
   SITE_POR_DEFECTO,
@@ -662,6 +693,7 @@ module.exports = {
   robotsTxt,
   sitemapXml,
   validarSalida,
+  validarFichaHtml,
   xmlEscape,
   normalizarRedirect,
   resolverDestino,

@@ -487,3 +487,26 @@ test('sitemap y robots van a --root, no a --out', () => {
     fs.rmSync(out, { recursive: true, force: true });
   }
 });
+
+test('validarFichaHtml exige canonical único y un JSON-LD coherente', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+
+  const html = fs.readFileSync(path.join(dir, 'demo-nube.html'), 'utf8');
+  const canonical = prerender.urlEstatica(SITE, 'demo-nube');
+  assert.deepEqual(prerender.validarFichaHtml(html, { canonical: canonical }), []);
+
+  const sinLd = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+  assert.match(prerender.validarFichaHtml(sinLd, { canonical: canonical }).join(' '), /1 bloque JSON-LD/);
+
+  const dosCanon = html.replace('</head>', '  <link rel="canonical" href="' + canonical + '">\n</head>');
+  assert.match(prerender.validarFichaHtml(dosCanon, { canonical: canonical }).join(' '), /1 canonical/);
+
+  const canonMal = html.replace(/("mainEntityOfPage":\{"@type":"WebPage","@id":")[^"]+"/, '$1https://otro.test/x"');
+  assert.match(prerender.validarFichaHtml(canonMal, { canonical: canonical }).join(' '), /mainEntityOfPage/);
+
+  fs.rmSync(dir, { recursive: true, force: true });
+});
