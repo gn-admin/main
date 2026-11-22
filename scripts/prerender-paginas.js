@@ -1,5 +1,5 @@
 /*
- * Generación de fichas estáticas para el prerender (F2).
+ * Generación de fichas, lápidas y redirecciones estáticas (F2/F3).
  * Usa la misma plantilla que el cliente (js/post-template.js).
  */
 'use strict';
@@ -178,7 +178,64 @@ function generarHtml(post, pagina, shell, siteUrl) {
   return prefijarRutas(html);
 }
 
-function escribirPaginas(paginas, dir) {
+function htmlBase(shell, titulo, descripcion) {
+  let html = shell
+    .replace(/<title>[^<]*<\/title>/, '<title>' + esc(titulo) + '</title>')
+    .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="' + esc(descripcion) + '">')
+    .replace(/<noscript>[\s\S]*?<\/noscript>\s*/g, '');
+  return html.replace(
+    /<script src="js\/(?:data-source|canal-publico|publicaciones-api|blog-api|blog-render|post-template)\.js[^"]*"><\/script>\s*/g,
+    ''
+  );
+}
+
+// Lápida: conserva la URL, pero no compite en buscadores ni tiene canónica.
+function paginaRetirada(shell) {
+  let html = htmlBase(
+    shell,
+    'Publicación retirada · Grupo Nebak',
+    'Esta publicación se retiró y ya no está disponible.'
+  );
+  html = html.replace('</head>', '  <meta name="robots" content="noindex,nofollow">\n</head>');
+  const cuerpo =
+    '<article class="post-sheet">' +
+      '<header class="post-hero"><div class="post-hero-copy">' +
+        '<p class="eyebrow">Publicación retirada</p>' +
+        '<h1>Contenido retirado</h1>' +
+        '<p class="lead">Esta publicación se retiró y ya no está disponible. Si llegaste desde un enlace antiguo, puedes volver al inicio o consultar las adopciones e historias actuales.</p>' +
+        '<div class="actions">' +
+          '<a class="btn btn-primary" href="../index.html">Volver al inicio</a>' +
+          '<a class="btn btn-secondary" href="../historias.html">Ver historias</a>' +
+        '</div>' +
+      '</div></header>' +
+    '</article>';
+  html = html.replace(/<div id="blogPostDetail"><\/div>/, '<div id="blogPostDetail">' + cuerpo + '</div>');
+  return prefijarRutas(html);
+}
+
+// Página de paso para un slug histórico: noindex,follow y canónica al destino.
+function paginaRedirect(destino) {
+  const url = esc(destino);
+  const json = JSON.stringify(String(destino)).replace(/</g, '\\u003c');
+  return '<!doctype html>\n<html lang="es">\n<head>\n' +
+    '  <meta charset="utf-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '  <title>Redirigiendo · Grupo Nebak</title>\n' +
+    '  <meta name="robots" content="noindex,follow">\n' +
+    '  <link rel="canonical" href="' + url + '">\n' +
+    '  <meta http-equiv="refresh" content="0; url=' + url + '">\n' +
+    '  <link rel="stylesheet" href="../css/main.css">\n' +
+    '  <script>location.replace(' + json + ');</script>\n' +
+    '</head>\n<body>\n' +
+    '  <main id="contenido" class="section"><div class="container" style="max-width:720px">\n' +
+    '    <p class="eyebrow">Esta ficha se ha movido</p>\n' +
+    '    <h1>Redirigiendo…</h1>\n' +
+    '    <p class="lead">Si no ocurre automáticamente, <a href="' + url + '">continúa a la nueva ficha</a>.</p>\n' +
+    '  </div></main>\n' +
+    '</body>\n</html>\n';
+}
+
+function escribirPaginas(paginas, dir, extras) {
   fs.mkdirSync(dir, { recursive: true });
   const nombres = {};
   paginas.forEach(function (pagina) {
@@ -186,11 +243,15 @@ function escribirPaginas(paginas, dir) {
     nombres[archivo] = true;
     fs.writeFileSync(path.join(dir, archivo), pagina.html);
   });
+  const extrasDir = (extras && extras.root) ? extras.root : dir;
+  fs.mkdirSync(extrasDir, { recursive: true });
+  if (extras && extras.sitemap) fs.writeFileSync(path.join(extrasDir, 'sitemap.xml'), extras.sitemap);
+  if (extras && extras.robots) fs.writeFileSync(path.join(extrasDir, 'robots.txt'), extras.robots);
 
   // Solo se limpian fichas .html de primer nivel que ya no se generan.
   const eliminadas = [];
   fs.readdirSync(dir).forEach(function (nombre) {
-    if (!/.html$/.test(nombre) || nombres[nombre]) return;
+    if (!/\.html$/.test(nombre) || nombres[nombre]) return;
     const ruta = path.join(dir, nombre);
     try {
       if (fs.statSync(ruta).isFile()) {
@@ -205,6 +266,7 @@ function escribirPaginas(paginas, dir) {
 
   return { escritas: paginas.length, eliminadas: eliminadas };
 }
+
 // Detalles del canal (ficha/evento). En fixtures se leen de detalles.json.
 async function cargarDetalles(publicaciones, opciones) {
   const opts = opciones || {};
@@ -254,6 +316,8 @@ module.exports = {
   generarHtml,
   imagenSeo,
   jsonLd,
+  paginaRedirect,
+  paginaRetirada,
   prefijarRutas,
   prepararPost,
   seccionDe,

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /*
- * Prerender de fichas y sitemap (F1: plan en memoria, sin escribir).
+ * Prerender de fichas, lápidas, redirecciones, sitemap y robots (F3).
  *
  * Uso:
  *   node scripts/prerender.js --dry
  *   node scripts/prerender.js --dry --fixture tests/fixtures/prerender
- *   node scripts/prerender.js --dry --site-url https://ejemplo.test/main
+ *   node scripts/prerender.js --out publicaciones --root .
  *
- * La escritura de páginas llega en F2 y el sitemap/robots en F3; por eso sin
- * --dry el script sale con error en vez de fingir que ha publicado.
+ * Sin --dry escribe las fichas indexables, una lápida por retirada, una página
+ * de paso por redirect y los sitemap.xml/robots.txt de la raíz de --out.
  *
  * Contrato del canal (comprobado en vivo): el listado ya trae `seo`,
  * `contentHtml`, `updatedAt` y `type`; `sitemap` puede venir vacío con `notice`
@@ -105,6 +105,125 @@ function esIndexable(publicacion) {
 
 function fechaDe(publicacion) {
   return (publicacion && (publicacion.updatedAt || publicacion.publishedAt)) || '';
+}
+
+// ---------- sitemap y robots ----------
+
+function xmlEscape(valor) {
+  return String(valor === undefined || valor === null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function atributoHtml(valor) {
+  // Mismo escape que PostTemplate.esc: el apóstrofe no se toca en atributos.
+  return xmlEscape(valor).replace(/&apos;/g, "'");
+}
+
+function fechaSitemap(valor) {
+  var m = /^(\d{4}-\d{2}-\d{2})/.exec(String(valor || ''));
+  return m ? m[1] : '';
+}
+
+function sitemapXml(urls) {
+  var lineas = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+  ];
+  (urls || []).forEach(function (fila) {
+    var lastmod = fechaSitemap(fila.lastmod);
+    lineas.push('  <url><loc>' + xmlEscape(fila.loc) + '</loc>' +
+      (lastmod ? '<lastmod>' + lastmod + '</lastmod>' : '') + '</url>');
+  });
+  lineas.push('</urlset>');
+  return lineas.join('\n') + '\n';
+}
+
+function robotsTxt(siteUrl) {
+  var base = String(siteUrl || SITE_POR_DEFECTO).replace(/\/+$/, '');
+  var ruta = '/';
+  try {
+    ruta = new URL(base).pathname.replace(/\/+$/, '') + '/';
+  } catch (err) {
+    ruta = '/';
+  }
+  return 'User-agent: *\n' +
+    'Allow: /\n' +
+    'Disallow: ' + ruta + 'post.html\n\n' +
+    'Sitemap: ' + base + '/sitemap.xml\n';
+}
+
+function contar(html, re) {
+  return (String(html).match(re) || []).length;
+}
+
+// La salida no se escribe si el sitemap, robots o alguna página no cuadran.
+function validarSalida(salida) {
+  var errores = [];
+  var paginas = (salida && salida.paginas) || [];
+  var plan = (salida && salida.plan) || { sitemap: [] };
+  var xml = String((salida && salida.sitemapXml) || '');
+  var robots = String((salida && salida.robotsTexto) || '');
+
+  if (xml.indexOf('<?xml') !== 0) errores.push('sitemap.xml sin declaración XML');
+  if (!/<urlset[^>]*>/.test(xml)) errores.push('sitemap.xml sin <urlset>');
+  if (!/<\/urlset>/.test(xml)) errores.push('sitemap.xml sin cierre </urlset>');
+
+  var locs = [];
+  xml.replace(/<loc>([\s\S]*?)<\/loc>/g, function (todo, loc) { locs.push(loc); });
+  if (!locs.length) errores.push('sitemap.xml sin ninguna URL');
+  var vistos = {};
+  locs.forEach(function (loc) {
+    if (vistos[loc]) errores.push('URL duplicada en sitemap.xml: ' + loc);
+    vistos[loc] = true;
+    if (!/^https?:\/\//.test(loc)) errores.push('URL no absoluta en sitemap.xml: ' + loc);
+  });
+
+  var esperadas = (plan.sitemap || []).map(function (fila) { return fila.loc; });
+  if (locs.length !== esperadas.length) {
+    errores.push('sitemap.xml no cuadra: ' + locs.length + ' URLs frente a ' + esperadas.length + ' esperadas');
+  }
+  esperadas.forEach(function (loc) {
+    if (!vistos[xmlEscape(loc)]) errores.push('Falta en sitemap.xml: ' + loc);
+  });
+
+  if (!/^User-agent: \*/m.test(robots)) errores.push('robots.txt sin User-agent');
+  if (!/^Allow: \//m.test(robots)) errores.push('robots.txt sin Allow: /');
+  if (!/^Sitemap: https?:\/\//m.test(robots)) errores.push('robots.txt sin línea Sitemap:');
+
+  paginas.forEach(function (pagina) {
+    var html = String(pagina.html || '');
+    var nombre = pagina.slug || '(sin slug)';
+    var canon = contar(html, /<link rel="canonical"/g);
+    var json = contar(html, /application\/ld\+json/g);
+    if (!html) {
+      errores.push(nombre + ': HTML vacío');
+      return;
+    }
+    if (pagina.estado === 'retirada' || pagina.retirada) {
+      if (!/name="robots" content="noindex,nofollow"/.test(html)) errores.push(nombre + ' (retirada): falta robots noindex,nofollow');
+      if (canon) errores.push(nombre + ' (retirada): no debe llevar canonical');
+      if (json) errores.push(nombre + ' (retirada): no debe llevar JSON-LD');
+      if (html.indexOf('Contenido retirado') === -1) errores.push(nombre + ' (retirada): falta el mensaje');
+    } else if (pagina.estado === 'redirect' || pagina.redirect) {
+      if (!/name="robots" content="noindex,follow"/.test(html)) errores.push(nombre + ' (redirect): falta robots noindex,follow');
+      if (canon !== 1) errores.push(nombre + ' (redirect): se esperaba 1 canonical y hay ' + canon);
+      if (pagina.destino && html.indexOf('rel="canonical" href="' + atributoHtml(pagina.destino) + '"') === -1) {
+        errores.push(nombre + ' (redirect): canonical no apunta al destino');
+      }
+      if (!/http-equiv="refresh"/.test(html)) errores.push(nombre + ' (redirect): falta meta refresh');
+      if (json) errores.push(nombre + ' (redirect): no debe llevar JSON-LD');
+    } else if (pagina.indexable) {
+      if (canon !== 1) errores.push(nombre + ': se esperaba 1 canonical y hay ' + canon);
+      if (!json) errores.push(nombre + ': falta JSON-LD');
+      if (/name="robots" content="[^"]*noindex/.test(html)) errores.push(nombre + ': no debe ser noindex');
+    }
+  });
+
+  return errores;
 }
 
 // ---------- configuración ----------
@@ -249,14 +368,80 @@ function construirPlan(datos, opciones) {
       return;
     }
     vistos[slug] = true;
-    var indexable = esIndexable(pub) && !retiradasPorSlug[slug] && !redirectsPorSlug[slug];
+
+    var retirada = retiradasPorSlug[slug];
+    var redirect = redirectsPorSlug[slug];
+    if (retirada) {
+      paginas.push({
+        slug: slug,
+        tipo: pub.type || '',
+        url: urlEstatica(siteUrl, slug),
+        canonical: null,
+        indexable: false,
+        lastmod: retirada.fecha || fechaDe(pub),
+        estado: 'retirada',
+        retirada: true,
+        fecha: retirada.fecha || ''
+      });
+      return;
+    }
+    if (redirect) {
+      avisos.push('Redirect sustituye a la ficha publicada: ' + slug);
+      paginas.push({
+        slug: slug,
+        tipo: 'redirect',
+        url: urlEstatica(siteUrl, slug),
+        canonical: redirect.destino,
+        destino: redirect.destino,
+        indexable: false,
+        lastmod: '',
+        estado: 'redirect',
+        redirect: true
+      });
+      return;
+    }
+    if (!esIndexable(pub)) return;
     paginas.push({
       slug: slug,
       tipo: pub.type || '',
       url: urlEstatica(siteUrl, slug),
       canonical: urlEstatica(siteUrl, slug),
-      indexable: indexable,
-      lastmod: fechaDe(pub)
+      indexable: true,
+      lastmod: fechaDe(pub),
+      estado: 'ficha'
+    });
+  });
+
+  retiradas.forEach(function (fila) {
+    if (vistos[fila.slug]) return;
+    vistos[fila.slug] = true;
+    paginas.push({
+      slug: fila.slug,
+      tipo: fila.tipo || '',
+      url: urlEstatica(siteUrl, fila.slug),
+      canonical: null,
+      indexable: false,
+      lastmod: fila.fecha || '',
+      estado: 'retirada',
+      retirada: true,
+      fecha: fila.fecha || ''
+    });
+  });
+
+  Object.keys(redirectsPorSlug).forEach(function (slug) {
+    if (vistos[slug]) return;
+    var info = redirectsPorSlug[slug];
+    vistos[slug] = true;
+    paginas.push({
+      slug: slug,
+      tipo: 'redirect',
+      url: urlEstatica(siteUrl, slug),
+      canonical: info.destino,
+      destino: info.destino,
+      indexable: false,
+      lastmod: '',
+      estado: 'redirect',
+      redirect: true
     });
   });
 
@@ -310,7 +495,7 @@ function construirPlan(datos, opciones) {
 // ---------- CLI ----------
 
 function argumentos(argv) {
-  var args = { dry: false, soft: false, fixture: '', out: 'publicaciones', siteUrl: SITE_POR_DEFECTO, help: false };
+  var args = { dry: false, soft: false, fixture: '', out: 'publicaciones', root: '.', siteUrl: SITE_POR_DEFECTO, help: false };
   for (var i = 0; i < argv.length; i++) {
     var arg = argv[i];
     if (arg === '--dry') args.dry = true;
@@ -322,24 +507,31 @@ function argumentos(argv) {
     else if (arg.indexOf('--site-url=') === 0) args.siteUrl = arg.slice('--site-url='.length);
     else if (arg === '--out') args.out = argv[++i] || args.out;
     else if (arg.indexOf('--out=') === 0) args.out = arg.slice('--out='.length);
+    else if (arg === '--root') args.root = argv[++i] || args.root;
+    else if (arg.indexOf('--root=') === 0) args.root = arg.slice('--root='.length);
     else throw new Error('Opción desconocida: ' + arg);
   }
   return args;
 }
 
 function textoResumen(plan, args) {
-  var indexables = plan.paginas.filter(function (p) { return p.indexable; }).length;
+  var cuenta = { ficha: 0, retirada: 0, redirect: 0 };
+  plan.paginas.forEach(function (pagina) {
+    if (cuenta[pagina.estado] !== undefined) cuenta[pagina.estado] += 1;
+  });
+  var total = plan.paginas.length;
   var lineas = [];
-  lineas.push('Prerender (F2, ' + (args.dry ? 'dry run' : 'escritura') + ')');
+  lineas.push('Prerender (F3, ' + (args.dry ? 'dry run' : 'escritura') + ')');
   lineas.push('SITE_URL: ' + plan.siteUrl);
-  lineas.push('publicaciones: ' + plan.paginas.length + ' (' + indexables + ' indexables)');
+  lineas.push('publicaciones: ' + cuenta.ficha + ' (' + cuenta.ficha + ' indexables)');
+  lineas.push('páginas: ' + total + ' (fichas ' + cuenta.ficha + ' · lápidas ' + cuenta.retirada + ' · redirects ' + cuenta.redirect + ')');
   lineas.push('retiradas: ' + plan.retiradas.length);
   lineas.push('redirects: ' + plan.redirects.length);
   lineas.push('sitemap: ' + plan.sitemap.length + ' URLs');
   plan.avisos.forEach(function (aviso) { lineas.push('aviso: ' + aviso); });
   plan.errores.forEach(function (error) { lineas.push('error: ' + error); });
   if (args.dry) {
-    lineas.push('páginas a escribir: ' + indexables);
+    lineas.push('páginas a escribir: ' + total);
     lineas.push('muestra: ' + plan.sitemap.slice(0, 3).map(function (u) { return u.loc; }).join(' · '));
   } else {
     lineas.push('destino: ' + args.out);
@@ -356,7 +548,7 @@ async function main(argv) {
     return 1;
   }
   if (args.help) {
-    console.log('Uso: node scripts/prerender.js [--dry] [--fixture <dir>] [--out <dir>] [--site-url <url>] [--soft]');
+    console.log('Uso: node scripts/prerender.js [--dry] [--fixture <dir>] [--out <dir>] [--root <dir>] [--site-url <url>] [--soft]');
     return 0;
   }
 
@@ -381,22 +573,71 @@ async function main(argv) {
   if (plan.errores.length && !args.soft) return 1;
   if (args.dry) return 0;
 
+  var fichas = plan.paginas.filter(function (pagina) { return pagina.indexable; });
+  var slugsFicha = {};
+  fichas.forEach(function (pagina) { slugsFicha[pagina.slug] = true; });
+  var publicacionesFicha = datos.publicaciones.filter(function (pub) {
+    return slugsFicha[slugSeguro(pub && pub.slug)];
+  });
+
   var consultarEscritura = args.fixture ? null : clienteCanal(config);
-  var detalles = await paginasMod.cargarDetalles(datos.publicaciones, {
+  var detalles = await paginasMod.cargarDetalles(publicacionesFicha, {
     fixture: args.fixture,
     consultar: consultarEscritura
   });
   var shell = fs.readFileSync(path.join(RAIZ, 'post.html'), 'utf8');
   var porSlug = {};
   datos.publicaciones.forEach(function (pub) { porSlug[pub.slug] = pub; });
-  var paginas = plan.paginas.filter(function (pagina) { return pagina.indexable; }).map(function (pagina) {
+
+  var paginas = plan.paginas.map(function (pagina) {
+    if (pagina.estado === 'retirada') {
+      return {
+        slug: pagina.slug,
+        estado: 'retirada',
+        retirada: true,
+        html: paginasMod.paginaRetirada(shell)
+      };
+    }
+    if (pagina.estado === 'redirect') {
+      return {
+        slug: pagina.slug,
+        estado: 'redirect',
+        redirect: true,
+        destino: pagina.destino,
+        html: paginasMod.paginaRedirect(pagina.destino)
+      };
+    }
     var post = paginasMod.prepararPost(porSlug[pagina.slug], detalles[pagina.slug]);
-    return { slug: pagina.slug, html: paginasMod.generarHtml(post, pagina, shell, plan.siteUrl) };
+    return {
+      slug: pagina.slug,
+      estado: 'ficha',
+      indexable: true,
+      html: paginasMod.generarHtml(post, pagina, shell, plan.siteUrl)
+    };
   });
+
+  var sitemapTexto = sitemapXml(plan.sitemap);
+  var robotsTexto = robotsTxt(plan.siteUrl);
+  var erroresSalida = validarSalida({
+    plan: plan,
+    paginas: paginas,
+    sitemapXml: sitemapTexto,
+    robotsTexto: robotsTexto
+  });
+  if (erroresSalida.length) {
+    erroresSalida.forEach(function (error) { console.error('error: ' + error); });
+    if (!args.soft) return 1;
+  }
+
   var destino = path.resolve(process.cwd(), args.out);
-  var resultado = paginasMod.escribirPaginas(paginas, destino);
+  var raiz = path.resolve(process.cwd(), args.root);
+  var resultado = paginasMod.escribirPaginas(paginas, destino, {
+    sitemap: sitemapTexto,
+    robots: robotsTexto,
+    root: raiz
+  });
   var extra = resultado.eliminadas.length ? ' · eliminadas: ' + resultado.eliminadas.length : '';
-  console.log('escritas: ' + resultado.escritas + ' páginas en ' + destino + extra);
+  console.log('escritas: ' + resultado.escritas + ' páginas en ' + destino + extra + ' · sitemap.xml y robots.txt en ' + raiz);
   return 0;
 }
 
@@ -417,6 +658,11 @@ module.exports = {
   cargarFixtures,
   construirPlan,
   descargarListado,
+  fechaSitemap,
+  robotsTxt,
+  sitemapXml,
+  validarSalida,
+  xmlEscape,
   normalizarRedirect,
   resolverDestino,
   normalizarRetirada,

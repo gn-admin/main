@@ -16,6 +16,7 @@ const RAIZ = path.join(__dirname, '..');
 const FIXTURES = path.join(__dirname, 'fixtures', 'prerender');
 
 const prerender = require(path.join(RAIZ, 'scripts', 'prerender.js'));
+const paginasMod = require(path.join(RAIZ, 'scripts', 'prerender-paginas.js'));
 
 function fixture(nombre) {
   return JSON.parse(fs.readFileSync(path.join(FIXTURES, nombre), 'utf8'));
@@ -65,7 +66,10 @@ test('plan con fixtures: 7 fichas, sin redirects y 15 URLs de sitemap', () => {
   const plan = prerender.construirPlan(datos(), { siteUrl: SITE });
 
   assert.equal(plan.errores.length, 0);
-  assert.equal(plan.paginas.length, 7);
+  assert.equal(plan.paginas.length, 12);
+  assert.equal(plan.paginas.filter(p => p.estado === 'ficha').length, 7);
+  assert.equal(plan.paginas.filter(p => p.estado === 'retirada').length, 5);
+  assert.equal(plan.paginas.filter(p => p.estado === 'redirect').length, 0);
   assert.equal(plan.paginas.filter(p => p.indexable).length, 7);
   assert.equal(plan.retiradas.length, 5);
   assert.equal(plan.redirects.length, 0);
@@ -74,7 +78,14 @@ test('plan con fixtures: 7 fichas, sin redirects y 15 URLs de sitemap', () => {
   const nube = plan.paginas.find(p => p.slug === 'demo-nube');
   assert.equal(nube.canonical, SITE + '/publicaciones/demo-nube.html');
   assert.equal(nube.lastmod, '2026-11-20T09:44:52.247Z');
+  assert.equal(nube.estado, 'ficha');
   assert.ok(plan.sitemap.some(u => u.loc === nube.canonical));
+
+  const lua = plan.paginas.find(p => p.slug === 'demo-lua');
+  assert.equal(lua.estado, 'retirada');
+  assert.equal(lua.retirada, true);
+  assert.equal(lua.canonical, null);
+  assert.ok(!plan.sitemap.some(u => u.loc.endsWith('/demo-lua.html')));
 });
 
 test('el sitemap avisa del endpoint vacío sin tratarlo como error', () => {
@@ -91,7 +102,9 @@ test('una retirada no se indexa ni entra en el sitemap', () => {
 
   const nube = plan.paginas.find(p => p.slug === 'demo-nube');
   assert.equal(nube.indexable, false);
-  assert.ok(!plan.sitemap.some(u => u.loc === nube.canonical));
+  assert.equal(nube.estado, 'retirada');
+  assert.equal(nube.canonical, null);
+  assert.ok(!plan.sitemap.some(u => u.loc.endsWith('/demo-nube.html')));
   assert.equal(plan.sitemap.length, 14);
   assert.ok(plan.retiradas.some(r => r.slug === 'demo-nube'));
 });
@@ -172,13 +185,16 @@ test('CLI --dry con fixtures resume el plan y sale 0', () => {
 test('CLI escribe una ficha por publicación indexable', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
 
   assert.equal(res.status, 0, res.stderr);
   const ficheros = fs.readdirSync(dir).sort();
-  assert.equal(ficheros.length, 7);
+  assert.equal(ficheros.length, 14);
   assert.ok(ficheros.includes('demo-nube.html'));
+  assert.ok(ficheros.includes('demo-lua.html'));
+  assert.ok(ficheros.includes('sitemap.xml'));
+  assert.ok(ficheros.includes('robots.txt'));
 
   const html = fs.readFileSync(path.join(dir, 'demo-nube.html'), 'utf8');
   assert.ok(html.includes('<title>Nube, perro mestizo en adopción · Grupo Nebak</title>'));
@@ -198,7 +214,7 @@ test('CLI escribe una ficha por publicación indexable', () => {
 test('la ficha estática de evento usa schema Event', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(res.status, 0, res.stderr);
 
@@ -212,12 +228,12 @@ test('la ficha estática de evento usa schema Event', () => {
 test('--dry no escribe ninguna ficha', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
 
   assert.equal(res.status, 0, res.stderr);
   assert.equal(fs.readdirSync(dir).length, 0);
-  assert.ok(res.stdout.includes('páginas a escribir: 7'));
+  assert.ok(res.stdout.includes('páginas a escribir: 12'));
 });
 
 test('renderArticle comparte el markup del cliente', () => {
@@ -260,7 +276,7 @@ test('un duplicado en el listado no bloquea el plan', () => {
   const plan = prerender.construirPlan(entrada, { siteUrl: SITE });
 
   assert.equal(plan.errores.length, 0);
-  assert.equal(plan.paginas.length, 7);
+  assert.equal(plan.paginas.length, 12);
   assert.ok(plan.avisos.some(a => a.indexOf('Slug duplicado') !== -1));
 });
 
@@ -315,7 +331,7 @@ test('la escritura elimina fichas obsoletas y respeta otros archivos', () => {
   fs.writeFileSync(path.join(dir, 'nota.txt'), 'no tocar');
 
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
 
   assert.equal(res.status, 0, res.stderr);
@@ -329,9 +345,145 @@ test('--dry no borra fichas obsoletas', () => {
   fs.writeFileSync(path.join(dir, 'ficha-vieja.html'), '<p>obsoleta</p>');
 
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
 
   assert.equal(res.status, 0, res.stderr);
   assert.ok(fs.existsSync(path.join(dir, 'ficha-vieja.html')));
+});
+
+test('la lápida no tiene canónica ni JSON-LD y sale del sitemap', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir, '--root', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+
+  try {
+    const lapida = fs.readFileSync(path.join(dir, 'demo-lua.html'), 'utf8');
+    assert.ok(lapida.includes('name="robots" content="noindex,nofollow"'));
+    assert.ok(lapida.includes('Contenido retirado'));
+    assert.ok(lapida.includes('href="../index.html"'));
+    assert.ok(!lapida.includes('rel="canonical"'));
+    assert.ok(!lapida.includes('application/ld+json'));
+    assert.ok(!lapida.includes('publicaciones-api.js'));
+    assert.ok(!lapida.includes('blog-render.js'));
+
+    const sitemap = fs.readFileSync(path.join(dir, 'sitemap.xml'), 'utf8');
+    assert.ok(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
+    assert.ok(sitemap.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
+    assert.equal((sitemap.match(/<url>/g) || []).length, 15);
+    assert.ok(!sitemap.includes('demo-lua.html'));
+    assert.ok(sitemap.includes('<lastmod>2026-11-20</lastmod>'));
+
+    const robots = fs.readFileSync(path.join(dir, 'robots.txt'), 'utf8');
+    assert.ok(robots.includes('User-agent: *'));
+    assert.ok(robots.includes('Allow: /'));
+    assert.ok(robots.includes('Disallow: /main/post.html'));
+    assert.ok(robots.includes('Sitemap: https://gn-admin.github.io/main/sitemap.xml'));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('CLI genera un redirect 301 fuera del sitemap', () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-fixture-'));
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  fs.cpSync(FIXTURES, fixture, { recursive: true });
+  fs.writeFileSync(path.join(fixture, 'redirects.json'), JSON.stringify({
+    status: 'success',
+    data: [{ slug: 'demo-ficha-vieja', nuevoSlug: 'demo-nube' }]
+  }));
+
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', fixture, '--out', out, '--root', out
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  try {
+    assert.equal(res.status, 0, res.stderr);
+    const html = fs.readFileSync(path.join(out, 'demo-ficha-vieja.html'), 'utf8');
+    assert.ok(html.includes('name="robots" content="noindex,follow"'));
+    assert.ok(html.includes('rel="canonical" href="https://gn-admin.github.io/main/publicaciones/demo-nube.html"'));
+    assert.ok(html.includes('http-equiv="refresh"'));
+    assert.ok(html.includes('location.replace'));
+    assert.ok(!html.includes('application/ld+json'));
+    const sitemap = fs.readFileSync(path.join(out, 'sitemap.xml'), 'utf8');
+    assert.ok(!sitemap.includes('demo-ficha-vieja.html'));
+    assert.ok(sitemap.includes('demo-nube.html'));
+    assert.equal((sitemap.match(/<url>/g) || []).length, 15);
+    assert.equal(fs.readdirSync(out).filter(n => n.endsWith('.html')).length, 13);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+    fs.rmSync(out, { recursive: true, force: true });
+  }
+});
+
+test('sitemapXml escapa URLs y validarSalida detecta descuadres', () => {
+  const xml = prerender.sitemapXml([
+    { loc: 'https://ejemplo.test/a?b=1&c=2', lastmod: '2026-10-03T10:00:00Z' }
+  ]);
+  assert.ok(xml.includes('<loc>https://ejemplo.test/a?b=1&amp;c=2</loc>'));
+  assert.ok(xml.includes('<lastmod>2026-10-03</lastmod>'));
+
+  const robots = prerender.robotsTxt(SITE);
+  const plan = prerender.construirPlan({
+    publicaciones: [], retiradas: [], redirects: []
+  }, { siteUrl: SITE });
+
+  const vacio = prerender.validarSalida({
+    plan: plan, paginas: [], sitemapXml: '', robotsTexto: ''
+  }).join(' ');
+  assert.match(vacio, /sin declaración XML/);
+  assert.match(vacio, /sin <urlset>/);
+  assert.match(vacio, /sin User-agent/);
+  assert.match(vacio, /sin línea Sitemap:/);
+
+  const descuadre = prerender.validarSalida({
+    plan: plan, paginas: [], sitemapXml: prerender.sitemapXml([]), robotsTexto: robots
+  }).join(' ');
+  assert.match(descuadre, /sin ninguna URL/);
+  assert.match(descuadre, /no cuadra/);
+  assert.ok(robots.includes('Disallow: /main/post.html'));
+});
+
+test('un redirect con apóstrofe en la URL sigue validando', () => {
+  const destino = "https://ejemplo.test/a'b?x=1&y=2";
+  const html = paginasMod.paginaRedirect(destino);
+  const plan = { sitemap: [{ loc: SITE + '/' }] };
+  const errores = prerender.validarSalida({
+    plan: plan,
+    paginas: [{ slug: 'vieja', estado: 'redirect', destino: destino, html: html }],
+    sitemapXml: prerender.sitemapXml(plan.sitemap),
+    robotsTexto: prerender.robotsTxt(SITE)
+  });
+  assert.deepEqual(errores, []);
+});
+
+test('JSON-LD y redirect escapan el cierre de script', () => {
+  const ld = paginasMod.jsonLd({ title: '</script><script>alert(1)</script>', type: 'animal' }, SITE + '/publicaciones/x.html', SITE);
+  assert.equal(ld.split('</script>').length - 1, 1);
+
+  const html = paginasMod.paginaRedirect('https://ejemplo.test/a</script><script>alert(1)</script>');
+  assert.equal(html.split('</script>').length - 1, 1);
+});
+
+test('sitemap y robots van a --root, no a --out', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-root-'));
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', out, '--root', root
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  try {
+    assert.equal(res.status, 0, res.stderr);
+    assert.ok(fs.existsSync(path.join(root, 'sitemap.xml')));
+    assert.ok(fs.existsSync(path.join(root, 'robots.txt')));
+    assert.ok(!fs.existsSync(path.join(out, 'sitemap.xml')));
+    assert.ok(!fs.existsSync(path.join(out, 'robots.txt')));
+    assert.ok(fs.existsSync(path.join(out, 'demo-nube.html')));
+    assert.ok(fs.existsSync(path.join(out, 'demo-lua.html')));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(out, { recursive: true, force: true });
+  }
 });
