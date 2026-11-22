@@ -19,6 +19,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const paginasMod = require(path.join(__dirname, 'prerender-paginas.js'));
 
 const RAIZ = path.resolve(__dirname, '..');
 const SITE_POR_DEFECTO = 'https://gn-admin.github.io/main';
@@ -309,7 +310,7 @@ function construirPlan(datos, opciones) {
 // ---------- CLI ----------
 
 function argumentos(argv) {
-  var args = { dry: false, soft: false, fixture: '', siteUrl: SITE_POR_DEFECTO, help: false };
+  var args = { dry: false, soft: false, fixture: '', out: 'publicaciones', siteUrl: SITE_POR_DEFECTO, help: false };
   for (var i = 0; i < argv.length; i++) {
     var arg = argv[i];
     if (arg === '--dry') args.dry = true;
@@ -319,6 +320,8 @@ function argumentos(argv) {
     else if (arg.indexOf('--fixture=') === 0) args.fixture = arg.slice('--fixture='.length);
     else if (arg === '--site-url') args.siteUrl = argv[++i] || args.siteUrl;
     else if (arg.indexOf('--site-url=') === 0) args.siteUrl = arg.slice('--site-url='.length);
+    else if (arg === '--out') args.out = argv[++i] || args.out;
+    else if (arg.indexOf('--out=') === 0) args.out = arg.slice('--out='.length);
     else throw new Error('Opción desconocida: ' + arg);
   }
   return args;
@@ -327,7 +330,7 @@ function argumentos(argv) {
 function textoResumen(plan, args) {
   var indexables = plan.paginas.filter(function (p) { return p.indexable; }).length;
   var lineas = [];
-  lineas.push('Prerender (F1, ' + (args.dry ? 'dry run' : 'sin escritura') + ')');
+  lineas.push('Prerender (F2, ' + (args.dry ? 'dry run' : 'escritura') + ')');
   lineas.push('SITE_URL: ' + plan.siteUrl);
   lineas.push('publicaciones: ' + plan.paginas.length + ' (' + indexables + ' indexables)');
   lineas.push('retiradas: ' + plan.retiradas.length);
@@ -336,7 +339,10 @@ function textoResumen(plan, args) {
   plan.avisos.forEach(function (aviso) { lineas.push('aviso: ' + aviso); });
   plan.errores.forEach(function (error) { lineas.push('error: ' + error); });
   if (args.dry) {
+    lineas.push('páginas a escribir: ' + indexables);
     lineas.push('muestra: ' + plan.sitemap.slice(0, 3).map(function (u) { return u.loc; }).join(' · '));
+  } else {
+    lineas.push('destino: ' + args.out);
   }
   return lineas.join('\n');
 }
@@ -350,7 +356,7 @@ async function main(argv) {
     return 1;
   }
   if (args.help) {
-    console.log('Uso: node scripts/prerender.js --dry [--fixture <dir>] [--site-url <url>] [--soft]');
+    console.log('Uso: node scripts/prerender.js [--dry] [--fixture <dir>] [--out <dir>] [--site-url <url>] [--soft]');
     return 0;
   }
 
@@ -372,11 +378,25 @@ async function main(argv) {
   var plan = construirPlan(datos, { siteUrl: args.siteUrl });
   console.log(textoResumen(plan, args));
 
-  if (!args.dry) {
-    console.error('La escritura de páginas y sitemap se implementa en F2/F3; usa --dry.');
-    return 1;
-  }
   if (plan.errores.length && !args.soft) return 1;
+  if (args.dry) return 0;
+
+  var consultarEscritura = args.fixture ? null : clienteCanal(config);
+  var detalles = await paginasMod.cargarDetalles(datos.publicaciones, {
+    fixture: args.fixture,
+    consultar: consultarEscritura
+  });
+  var shell = fs.readFileSync(path.join(RAIZ, 'post.html'), 'utf8');
+  var porSlug = {};
+  datos.publicaciones.forEach(function (pub) { porSlug[pub.slug] = pub; });
+  var paginas = plan.paginas.filter(function (pagina) { return pagina.indexable; }).map(function (pagina) {
+    var post = paginasMod.prepararPost(porSlug[pagina.slug], detalles[pagina.slug]);
+    return { slug: pagina.slug, html: paginasMod.generarHtml(post, pagina, shell, plan.siteUrl) };
+  });
+  var destino = path.resolve(process.cwd(), args.out);
+  var resultado = paginasMod.escribirPaginas(paginas, destino);
+  var extra = resultado.eliminadas.length ? ' · eliminadas: ' + resultado.eliminadas.length : '';
+  console.log('escritas: ' + resultado.escritas + ' páginas en ' + destino + extra);
   return 0;
 }
 

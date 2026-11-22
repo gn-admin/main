@@ -8,6 +8,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
@@ -168,13 +169,68 @@ test('CLI --dry con fixtures resume el plan y sale 0', () => {
   assert.match(res.stdout, /SITE_URL: https:\/\/gn-admin\.github\.io\/main/);
 });
 
-test('CLI sin --dry no escribe y explica que llega en F2/F3', () => {
+test('CLI escribe una ficha por publicación indexable', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
   const res = spawnSync(process.execPath, [
-    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender'
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
   ], { cwd: RAIZ, encoding: 'utf8' });
 
-  assert.equal(res.status, 1);
-  assert.match(res.stderr, /F2\/F3/);
+  assert.equal(res.status, 0, res.stderr);
+  const ficheros = fs.readdirSync(dir).sort();
+  assert.equal(ficheros.length, 7);
+  assert.ok(ficheros.includes('demo-nube.html'));
+
+  const html = fs.readFileSync(path.join(dir, 'demo-nube.html'), 'utf8');
+  assert.ok(html.includes('<title>Nube, perro mestizo en adopción · Grupo Nebak</title>'));
+  assert.ok(html.includes('<link rel="canonical" href="https://gn-admin.github.io/main/publicaciones/demo-nube.html">'));
+  assert.ok(html.includes('<meta name="robots" content="index,follow">'));
+  assert.ok(html.includes('"@type":"Article"'));
+  assert.ok(html.includes('<h1>Nube, mestizo de 2 años</h1>'));
+  assert.ok(html.includes('href="../css/main.css"'));
+  assert.ok(html.includes('href="../contacto.html"'));
+  assert.ok(!html.includes('publicaciones-api.js'));
+  assert.ok(!html.includes('blog-render.js'));
+  assert.ok(!html.includes('data-source.js'));
+  assert.equal(html.split('post-template.js').length - 1, 1);
+  assert.ok(html.includes('PostTemplate.initCarousels(document)'));
+});
+
+test('la ficha estática de evento usa schema Event', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+
+  const html = fs.readFileSync(path.join(dir, 'demo-jornada-puertas-abiertas.html'), 'utf8');
+  assert.ok(html.includes('"@type":"Event"'));
+  assert.ok(html.includes('"startDate":"2027-03-21T00:00:00.000Z"'));
+  assert.ok(html.includes('Jornada de Puertas Abiertas'));
+  assert.ok(!html.includes('publicaciones-api.js'));
+});
+
+test('--dry no escribe ninguna ficha', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 0, res.stderr);
+  assert.equal(fs.readdirSync(dir).length, 0);
+  assert.ok(res.stdout.includes('páginas a escribir: 7'));
+});
+
+test('renderArticle comparte el markup del cliente', () => {
+  const T = require(path.join(RAIZ, 'js', 'post-template.js'));
+  const html = T.renderArticle({
+    slug: 'x', title: 'Ficha de prueba', category: 'Gatos en adopción',
+    content: '<p>Contenido</p>', publication: null
+  }, { from: 'gatos', fallbackImage: function (src) { return src || 'logo.jpg'; } });
+
+  assert.ok(html.includes('<h1>Ficha de prueba</h1>'));
+  assert.ok(html.includes('<p>Contenido</p>'));
+  assert.ok(html.includes('href="gatos-en-adopcion.html"'));
+  assert.ok(html.includes('post-sheet--ficha'));
 });
 
 test('CLI con fixture inexistente falla con mensaje claro', () => {
@@ -251,4 +307,31 @@ test('redirect a un slug no publicado avisa pero no falla', () => {
 
   assert.equal(plan.errores.length, 0);
   assert.ok(plan.avisos.some(a => a.indexOf('slug no publicado') !== -1));
+});
+
+test('la escritura elimina fichas obsoletas y respeta otros archivos', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  fs.writeFileSync(path.join(dir, 'ficha-vieja.html'), '<p>obsoleta</p>');
+  fs.writeFileSync(path.join(dir, 'nota.txt'), 'no tocar');
+
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--fixture', 'tests/fixtures/prerender', '--out', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 0, res.stderr);
+  assert.ok(!fs.existsSync(path.join(dir, 'ficha-vieja.html')));
+  assert.ok(fs.existsSync(path.join(dir, 'nota.txt')));
+  assert.ok(res.stdout.includes('eliminadas: 1'));
+});
+
+test('--dry no borra fichas obsoletas', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gn-prerender-'));
+  fs.writeFileSync(path.join(dir, 'ficha-vieja.html'), '<p>obsoleta</p>');
+
+  const res = spawnSync(process.execPath, [
+    'scripts/prerender.js', '--dry', '--fixture', 'tests/fixtures/prerender', '--out', dir
+  ], { cwd: RAIZ, encoding: 'utf8' });
+
+  assert.equal(res.status, 0, res.stderr);
+  assert.ok(fs.existsSync(path.join(dir, 'ficha-vieja.html')));
 });
