@@ -160,7 +160,8 @@
         var CHIP_KEYS = ['urgente','cachorro','adulto','especial'];
 
         // Carga las taxonomías del canal para este tipo y pinta los filtros.
-        var tipoTax = /grupo/i.test(cat) ? 'animal_grupo' : 'animal';
+        var tipoTax = /grupo/i.test(cat) ? 'animal_grupo'
+          : (/evento/i.test(cat) ? 'evento' : 'animal');
         if (api.taxonomias) {
           api.taxonomias(tipoTax).then(function (res) {
             var data = (res && res.data) || res || {};
