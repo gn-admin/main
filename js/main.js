@@ -121,11 +121,18 @@
     }
     var api = (typeof PublicacionesAPI !== 'undefined') ? PublicacionesAPI : null;
     if (!api) return;
+    function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
     var secciones = [];
     var faltaSeccion = false;
     containers.forEach(function(root){
       var c = root.getAttribute('data-adoption-list');
-      var s = /gatos/i.test(c) ? 'gatos' : (/perros/i.test(c) ? 'perros' : '');
+      var s = /gatos/i.test(c) ? 'gatos'
+        : (/perros/i.test(c) ? 'perros'
+        : (/acogid/i.test(c) ? 'acogidas'
+        : (/adoptad/i.test(c) ? 'adoptados'
+        : (/caso externo/i.test(c) ? 'casosExternos'
+        : (/grupo/i.test(c) ? 'grupos' : '')))));
       if (!s) faltaSeccion = true;
       else if (secciones.indexOf(s) === -1) secciones.push(s);
     });
@@ -141,13 +148,66 @@
         var filterSel = document.querySelector('[data-adoption-filter="'+cat+'"]');
         var chipsWrap = document.querySelector('[data-adoption-chips="'+cat+'"]');
         var meta = document.querySelector('[data-adoption-meta="'+cat+'"]');
-        var state = { q:'', chip:'all', sort:'recent' };
+        var state = { q:'', chip:'all', taxStatus:'all', sort:'recent' };
+        var taxonomyStatuses = null; // null = no cargado; [] = sin taxonomías
+
+        // Carga las taxonomías del canal para este tipo y pinta los filtros.
+        var tipoTax = /grupo/i.test(cat) ? 'animal_grupo' : 'animal';
+        if (api.taxonomias) {
+          api.taxonomias(tipoTax).then(function (res) {
+            var data = (res && res.data) || res || {};
+            var statuses = (data.status || data.statuses || []);
+            if (Array.isArray(statuses) && statuses.length) {
+              taxonomyStatuses = statuses;
+              renderChips();
+            }
+          }).catch(function () { taxonomyStatuses = []; });
+        }
+
+        function renderChips() {
+          if (!chipsWrap) return;
+          var chips = ['<button type="button" class="filter-chip is-active" data-chip="all" aria-pressed="true">Todos</button>'];
+          if (taxonomyStatuses && taxonomyStatuses.length) {
+            taxonomyStatuses.forEach(function (st) {
+              var val = (typeof st === 'string') ? st : (st.value || st.slug || st.label || '');
+              var lab = (typeof st === 'string') ? st : (st.label || st.value || st.slug || '');
+              if (!val) return;
+              chips.push('<button type="button" class="filter-chip" data-chip-tax="' + escAttr(val) + '" aria-pressed="false">' + esc(lab) + '</button>');
+            });
+          } else {
+            chips.push('<button type="button" class="filter-chip" data-chip="urgente" aria-pressed="false">Urgente</button>');
+            chips.push('<button type="button" class="filter-chip" data-chip="cachorro" aria-pressed="false">Cachorros</button>');
+            chips.push('<button type="button" class="filter-chip" data-chip="adulto" aria-pressed="false">Adultos / Senior</button>');
+            chips.push('<button type="button" class="filter-chip" data-chip="especial" aria-pressed="false">Necesidades especiales</button>');
+          }
+          chipsWrap.innerHTML = chips.join('');
+          // Re-bind click handlers
+          $$( '[data-chip], [data-chip-tax]', chipsWrap).forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              if (btn.hasAttribute('data-chip-tax')) {
+                state.taxStatus = btn.getAttribute('data-chip-tax');
+                state.chip = 'all';
+              } else {
+                state.chip = btn.getAttribute('data-chip');
+                state.taxStatus = 'all';
+              }
+              $$( '[data-chip], [data-chip-tax]', chipsWrap).forEach(function (b) { b.classList.remove('is-active'); });
+              btn.classList.add('is-active');
+              render();
+            });
+          });
+          var first = chipsWrap.querySelector('.chip');
+          if (first) first.classList.add('is-active');
+        }
 
         function render(){
           var q = norm(state.q);
           var filtered = list.filter(function(p){
+            // Descartar publicaciones retiradas o redirigidas.
+            if (p && (p.status === 'gone' || p.redirect)) return false;
             var text = norm([p.title,p.excerpt,p.category,(p.tags||[]).join(' ')].join(' '));
             if (q && text.indexOf(q) === -1) return false;
+            if (state.taxStatus && state.taxStatus !== 'all' && p.status !== state.taxStatus) return false;
             var f = tagFlags(p);
             if (state.chip === 'urgente' && !f.urgente) return false;
             if (state.chip === 'cachorro' && !f.cachorro) return false;
@@ -169,6 +229,8 @@
             var img = imgPath(p.image);
             var flags = tagFlags(p);
             var badges = [];
+            if (p.featured) badges.push('Destacado');
+            if (p.sponsor && p.sponsor.available) badges.push('Apadrinable');
             if (flags.urgente) badges.push('Urgente');
             if (flags.cachorro) badges.push('Cachorro');
             if (flags.especial) badges.push('Necesidades especiales');
@@ -182,13 +244,25 @@
 
         if (search) search.addEventListener('input', function(){ state.q = search.value || ''; render(); });
         if (filterSel) filterSel.addEventListener('change', function(){ state.sort = filterSel.value || 'recent'; render(); });
-        if (chipsWrap) $$('.filter-chip', chipsWrap).forEach(function(btn){
-          btn.addEventListener('click', function(){
-            $$('.filter-chip', chipsWrap).forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-pressed','false'); });
-            btn.classList.add('is-active'); btn.setAttribute('aria-pressed','true');
-            state.chip = btn.getAttribute('data-chip') || 'all'; render();
+        // Delegación para chips (estáticos o dinámicos por taxonomías).
+        if (chipsWrap) {
+          chipsWrap.addEventListener('click', function (e) {
+            var btn = e.target && e.target.closest ? e.target.closest('[data-chip], [data-chip-tax]') : null;
+            if (!btn || !chipsWrap.contains(btn)) return;
+            $$('.filter-chip, .chip', chipsWrap).forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
+            btn.classList.add('is-active'); btn.setAttribute('aria-pressed', 'true');
+            if (btn.hasAttribute('data-chip-tax')) {
+              state.taxStatus = btn.getAttribute('data-chip-tax');
+              state.chip = 'all';
+            } else {
+              state.chip = btn.getAttribute('data-chip') || 'all';
+              state.taxStatus = 'all';
+            }
+            render();
           });
-        });
+        }
+        // Render inicial de chips (fallback) y luego taxonomías.
+        renderChips();
         render();
       });
     }).catch(function(){

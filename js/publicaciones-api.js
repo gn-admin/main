@@ -54,7 +54,12 @@ var PublicacionesAPI = (function () {
     casosExternos: {
       scope: 'category',
       categories: ['Caso externo'],
-      query: null
+      query: { endpoint: 'publicaciones', category: 'Caso externo' }
+    },
+    grupos: {
+      scope: 'category',
+      categories: ['Grupo', 'Grupos'],
+      query: { endpoint: 'publicaciones', type: 'animal_grupo' }
     },
     apadrinamiento: {
       scope: 'category',
@@ -559,6 +564,15 @@ var PublicacionesAPI = (function () {
     return modeFor(section);
   }
 
+  // Taxonomías del canal (filtros). Devuelve la promesa del sobre.
+  function taxonomias(type) {
+    var query = { endpoint: 'taxonomias' };
+    if (type) query.type = type;
+    var api = cliente();
+    if (api) return api.taxonomias(type);
+    return requestChannel(query);
+  }
+
   function fallbackImage(src) {
     if (!src || !String(src).trim()) return FALLBACK_IMAGE;
     return String(src);
@@ -588,6 +602,7 @@ var PublicacionesAPI = (function () {
     loadPost: loadPost,
     getSiteConfig: getSiteConfig,
     getSource: getSource,
+    taxonomias: taxonomias,
     fallbackImage: fallbackImage,
     urlEstatica: function (slug) {
       var s = String(slug == null ? '' : slug).trim();

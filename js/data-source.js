@@ -30,9 +30,10 @@
       historias:      { mode: 'real' },
       gatos:          { mode: 'real' },
       perros:         { mode: 'real' },
-      acogidas:       { mode: 'fake' },
-      adoptados:      { mode: 'fake' },
-      casosExternos:  { mode: 'fake' },
+      acogidas:       { mode: 'real' },
+      adoptados:      { mode: 'real' },
+      casosExternos:  { mode: 'real' },
+      grupos:         { mode: 'real' },
       apadrinamiento: { mode: 'fake' }, // el canal aún no expone este dato
       home:           { mode: 'real' },
       detalle:        { mode: 'real' }
