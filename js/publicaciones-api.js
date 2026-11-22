@@ -64,7 +64,7 @@ var PublicacionesAPI = (function () {
     eventos: {
       scope: 'category',
       categories: ['Evento', 'Eventos'],
-      query: { endpoint: 'publicaciones', category: 'Evento' }
+      query: { endpoint: 'publicaciones', type: 'evento' }
     },
     apadrinamiento: {
       scope: 'category',

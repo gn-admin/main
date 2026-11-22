@@ -62,6 +62,22 @@
         fallbackImage: HistoriasAPI.fallbackImage
       });
       PostTemplate.initCarousels(root);
+      // Publicaciones relacionadas por categoría (filtro avanzado de detalle).
+      try {
+        var todos = (typeof HistoriasAPI.getAllPosts === 'function') ? (HistoriasAPI.getAllPosts() || []) : [];
+        var relacionadas = todos.filter(function (p) {
+          return p && p.slug && p.slug !== post.slug && (p.category || '') === (post.category || '');
+        }).slice(0, 4);
+        if (relacionadas.length) {
+          var html = '<section class="post-related" style="margin-top:2rem"><h2>Más de ' + esc(post.category || 'esta categoría') + '</h2><ul>';
+          relacionadas.forEach(function (p) {
+            var url = (p.urlEstatica) ? p.urlEstatica : ('post.html?slug=' + encodeURIComponent(p.slug));
+            html += '<li><a href="' + esc(url) + '">' + esc(p.title) + '</a></li>';
+          });
+          html += '</ul></section>';
+          root.insertAdjacentHTML('beforeend', html);
+        }
+      } catch (e) { /* sin bloquear */ }
     }).catch(function (err) {
       renderError(root, 'No se pudo cargar la publicación. Comprueba tu conexión o inténtalo de nuevo.');
       console.error(err);
