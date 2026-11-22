@@ -1,0 +1,29 @@
+{
+  "site": { "name": "Grupo Nebak (local)" },
+  "posts": [
+    {
+      "slug": "gato-local",
+      "title": "Gato local",
+      "category": "Gatos en adopción",
+      "excerpt": "Ficha local de gato.",
+      "content": "<p>Gato local.</p>",
+      "date": "2026-01-10"
+    },
+    {
+      "slug": "perro-local",
+      "title": "Perro local",
+      "category": "Perros en adopción",
+      "excerpt": "Ficha local de perro.",
+      "content": "<p>Perro local.</p>",
+      "date": "2026-01-11"
+    },
+    {
+      "slug": "historia-local",
+      "title": "Historia local",
+      "category": "Historias",
+      "excerpt": "Historia local.",
+      "content": "<p>Historia local.</p>",
+      "date": "2026-01-12"
+    }
+  ]
+}

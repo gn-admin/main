@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "data": {
+    "slug": "demo-nube",
+    "title": "Nube, mestizo de 2 años",
+    "category": "Perros en adopción",
+    "excerpt": "Nube busca familia.",
+    "contentHtml": "<p>Nube es un perro tranquilo.</p><p>Se lleva bien con niños.</p>",
+    "publishedAt": "2026-11-20T10:00:00.000Z",
+    "coverImage": { "src": "https://img.test/nube.jpg", "alt": "Nube" },
+    "icons": [{ "label": "Edad", "value": "2 años" }],
+    "gallery": [{ "src": "https://img.test/nube-2.jpg", "alt": "Nube jugando" }]
+  }
+}

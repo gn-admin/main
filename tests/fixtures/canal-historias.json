@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "slug": "demo-un-ano-de-adopciones",
+      "title": "Un año de adopciones",
+      "category": "Historias",
+      "excerpt": "Repaso al año.",
+      "contentHtml": "<p>Un año de finales felices.</p>",
+      "publishedAt": "2026-11-15T10:00:00.000Z",
+      "coverImage": { "src": "https://img.test/historia.jpg", "alt": "Un año de adopciones" }
+    }
+  ],
+  "pagination": { "page": 1, "pageSize": 24, "total": 1 }
+}

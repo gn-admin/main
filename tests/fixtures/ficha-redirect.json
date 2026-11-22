@@ -1,0 +1,10 @@
+{
+  "status": "success",
+  "data": {
+    "slug": "demo-nube",
+    "title": "Nube, mestizo de 2 años",
+    "category": "Perros en adopción",
+    "contentHtml": "<p>Nube es un perro tranquilo.</p>"
+  },
+  "redirect": { "from": "nube-vieja", "slug": "demo-nube" }
+}

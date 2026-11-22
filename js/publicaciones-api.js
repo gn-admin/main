@@ -426,7 +426,9 @@ var PublicacionesAPI = (function () {
     if (!def) return load();                 // sección desconocida: catálogo
     if (def.scope === 'view') return load(); // 'home' es una vista de todo
     if (modeFor(section) === 'real') {
-      return loadRealSection(section).catch(function () { return loadFake(); });
+      return loadRealSection(section).catch(function () {
+        return options().fallbackOnError ? loadFake() : null;
+      });
     }
     return loadFake();
   }
