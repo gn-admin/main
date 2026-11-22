@@ -10,7 +10,7 @@ var HistoriasAPI = (function () {
   function load() {
     var a = api();
     if (!a) return Promise.resolve({ site: {}, posts: [] });
-    return a.load().then(function () {
+    return a.load(['historias']).then(function () {
       return { site: a.getSiteConfig(), posts: a.getPostsFor('historias') };
     });
   }

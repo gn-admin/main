@@ -389,7 +389,7 @@ var PublicacionesAPI = (function () {
   // ámbito local (home, al ser una vista, ve todo lo cargado).
   function getPostsFor(section) {
     var def = SECTIONS[section];
-    if (!loaded || !def) return getAllPosts();
+    if (!def) return getAllPosts();
     if (modeFor(section) === 'real') {
       if (realServed[section]) return (realPosts[section] || []).slice();
       // Canal caído con fallback: la sección se queda con su fake, igual que
@@ -398,8 +398,9 @@ var PublicacionesAPI = (function () {
     }
     if (def.scope === 'view') return getAllPosts();
     var out = [];
-    for (var i = 0; i < loaded.posts.length; i++) {
-      var post = loaded.posts[i];
+    var fakePosts = fake ? fake.posts : [];
+    for (var i = 0; i < fakePosts.length; i++) {
+      var post = fakePosts[i];
       if (realBySlug[post.slug]) continue; // una sección fake lee solo datos locales
       if (def.scope === 'rest') {
         if (inHistoriasFeed(post)) out.push(post);
@@ -412,19 +413,62 @@ var PublicacionesAPI = (function () {
 
   // ---------- API pública ----------
 
-  function load() {
+  function normalizeSections(sections) {
+    if (sections === undefined || sections === null) return null;
+    if (typeof sections === 'string') return [sections];
+    return Array.isArray(sections) ? sections : null;
+  }
+
+  // Carga mínima: solo la sección pedida. El JSON local se descarga únicamente
+  // si esa sección está en fake o si el canal falla y hay que degradar.
+  function ensureSection(section) {
+    var def = SECTIONS[section];
+    if (!def) return load();                 // sección desconocida: catálogo
+    if (def.scope === 'view') return load(); // 'home' es una vista de todo
+    if (modeFor(section) === 'real') {
+      return loadRealSection(section).catch(function () { return loadFake(); });
+    }
+    return loadFake();
+  }
+
+  // load()               -> catálogo completo (chat, home): fake + todas las reales
+  // load(['gatos'])      -> solo esa sección (y solo su llamada al canal)
+  function load(sections) {
+    var list = normalizeSections(sections);
+    if (list) {
+      var seen = {};
+      var uniq = [];
+      list.forEach(function (section) {
+        if (section && SECTIONS[section] && !seen[section]) {
+          seen[section] = true;
+          uniq.push(section);
+        }
+      });
+      if (!uniq.length) {
+        return Promise.resolve({ site: fake ? fake.site : {}, posts: [], sections: {} });
+      }
+      return Promise.all(uniq.map(ensureSection)).then(function () {
+        var state = {};
+        var posts = [];
+        uniq.forEach(function (section) {
+          state[section] = { mode: modeFor(section), served: !!realServed[section] };
+          posts = posts.concat(getPostsFor(section));
+        });
+        return { site: fake ? fake.site : {}, posts: posts, sections: state };
+      });
+    }
     if (loaded) return Promise.resolve(loaded);
     if (pending) return pending;
     pending = loadFake().then(function () {
-      var sections = realSections();
-      if (!sections.length) {
+      var allSections = realSections();
+      if (!allSections.length) {
         return { site: fake.site, posts: fake.posts.slice(), sections: {} };
       }
-      return Promise.all(sections.map(function (section) {
+      return Promise.all(allSections.map(function (section) {
         return loadRealSection(section).catch(function () { return []; });
       })).then(function () {
         var state = {};
-        sections.forEach(function (section) { state[section] = { mode: 'real', served: !!realServed[section] }; });
+        allSections.forEach(function (section) { state[section] = { mode: 'real', served: !!realServed[section] }; });
         return { site: fake.site, posts: mergedPosts(), sections: state };
       });
     }).then(function (result) {
@@ -438,9 +482,7 @@ var PublicacionesAPI = (function () {
       return loaded;
     });
     return pending;
-  }
-
-  function getAllPosts() {
+  }  function getAllPosts() {
     return loaded ? loaded.posts.slice() : [];
   }
 
@@ -457,14 +499,14 @@ var PublicacionesAPI = (function () {
     if (!wanted) return Promise.resolve({ post: null, notFound: true });
     var api = detalleReal() ? cliente() : null;
     if (!api) {
-      return load().then(function () { return { post: getPostBySlug(wanted) }; });
+      return loadFake().then(function () { return { post: getPostBySlug(wanted) || localPostBySlug(wanted) }; });
     }
     return api.ficha(wanted).then(function (res) {
       if (res && res.status === 'gone') return { post: null, gone: true, message: res.error || '' };
       if (!res || res.status !== 'success') {
         // Compatibilidad: un enlace antiguo a una ficha local sigue abriéndose
         // aunque el canal no conozca ese slug.
-        return load().then(function () {
+        return loadFake().then(function () {
           var local = getPostBySlug(wanted) || localPostBySlug(wanted);
           if (local) return { post: local };
           return { post: null, notFound: true, message: (res && res.error) || '' };

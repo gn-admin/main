@@ -114,7 +114,15 @@
     }
     var api = (typeof PublicacionesAPI !== 'undefined') ? PublicacionesAPI : null;
     if (!api) return;
-    api.load().then(function(){
+    var secciones = [];
+    var faltaSeccion = false;
+    containers.forEach(function(root){
+      var c = root.getAttribute('data-adoption-list');
+      var s = /gatos/i.test(c) ? 'gatos' : (/perros/i.test(c) ? 'perros' : '');
+      if (!s) faltaSeccion = true;
+      else if (secciones.indexOf(s) === -1) secciones.push(s);
+    });
+    api.load(faltaSeccion ? undefined : secciones).then(function(){
       var posts = api.getAllPosts();
       containers.forEach(function(root){
         var cat = root.getAttribute('data-adoption-list');
