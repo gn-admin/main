@@ -27,8 +27,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Prerender fichas y sitemap
+        env:
+          SITE_URL: https://gn-admin.github.io/main
+        run: node scripts/prerender.js --site-url "$SITE_URL"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
