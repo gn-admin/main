@@ -4,6 +4,13 @@
 > Proyecto destino: `main` (`https://gn-admin.github.io/main`). Proyecto origen: `admin-dashboard` (gestor) + su backend Google Apps Script (canal público).
 > Reglas que no se rompen: no modificar `main` desde el repo del gestor; `node --test` verde en ambos; no commitear `docs/plan-fuente-datos-fake-endpoint.md` (este plan sí se commitea).
 
+## Estado de ejecución (2026-11-23)
+
+- [x] **Fase 1 · exportación estática**: `scripts/exportar-datos.js` descarga el listado paginado y escribe `data/publicaciones.json`, `data/retiradas.json`, `data/redirects.json`, `data/taxonomias.json` y `data/config-publica.json` de forma atómica. Integrado en `.github/workflows/pages.yml` con `--soft` (no bloquea el deploy). Los JSON quedan versionados como fallback.
+- [x] **Resiliencia básica**: si un endpoint opcional falla y existe un JSON previo, se conserva; `--soft` evita romper el build por datos.
+- [ ] **Fase 1 · cliente estático**: `publicaciones-api.js` aún no lee `data/publicaciones.json`; el siguiente paso es añadir el modo `static` y dejar GAS solo para detalle/fallback.
+- [ ] **Fases 2–6**: caché SW/localStorage, reducción de peticiones, reintentos con backoff, cron cada 6 h y proxy opcional.
+
 ## 1. Problema y motivación
 
 Hoy la web `main` (GitHub Pages estático) consume el canal público de Apps Script **en tiempo de ejecución** desde el navegador: cada visita a un listado dispara `fetch`/JSONP contra `/exec` (`publicaciones`, `animales-publicos`, `eventos-publicos`, `historias-publicas`, `taxonomias`, `config-publica`, `publicacion&slug`). Además, el deploy de Pages ejecuta `scripts/prerender.js`, que vuelve a consultar el canal (listado paginado + `retiradas` + `redirects` + `sitemap` + detalle por ficha).
