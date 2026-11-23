@@ -22,3 +22,9 @@ Este repositorio contiene la **versión publicada** del sitio web de Grupo Nebak
 ## Notas
 - Rutas relativas a la raíz del sitio (compatibles con el despliegue en `/main/`).
 - Los datos de publicaciones/fichas se cargan actualmente desde JSON local; la evolución a endpoint público se documenta en `docs/`.
+
+## Documentación
+
+- `docs/DOCUMENTACION.md`: documentación técnica consolidada.
+- `docs/analisis-endpoint-seo-formularios-cookies-main.md`: análisis detallado.
+- `PENDIENTES.md`: checklist de lo que falta para dejar `main` al 100%.
