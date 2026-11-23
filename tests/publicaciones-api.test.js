@@ -201,7 +201,7 @@ test('ficha: una llamada por slug y post normalizado', async () => {
   assert.ok(resultado.post);
   assert.equal(resultado.post.title, 'Nube, mestizo de 2 años');
   assert.equal(resultado.post.content, '<p>Nube es un perro tranquilo.</p><p>Se lleva bien con niños.</p>');
-  assert.equal(resultado.post.url, 'post.html?slug=demo-nube');
+  assert.equal(resultado.post.url, 'post/?slug=demo-nube');
   assert.equal(resultado.post.publication.icons.length, 1);
   assert.equal(resultado.gone, undefined);
 });

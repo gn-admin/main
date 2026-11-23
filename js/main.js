@@ -9,7 +9,7 @@
   // el enlace dinámico antiguo.
   function fichaUrl(p, from) {
     if (p && p.urlEstatica) return p.urlEstatica;
-    return 'post.html?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from || 'historias');
+    return 'post/?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from || 'historias');
   }
 
   // Year
@@ -266,7 +266,7 @@
         render();
       });
     }).catch(function(){
-      containers.forEach(function(root){ root.innerHTML = '<div class="listing-empty">No se pudo cargar el listado ahora mismo. Puedes escribirnos en <a href="contacto.html">contacto</a>.</div>'; });
+      containers.forEach(function(root){ root.innerHTML = '<div class="listing-empty">No se pudo cargar el listado ahora mismo. Puedes escribirnos en <a href="../contacto/">contacto</a>.</div>'; });
     });
   })();
 
@@ -717,7 +717,7 @@
 
     function formAdopt(prefill) {
       var animal = (prefill && !/(adopt|form|solicitud|rellen)/i.test(prefill)) ? prefill : '';
-      renderForm('Adopción', 'Cuéntanos tu interés y te contactamos. Puedes revisar el <a href="protocolo.html">protocolo de adopción</a> antes de enviar.',
+      renderForm('Adopción', 'Cuéntanos tu interés y te contactamos. Puedes revisar el <a href="../protocolo/">protocolo de adopción</a> antes de enviar.',
         '<label>Nombre *<input type="text" name="nombre" required></label>'+
         '<label>Email *<input type="email" name="email" required></label>'+
         '<label>Teléfono<input type="tel" name="telefono"></label>'+

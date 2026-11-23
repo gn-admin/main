@@ -58,14 +58,14 @@
   function backTarget(post, fromParam) {
     var from = String(fromParam || '').toLowerCase();
     var cat = String(post.category || '');
-    if (from === 'gatos') return { href: 'gatos-en-adopcion.html', label: 'Volver a gatos en adopción' };
-    if (from === 'perros') return { href: 'perros-en-adopcion.html', label: 'Volver a perros en adopción' };
-    if (from === 'eventos') return { href: 'index.html', label: 'Volver al inicio' };
-    if (from === 'historias') return { href: 'historias.html', label: 'Volver a historias' };
-    if (cat === 'Gatos en adopción') return { href: 'gatos-en-adopcion.html', label: 'Volver a gatos en adopción' };
-    if (cat === 'Perros en adopción') return { href: 'perros-en-adopcion.html', label: 'Volver a perros en adopción' };
-    if (/evento/i.test(cat)) return { href: 'index.html', label: 'Volver al inicio' };
-    return { href: 'historias.html', label: 'Volver a historias' };
+    if (from === 'gatos') return { href: '../gatos-en-adopcion/', label: 'Volver a gatos en adopción' };
+    if (from === 'perros') return { href: '../perros-en-adopcion/', label: 'Volver a perros en adopción' };
+    if (from === 'eventos') return { href: '../', label: 'Volver al inicio' };
+    if (from === 'historias') return { href: '../historias/', label: 'Volver a historias' };
+    if (cat === 'Gatos en adopción') return { href: '../gatos-en-adopcion/', label: 'Volver a gatos en adopción' };
+    if (cat === 'Perros en adopción') return { href: '../perros-en-adopcion/', label: 'Volver a perros en adopción' };
+    if (/evento/i.test(cat)) return { href: '../', label: 'Volver al inicio' };
+    return { href: '../historias/', label: 'Volver a historias' };
   }
 
   function isFichaPost(post) {
@@ -142,14 +142,14 @@
     var fromParam = opts.from;
     var ficha = isFichaPost(post);
     var image = imagen(post.image, fallbackImage);
-    var cta = post.cta || { label: 'Contactar con Nebak', url: 'contacto.html' };
+    var cta = post.cta || { label: 'Contactar con Nebak', url: '../contacto/' };
     var ctaHtml;
-    if (cta && /contacto\.html/.test(String(cta.url || ''))) {
+    if (cta && /contacto/.test(String(cta.url || ''))) {
       var formType = (post.category === 'Acogida' || post.category === 'Acogidas') ? 'acogida' : 'adopcion-animal';
       var concept = formType === 'acogida' ? ('Consulta de acogida: ' + post.title) : ('Consulta de adopción: ' + post.title);
-      ctaHtml = '<a class="btn btn-primary" href="contacto.html" data-open-form="' + formType + '" data-form-concept="' + esc(concept) + '" data-form-subject="' + esc(concept) + '" data-animal="' + esc(post.title) + '" data-animal-slug="' + esc(post.slug) + '">' + esc(cta.label || 'Contactar con Nebak') + '</a>';
+      ctaHtml = '<a class="btn btn-primary" href="../contacto/" data-open-form="' + formType + '" data-form-concept="' + esc(concept) + '" data-form-subject="' + esc(concept) + '" data-animal="' + esc(post.title) + '" data-animal-slug="' + esc(post.slug) + '">' + esc(cta.label || 'Contactar con Nebak') + '</a>';
     } else {
-      ctaHtml = '<a class="btn btn-primary" href="' + esc((cta && cta.url) || 'contacto.html') + '">' + esc((cta && cta.label) || 'Contactar con Nebak') + '</a>';
+      ctaHtml = '<a class="btn btn-primary" href="' + esc((cta && cta.url) || '../contacto/') + '">' + esc((cta && cta.label) || 'Contactar con Nebak') + '</a>';
     }
     var tags = Array.isArray(post.tags) ? post.tags : [];
     var content = post.content || ('<p>' + esc(post.excerpt || '') + '</p>');
@@ -194,7 +194,7 @@
       '<article class="post-sheet ' + (ficha ? 'post-sheet--ficha' : 'post-sheet--story') + '">' +
         hero +
         renderIcons(pub, post) +
-        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<a class="tag" href="historias.html?q=' + encodeURIComponent(t) + '">' + esc(t) + '</a>'; }).join('') + '</div>' : '') +
+        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<a class="tag" href="../historias/?q=' + encodeURIComponent(t) + '">' + esc(t) + '</a>'; }).join('') + '</div>' : '') +
         '<section class="post-section post-section--desc">' + descHead + '<div class="post-body">' + content + '</div></section>' +
         mediaBlocks +
         '<div class="actions actions-center post-actions">' + ctaHtml + ' <a class="btn btn-secondary" href="' + esc(back.href) + '">' + esc(back.label) + '</a></div>' +

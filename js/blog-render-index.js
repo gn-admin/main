@@ -20,7 +20,7 @@
     return text.slice(0, limit).replace(/\s+\S*$/, '') + '�';
   }
 
-  function postUrl(slug, from) { return 'post.html?slug=' + encodeURIComponent(slug) + '&from=' + encodeURIComponent(from || 'historias'); }
+  function postUrl(slug, from) { return 'post/?slug=' + encodeURIComponent(slug) + '&from=' + encodeURIComponent(from || 'historias'); }
 
   // Preferimos la ficha estática cuando el prerender la generó (urlEstatica);
   // si no existe, mantenemos el enlace dinámico antiguo.

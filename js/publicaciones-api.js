@@ -18,6 +18,7 @@ var PublicacionesAPI = (function () {
   'use strict';
 
   var LOCAL_DATA_URL = 'data/blog-posts.json';
+
   var FALLBACK_IMAGE = 'assets/images/logo.jpg';
 
   // Sección -> ámbito en los datos locales y consulta al canal público.
@@ -537,7 +538,7 @@ var PublicacionesAPI = (function () {
       }
       var post = normalizePost(res.data, { canal: true });
       if (post && post.slug) {
-        post.url = 'post.html?slug=' + encodeURIComponent(post.slug);
+        post.url = 'post/?slug=' + encodeURIComponent(post.slug);
         realBySlug[post.slug] = 'detalle';
       }
       return { post: post, redirect: res.redirect || null };

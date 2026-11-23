@@ -6,8 +6,8 @@
   }
 
   function renderError(root, message) {
-    root.innerHTML = '<a class="card-link" href="historias.html">← Volver a historias</a>' +
-      '<div class="post-sheet" style="margin-top:1rem"><h1>No encontramos esta ficha</h1><p>' + esc(message) + '</p><p><a class="btn btn-primary" href="historias.html">Ver historias</a></p></div>';
+    root.innerHTML = '<a class="card-link" href="../historias/">← Volver a historias</a>' +
+      '<div class="post-sheet" style="margin-top:1rem"><h1>No encontramos esta ficha</h1><p>' + esc(message) + '</p><p><a class="btn btn-primary" href="../historias/">Ver historias</a></p></div>';
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -39,7 +39,7 @@
       if (resultado.redirect && resultado.redirect.slug && resultado.redirect.slug !== post.slug) {
         params.set('slug', resultado.redirect.slug);
         if (window.history && history.replaceState) {
-          history.replaceState(null, '', 'post.html?' + params.toString());
+          history.replaceState(null, '', 'post/?' + params.toString());
         }
       }
       // La ficha estática es la canónica: evita que el SPA compita en buscadores.
@@ -71,7 +71,7 @@
         if (relacionadas.length) {
           var html = '<section class="post-related" style="margin-top:2rem"><h2>Más de ' + esc(post.category || 'esta categoría') + '</h2><ul>';
           relacionadas.forEach(function (p) {
-            var url = (p.urlEstatica) ? p.urlEstatica : ('post.html?slug=' + encodeURIComponent(p.slug));
+            var url = (p.urlEstatica) ? p.urlEstatica : ('post/?slug=' + encodeURIComponent(p.slug));
             html += '<li><a href="' + esc(url) + '">' + esc(p.title) + '</a></li>';
           });
           html += '</ul></section>';

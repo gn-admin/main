@@ -203,7 +203,7 @@ test('CLI escribe una ficha por publicación indexable', () => {
   assert.ok(html.includes('"@type":"Article"'));
   assert.ok(html.includes('<h1>Nube, mestizo de 2 años</h1>'));
   assert.ok(html.includes('href="../css/main.css"'));
-  assert.ok(html.includes('href="../contacto.html"'));
+  assert.ok(html.includes('href="../contacto/"'));
   assert.ok(!html.includes('publicaciones-api.js'));
   assert.ok(!html.includes('blog-render.js'));
   assert.ok(!html.includes('data-source.js'));
@@ -245,7 +245,7 @@ test('renderArticle comparte el markup del cliente', () => {
 
   assert.ok(html.includes('<h1>Ficha de prueba</h1>'));
   assert.ok(html.includes('<p>Contenido</p>'));
-  assert.ok(html.includes('href="gatos-en-adopcion.html"'));
+  assert.ok(html.includes('href="../gatos-en-adopcion/"'));
   assert.ok(html.includes('post-sheet--ficha'));
 });
 
@@ -363,7 +363,7 @@ test('la lápida no tiene canónica ni JSON-LD y sale del sitemap', () => {
     const lapida = fs.readFileSync(path.join(dir, 'demo-lua.html'), 'utf8');
     assert.ok(lapida.includes('name="robots" content="noindex,nofollow"'));
     assert.ok(lapida.includes('Contenido retirado'));
-    assert.ok(lapida.includes('href="../index.html"'));
+    assert.ok(lapida.includes('href="../"'));
     assert.ok(!lapida.includes('rel="canonical"'));
     assert.ok(!lapida.includes('application/ld+json'));
     assert.ok(!lapida.includes('publicaciones-api.js'));

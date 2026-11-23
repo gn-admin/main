@@ -208,8 +208,8 @@ function paginaRetirada(shell) {
         '<h1>Contenido retirado</h1>' +
         '<p class="lead">Esta publicación se retiró y ya no está disponible. Si llegaste desde un enlace antiguo, puedes volver al inicio o consultar las adopciones e historias actuales.</p>' +
         '<div class="actions">' +
-          '<a class="btn btn-primary" href="../index.html">Volver al inicio</a>' +
-          '<a class="btn btn-secondary" href="../historias.html">Ver historias</a>' +
+          '<a class="btn btn-primary" href="../">Volver al inicio</a>' +
+          '<a class="btn btn-secondary" href="../historias/">Ver historias</a>' +
         '</div>' +
       '</div></header>' +
     '</article>';

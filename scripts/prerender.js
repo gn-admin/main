@@ -25,13 +25,13 @@ const RAIZ = path.resolve(__dirname, '..');
 const SITE_POR_DEFECTO = 'https://gn-admin.github.io/main';
 const PAGINAS_FIJAS = [
   '',
-  'gatos-en-adopcion.html',
-  'perros-en-adopcion.html',
-  'historias.html',
-  'sobre-nosotros.html',
-  'adopciones.html',
-  'protocolo.html',
-  'contacto.html'
+  'gatos-en-adopcion/',
+  'perros-en-adopcion/',
+  'historias/',
+  'sobre-nosotros/',
+  'adopciones/',
+  'protocolo/',
+  'contacto/'
 ];
 const MAX_PAGINAS = 50;
 const ESTADOS_OCULTOS = ['borrador', 'oculto'];
@@ -585,7 +585,7 @@ async function main(argv) {
     fixture: args.fixture,
     consultar: consultarEscritura
   });
-  var shell = fs.readFileSync(path.join(RAIZ, 'post.html'), 'utf8');
+  var shell = fs.readFileSync(path.join(RAIZ, 'post', 'index.html'), 'utf8').replace(/\.\.\/js\//g, 'js/');
   var porSlug = {};
   datos.publicaciones.forEach(function (pub) { porSlug[pub.slug] = pub; });
 
