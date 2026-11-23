@@ -23,7 +23,7 @@
 | Dominios autorizados | `gn-admin.github.io` funciona; `localhost` y `127.0.0.1` **no** están autorizados |
 | Secret en EmailJS | Pegada en plantilla → Settings |
 | Service ID de EmailJS | `service_k6jkxaq` (validado el 23/11/2026 con un envío real) |
-| Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200) |
+| Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200 en dos envíos reales) |
 
 El error de dominio local se comprobó abriendo el iframe de reCAPTCHA: *«El host local no está en la lista de dominios admitidos para esta clave del sitio web»*. En `gn-admin.github.io` el reto se carga sin ese error.
 
