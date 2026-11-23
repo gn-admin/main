@@ -9,6 +9,8 @@ const RAIZ = path.join(__dirname, '..');
 const DOC = path.join(RAIZ, 'docs', 'plantillas-emailjs.md');
 const CONFIG_JS = path.join(RAIZ, 'js', 'forms-config.js');
 const PLANTILLA = 'template_formulario_web';
+// Clave pública publicada. Al rotar, actualizarla junto con la tabla del runbook.
+const SITE_KEY_PUBLICA = '6Lf_hiEuAAAAAIPhzqJgNuXEJmO7Rghx6ZTMduI5';
 
 const TIPOS = [
   'contacto-general',
@@ -58,6 +60,31 @@ function paramsDe(tipo) {
     page_url: 'https://gn-admin.github.io/main/contacto/',
     ...DATOS[tipo]
   }));
+}
+
+function cargarConfig() {
+  const previo = global.window;
+  const sandbox = {};
+  global.window = sandbox;
+  try {
+    delete require.cache[require.resolve(CONFIG_JS)];
+    require(CONFIG_JS);
+    return sandbox.NEBAK_FORMS_CONFIG;
+  } finally {
+    global.window = previo;
+  }
+}
+
+function rutasDeSecret(obj, ruta) {
+  const actual = ruta || '';
+  const encontradas = [];
+  if (!obj || typeof obj !== 'object') return encontradas;
+  Object.keys(obj).forEach((clave) => {
+    const camino = actual ? actual + '.' + clave : clave;
+    if (/secret|private/i.test(clave)) encontradas.push(camino);
+    encontradas.push(...rutasDeSecret(obj[clave], camino));
+  });
+  return encontradas;
 }
 
 function leerPlantilla() {
@@ -150,19 +177,28 @@ test('los condicionales están emparejados y usan variables enviadas', () => {
 });
 
 test('forms-config.js deja la plantilla única lista', () => {
-  const previo = global.window;
-  const sandbox = {};
-  global.window = sandbox;
-  try {
-    delete require.cache[require.resolve(CONFIG_JS)];
-    require(CONFIG_JS);
-    const cfg = sandbox.NEBAK_FORMS_CONFIG;
-    assert.ok(cfg, 'forms-config.js no define NEBAK_FORMS_CONFIG');
-    assert.match(cfg.emailjs.defaultTemplate, /^[A-Za-z0-9_-]{4,}$/, 'defaultTemplate debe ser un ID de EmailJS');
-    assert.deepEqual(cfg.emailjs.templates, {});
-  } finally {
-    global.window = previo;
-  }
+  const cfg = cargarConfig();
+  assert.ok(cfg, 'forms-config.js no define NEBAK_FORMS_CONFIG');
+  assert.match(cfg.emailjs.defaultTemplate, /^[A-Za-z0-9_-]{4,}$/, 'defaultTemplate debe ser un ID de EmailJS');
+  assert.deepEqual(cfg.emailjs.templates, {});
+});
+
+test('la siteKey es la clave pública y no una secret', () => {
+  const cfg = cargarConfig();
+  const siteKey = cfg.recaptcha && cfg.recaptcha.siteKey;
+
+  assert.equal(typeof siteKey, 'string', 'falta recaptcha.siteKey');
+  assert.match(siteKey, /^6L[A-Za-z0-9_-]{38}$/, 'siteKey no tiene el formato de una clave de reCAPTCHA');
+
+  // La site key es pública y conocida. Cualquier otro valor (por ejemplo, la
+  // secret pegada por error) publicaría una credencial privada en el cliente.
+  assert.equal(
+    siteKey,
+    SITE_KEY_PUBLICA,
+    'siteKey no es la clave pública publicada: si has pegado una secret, estás publicando una credencial privada. Si has rotado, actualiza SITE_KEY_PUBLICA y la tabla del runbook.'
+  );
+
+  assert.deepEqual(rutasDeSecret(cfg), [], 'forms-config.js no debe contener campos de secret');
 });
 
 test('To Email y Reply-To salen del payload', () => {

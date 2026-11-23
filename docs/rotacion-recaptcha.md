@@ -24,6 +24,7 @@
 | Secret en EmailJS | Pegada en plantilla → Settings |
 | Service ID de EmailJS | `service_k6jkxaq` (validado el 23/11/2026 con un envío real) |
 | Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200 en dos envíos reales) |
+| Versiones desplegadas | `forms-config.js?v=4`, `forms-transport.js?v=4`, `main.js?v=12` |
 
 El error de dominio local se comprobó abriendo el iframe de reCAPTCHA: *«El host local no está en la lista de dominios admitidos para esta clave del sitio web»*. En `gn-admin.github.io` el reto se carga sin ese error.
 
@@ -77,9 +78,10 @@ La secret filtrada no permite enviar correos (EmailJS guarda su copia) ni fabric
 
 1. Cambiar `recaptcha.siteKey` en `js/forms-config.js`.
 2. Adaptar `recaptchaToken()` en `js/forms-transport.js` al widget Checkbox (render visible en el formulario y lectura del token al enviar).
-3. Subir `forms-config.js?v=4` (y `forms-transport.js?v=4`) en las páginas.
-4. Ejecutar `node tests/forms-transport.test.js` y `node tests/plantillas-emailjs.test.js`.
-5. Probar en local: requiere que `localhost` esté en la lista de dominios y que el service ID de EmailJS sea correcto.
+3. Subir `forms-config.js?v=5` y `forms-transport.js?v=5` en las páginas: hoy están en `v=4`, y el número debe incrementarse para saltar la caché. Si también cambia `js/main.js`, subir su versión (hoy `v=12`).
+4. Actualizar `SITE_KEY_PUBLICA` en `tests/plantillas-emailjs.test.js`: el test falla si `siteKey` no es la clave pública.
+5. Ejecutar `node tests/forms-transport.test.js` y `node tests/plantillas-emailjs.test.js`.
+6. Probar en local: requiere que `localhost` esté en la lista de dominios y que el service ID de EmailJS sea correcto.
 
 ### Paso 4 — Actualizar EmailJS
 
@@ -107,13 +109,13 @@ Esto invalida la secret filtrada sin reescribir nada.
 
 - Anotar en este documento la fecha de rotación y el ID de la clave nueva.
 - Revisar GitHub → **Settings → Code security** por si hay alertas de secret scanning.
-- Opcional: añadir una comprobación al test de contrato que falle si `siteKey` tiene pinta de secret (`longitud`/prefijo), para evitar repetir el cruce.
+- Ejecutar `tests/plantillas-emailjs.test.js`: incluye la comprobación que falla si `siteKey` no es la clave pública (por ejemplo, una secret pegada por error).
 
 ## 6. Rollback
 
 Si la clave nueva falla:
 
-1. Restaurar `recaptcha.siteKey` anterior y su versión (`v=3`) en `js/forms-config.js`.
+1. Restaurar `recaptcha.siteKey` anterior y bajar las versiones a `v=4` en `js/forms-config.js` y `js/forms-transport.js` (y en `js/main.js` si se había subido).
 2. Restaurar la secret anterior en EmailJS.
 3. Desplegar.
 4. **No** borrar la clave nueva hasta confirmar el rollback; después, borrarla.

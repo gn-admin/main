@@ -196,7 +196,7 @@ window.NEBAK_FORMS_CONFIG = {
 ## 8. Verificación realizada
 
 - `node --check` sobre `js/main.js`, `js/busqueda-publicaciones.js`, `js/forms-config.js` y `js/forms-transport.js`.
-- `tests/plantillas-emailjs.test.js`: contrato de la plantilla única (variables que envía el transporte, condicionales emparejados, `detalle` de cada tipo y `defaultTemplate` en `forms-config.js`).
+- `tests/plantillas-emailjs.test.js`: contrato de la plantilla única (variables que envía el transporte, condicionales emparejados, `detalle` de cada tipo y `defaultTemplate` en `forms-config.js`) y comprobación de que `recaptcha.siteKey` es la clave pública y no una secret.
 - `tests/forms-transport.test.js`: honeypot (bloqueo, inyección única y por documento) y límite de 5 envíos por sesión, con liberación al caducar la ventana.
 - `tests/busqueda-chat.test.js`: buscador del chat con fichas sintéticas (especie, sinónimos, filtros, estados, límite y sin resultados) y con `data/publicaciones.json`.
 - `tests/publicaciones-api.test.js`: 16/16 y `tests/prerender.test.js --dry`: 30/30 en verde.
@@ -210,7 +210,7 @@ window.NEBAK_FORMS_CONFIG = {
 
 - **Activo:** `enabled: true`; `service_k6jkxaq`; `tpl_contacto_general`; site key v2 de `grupo-nebak`; buzón `nebakadopciones@gmail.com`.
 - **Desplegado:** `forms-config.js?v=4`, `forms-transport.js?v=4` y `main.js?v=12` en las 17 páginas y en `404.html`.
-- **Suite:** 9 transporte + 6 plantillas + 8 buscador + 16 publicaciones + 30 prerender = **69 pruebas en verde**.
+- **Suite:** 9 transporte + 7 plantillas + 8 buscador + 16 publicaciones + 30 prerender = **70 pruebas en verde**.
 - **Verificación pendiente:** confirmar la recepción en el buzón (y en spam). Es lo único que falta para dar el envío por confirmado de extremo a extremo.
 - **Rotación de la secret filtrada:** no es una tarea abierta. El 23/11/2026 se decide **no rotar ahora**; se revisa anualmente o ante incidente. Riesgo aceptado y procedimiento en el runbook.
 - **Opcional:** añadir `localhost` y `127.0.0.1` a los dominios de la clave para probar en local; hoy reCAPTCHA los rechaza.
