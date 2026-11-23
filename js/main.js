@@ -167,10 +167,16 @@
         var taxonomyStatuses = null; // null = no cargado; [] = sin taxonomías
         var CHIP_KEYS = ['urgente','cachorro','adulto','especial'];
 
-        // Carga las taxonomías del canal para este tipo y pinta los filtros.
+        // En las páginas de adopción el filtro de perfil se deriva del texto
+        // (cachorros, adultos, urgente, necesidades especiales); las taxonomías
+        // de estado del canal (en_adopcion, reservado...) no aportan aquí.
+        var esAdopcion = /gatos|perros|otro/i.test(cat);
         var tipoTax = /grupo/i.test(cat) ? 'animal_grupo'
           : (/evento/i.test(cat) ? 'evento' : 'animal');
-        if (api.taxonomias) {
+        if (esAdopcion) {
+          taxonomyStatuses = [];
+          renderChips();
+        } else if (api.taxonomias) {
           api.taxonomias(tipoTax).then(function (res) {
             var data = (res && res.data) || res || {};
             var statuses = (data.status || data.statuses || []);
