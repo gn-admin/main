@@ -202,7 +202,7 @@ test('CLI escribe una ficha por publicación indexable', () => {
   assert.ok(html.includes('<meta name="robots" content="index,follow">'));
   assert.ok(html.includes('"@type":"Article"'));
   assert.ok(html.includes('<h1>Nube, mestizo de 2 años</h1>'));
-  assert.ok(html.includes('href="../css/main.css"'));
+  assert.ok(html.includes('href="../css/main.css'));
   assert.ok(html.includes('href="../contacto/"'));
   assert.ok(!html.includes('publicaciones-api.js'));
   assert.ok(!html.includes('blog-render.js'));

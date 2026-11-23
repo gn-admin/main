@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-11-23T11:55:45.325Z",
+  "source": "gas-canal",
+  "status": "success",
+  "data": {
+    "site": {
+      "name": "Grupo Nebak",
+      "url": "https://gn-admin.github.io/admin-dashboard"
+    },
+    "contact": {
+      "email": "nebakadopciones@gmail.com",
+      "phone": "612345678"
+    },
+    "seo": {
+      "defaultTitle": "Grupo Nebak · Protección animal",
+      "defaultDescription": "Adopciones, acogidas e historias de la protectora Grupo Nebak.",
+      "robots": "index,follow",
+      "baseUrl": "https://gn-admin.github.io/admin-dashboard"
+    },
+    "locales": {
+      "default": "es-ES"
+    }
+  }
+}

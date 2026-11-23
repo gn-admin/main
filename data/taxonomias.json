@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-11-23T11:55:44.004Z",
+  "source": "gas-canal",
+  "status": "success",
+  "data": {
+    "type": [
+      "animal",
+      "animal_grupo",
+      "evento",
+      "historia"
+    ],
+    "category": [
+      "Perros en adopción",
+      "Gatos en adopción",
+      "Eventos",
+      "Historias"
+    ],
+    "status": [
+      "en_adopcion",
+      "reservado",
+      "en_acogida",
+      "programado",
+      "publicado"
+    ],
+    "species": [
+      "perro",
+      "gato"
+    ]
+  }
+}

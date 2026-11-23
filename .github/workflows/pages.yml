@@ -33,6 +33,10 @@ jobs:
           node-version: 22
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Exportar datos estáticos
+        env:
+          SITE_URL: https://gn-admin.github.io/main
+        run: node scripts/exportar-datos.js --soft
       - name: Prerender fichas y sitemap
         env:
           SITE_URL: https://gn-admin.github.io/main

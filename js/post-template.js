@@ -57,10 +57,48 @@
     if (/proceso|seguim|apoyo|cuidado|requisit/.test(l)) return { svg: doc, tone: 'tone-leaf' };
     if (/especie|gato|perro|animal/.test(l)) return { svg: paw, tone: 'tone-green' };
     if (/evento|hito|campan/.test(l)) return { svg: star, tone: 'tone-sun' };
-  
+
+  return { svg: heart, tone: 'tone-mint' };
+  }
+
   function initShare(root) {
     var scope = root || (typeof document !== 'undefined' ? document : null);
     if (!scope || !scope.querySelectorAll) return;
+    function copyLink(url, btn) {
+      var settled = false;
+      var finish = function (fn) { if (settled) return; settled = true; fn(); };
+      var done = function () {
+        var prev = btn.textContent;
+        btn.textContent = 'Copiado';
+        setTimeout(function () { btn.textContent = prev || 'Compartir'; }, 2000);
+      };
+      var manual = function () {
+        var ta = document.createElement('textarea');
+        ta.value = url;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+        document.body.removeChild(ta);
+        if (ok) done();
+        else window.prompt('Copia el enlace:', url);
+      };
+      if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        var timer = setTimeout(function () { finish(manual); }, 900);
+        navigator.clipboard.writeText(url).then(function () {
+          clearTimeout(timer);
+          finish(done);
+        }).catch(function () {
+          clearTimeout(timer);
+          finish(manual);
+        });
+      } else {
+        manual();
+      }
+    }
     var buttons = scope.querySelectorAll('.post-share-btn');
     Array.prototype.forEach.call(buttons, function (btn) {
       if (btn.__shareInit) return;
@@ -70,15 +108,9 @@
         var url = (typeof window !== 'undefined' && window.location) ? window.location.href : '';
         var title = btn.getAttribute('data-title') || (typeof document !== 'undefined' ? document.title : '');
         if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-          navigator.share({ title: title, url: url }).catch(function () {});
-        } else if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-          navigator.clipboard.writeText(url).then(function () {
-            var prev = btn.textContent;
-            btn.textContent = 'Copiado';
-            setTimeout(function () { btn.textContent = prev || 'Compartir'; }, 2000);
-          }).catch(function () { window.prompt('Copia el enlace:', url); });
+          navigator.share({ title: title, url: url }).catch(function () { copyLink(url, btn); });
         } else {
-          window.prompt('Copia el enlace:', url);
+          copyLink(url, btn);
         }
       });
     });
@@ -90,9 +122,6 @@
     } else {
       initShare(document);
     }
-  }
-
-  return { svg: heart, tone: 'tone-mint' };
   }
 
   function backTarget(post, fromParam) {
@@ -196,7 +225,7 @@
       var note = v.note ? '<p class="post-video-note">' + esc(v.note) + '</p>' : '';
       return '<div class="post-video-item">' +
         (videos.length > 1 && v.title ? '<h3 class="post-video-title">' + esc(v.title) + '</h3>' : '') +
-        '<div class="post-video-frame"><iframe src="' + safeUrl + '" title="' + title + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>' +
+        '<div class="post-video-frame"><iframe src="' + safeUrl + '" title="' + title + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>' +
         note + '</div>';
     }).join('');
     var heading = videos.length > 1 ? 'Vídeos' : 'Vídeo';
@@ -265,7 +294,7 @@
       '<article class="post-sheet ' + (ficha ? 'post-sheet--ficha' : 'post-sheet--story') + '">' +
         hero +
         renderIcons(pub, post) +
-        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<a class="tag" href="../historias/?q=' + encodeURIComponent(t) + '">' + esc(t) + '</a>'; }).join('') + '</div>' : '') +
+        (tags.length ? '<div class="card-tags post-tags">' + tags.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
         '<section class="post-section post-section--desc">' + descHead + '<div class="post-body">' + content + '</div></section>' +
         mediaBlocks +
         '<div class="actions actions-center post-actions">' + ctaHtml + ' <a class="btn btn-secondary" href="' + esc(back.href) + '">' + esc(back.label) + '</a></div>' +
@@ -319,6 +348,7 @@
     renderGallery: renderGallery,
     renderVideo: renderVideo,
     renderArticle: renderArticle,
-    initCarousels: initCarousels
+    initCarousels: initCarousels,
+    initShare: initShare
   };
 });
