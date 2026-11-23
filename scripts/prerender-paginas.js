@@ -173,8 +173,8 @@ function generarHtml(post, pagina, shell, siteUrl) {
   );
   html = html.replace(
     '</body>',
-    '<script src="../js/post-template.js?v=1"></script>\n' +
-    '<script>PostTemplate.initCarousels(document);</script>\n' +
+    '<script src="../js/post-template.js?v=4"></script>\n' +
+    '<script>PostTemplate.initCarousels(document);</script>\n<script>PostTemplate.initShare(document);</script>\n' +
     '</body>'
   );
 

@@ -57,7 +57,42 @@
     if (/proceso|seguim|apoyo|cuidado|requisit/.test(l)) return { svg: doc, tone: 'tone-leaf' };
     if (/especie|gato|perro|animal/.test(l)) return { svg: paw, tone: 'tone-green' };
     if (/evento|hito|campan/.test(l)) return { svg: star, tone: 'tone-sun' };
-    return { svg: heart, tone: 'tone-mint' };
+  
+  function initShare(root) {
+    var scope = root || (typeof document !== 'undefined' ? document : null);
+    if (!scope || !scope.querySelectorAll) return;
+    var buttons = scope.querySelectorAll('.post-share-btn');
+    Array.prototype.forEach.call(buttons, function (btn) {
+      if (btn.__shareInit) return;
+      btn.__shareInit = true;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var url = (typeof window !== 'undefined' && window.location) ? window.location.href : '';
+        var title = btn.getAttribute('data-title') || (typeof document !== 'undefined' ? document.title : '');
+        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+          navigator.share({ title: title, url: url }).catch(function () {});
+        } else if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText(url).then(function () {
+            var prev = btn.textContent;
+            btn.textContent = 'Copiado';
+            setTimeout(function () { btn.textContent = prev || 'Compartir'; }, 2000);
+          }).catch(function () { window.prompt('Copia el enlace:', url); });
+        } else {
+          window.prompt('Copia el enlace:', url);
+        }
+      });
+    });
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { initShare(document); });
+    } else {
+      initShare(document);
+    }
+  }
+
+  return { svg: heart, tone: 'tone-mint' };
   }
 
   function backTarget(post, fromParam) {
@@ -114,6 +149,37 @@
     '</section>';
   }
 
+
+  function toEmbedUrl(url) {
+    var s = String(url == null ? '' : url).trim();
+    var lower = s.toLowerCase();
+    var ytId = '';
+    if (lower.indexOf('youtu') !== -1) {
+      var idx;
+      if (lower.indexOf('youtu.be/') !== -1) { idx = lower.indexOf('youtu.be/') + 'youtu.be/'.length; }
+      else if (lower.indexOf('shorts/') !== -1) { idx = lower.indexOf('shorts/') + 'shorts/'.length; }
+      else if (lower.indexOf('embed/') !== -1) { idx = lower.indexOf('embed/') + 'embed/'.length; }
+      else if (lower.indexOf('v=') !== -1) { idx = lower.indexOf('v=') + 2; }
+      else { idx = -1; }
+      if (idx !== -1) {
+        var rest = s.slice(idx);
+        var stop = rest.search(/[?&#]/);
+        ytId = (stop === -1 ? rest : rest.slice(0, stop)).trim();
+      }
+    }
+    if (ytId) return 'https://www.youtube-nocookie.com/embed/' + ytId + '?rel=0';
+    // vimeo
+    if (lower.indexOf('vimeo.com') !== -1) {
+      var vi = lower.indexOf('vimeo.com/') + 'vimeo.com/'.length;
+      if (lower.slice(vi, vi+6) === 'video/') vi += 6;
+      var rest2 = s.slice(vi);
+      var digits = '';
+      for (var i=0;i<rest2.length;i++){ if (/[0-9]/.test(rest2.charAt(i))) digits += rest2.charAt(i); else break; }
+      if (digits) return 'https://player.vimeo.com/video/' + digits;
+    }
+    return s;
+  }
+
   function getVideos(pub) {
     if (!pub) return [];
     if (Array.isArray(pub.videos)) return pub.videos.filter(function (v) { return v && v.url; });
@@ -125,7 +191,7 @@
     var videos = getVideos(pub);
     if (!videos.length) return '';
     var items = videos.map(function (v, i) {
-      var safeUrl = esc(v.url);
+      var safeUrl = esc(toEmbedUrl(v.url));
       var title = esc(v.title || ('Vídeo ' + (i + 1)));
       var note = v.note ? '<p class="post-video-note">' + esc(v.note) + '</p>' : '';
       return '<div class="post-video-item">' +
@@ -169,7 +235,7 @@
           '<h1>' + esc(post.title) + '</h1>' +
           (post.excerpt ? '<p class="lead">' + esc(post.excerpt) + '</p>' : '') +
           (metaLine ? '<p class="meta">' + esc(metaLine) + '</p>' : '') +
-          '<div class="actions">' + ctaHtml + '<a class="btn btn-secondary" href="' + esc(back.href) + '">' + esc(back.label) + '</a></div>' +
+          '<div class="actions">' + ctaHtml + '<button type="button" class="btn btn-secondary post-share-btn" data-title="' + esc(post.title) + '">Compartir</button><a class="btn btn-secondary" href="' + esc(back.href) + '">' + esc(back.label) + '</a></div>' +
         '</div>' +
         '<div class="post-hero-media"><img src="' + esc(image) + '" alt="' + esc(post.imageAlt || post.title) + '" loading="eager" decoding="async"></div>' +
       '</header>'
