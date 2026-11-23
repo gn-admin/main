@@ -95,6 +95,7 @@ function entorno(opciones) {
   if (opts.options) Object.assign(sandbox.NEBAK_DATA_SOURCE.options, opts.options);
   sandbox.NEBAK_DATA_SOURCE = {
     version: 1,
+    staticMode: !!opts.staticMode,
     defaultMode: 'fake',
     endpointBase: CANAL,
     sections: {
@@ -295,4 +296,73 @@ test('listado excluye publicaciones retiradas o redirigidas', async () => {
   const slugs = api.getPostsFor('gatos').map(function (p) { return p.slug; });
   assert.ok(slugs.indexOf('gato-gone') === -1, 'gone excluido');
   assert.ok(slugs.indexOf('gato-redirect') === -1, 'redirect excluido');
+});
+
+// ---------- modo estático (data/publicaciones.json) ----------
+
+test('modo estático: si falla publicaciones.json, load() pide las secciones al canal', async () => {
+  const { api, llamadas } = entorno({
+    staticMode: true,
+    responder(url) {
+      if (url.indexOf('data/publicaciones.json') === 0) return new Error('404');
+      return responderPorDefecto(url);
+    }
+  });
+
+  const resultado = await api.load();
+
+  assert.ok(
+    llamadas.some(function (url) { return url.indexOf('data/publicaciones.json') === 0; }),
+    'debe intentar leer el JSON estático'
+  );
+  const canal = llamadasAlCanal(llamadas);
+  const endpoints = canal.map(function (url) { return new URL(url).searchParams.get('endpoint'); }).sort();
+  assert.deepEqual(endpoints, ['animales-publicos', 'animales-publicos', 'historias-publicas']);
+  const especies = canal
+    .map(function (url) { return new URL(url).searchParams.get('species'); })
+    .filter(Boolean)
+    .sort();
+  assert.deepEqual(especies, ['gato', 'perro']);
+
+  const slugs = resultado.posts.map(function (post) { return post.slug; });
+  assert.ok(slugs.indexOf('demo-trufa') !== -1, 'incluye gatos del canal');
+  assert.ok(slugs.indexOf('demo-nube') !== -1, 'incluye perros del canal');
+  assert.ok(slugs.indexOf('demo-un-ano-de-adopciones') !== -1, 'incluye historias del canal');
+});
+
+test('modo estático: con publicaciones.json no llama al canal', async () => {
+  const { api, llamadas } = entorno({
+    staticMode: true,
+    responder(url) {
+      if (url.indexOf('data/publicaciones.json') === 0) return { site: {}, posts: [] };
+      return responderPorDefecto(url);
+    }
+  });
+
+  await api.load();
+
+  assert.equal(llamadasAlCanal(llamadas).length, 0, 'el JSON estático evita el canal');
+});
+
+test('modo estático: loadPost() consulta ficha(slug) si el slug no está en el JSON', async () => {
+  const { api, llamadas } = entorno({
+    staticMode: true,
+    responder(url) {
+      if (url.indexOf('data/publicaciones.json') === 0) return { site: {}, posts: [] };
+      return responderPorDefecto(url);
+    }
+  });
+
+  const resultado = await api.loadPost('demo-nube');
+
+  const canal = llamadasAlCanal(llamadas);
+  assert.equal(canal.length, 1);
+  const url = new URL(canal[0]);
+  assert.equal(url.searchParams.get('endpoint'), 'publicacion');
+  assert.equal(url.searchParams.get('slug'), 'demo-nube');
+
+  assert.ok(resultado.post);
+  assert.equal(resultado.post.slug, 'demo-nube');
+  assert.equal(resultado.post.title, 'Nube, mestizo de 2 años');
+  assert.equal(resultado.notFound, undefined);
 });

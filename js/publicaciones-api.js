@@ -558,8 +558,12 @@ var PublicacionesAPI = (function () {
       }).then(function (staticOk) {
         var allSections = realSections();
         // Si el JSON estático no está disponible, se pide el catálogo al canal
-        // (GAS) sección a sección, igual que en el modo real.
-        var byChannel = staticOk ? Promise.resolve() : Promise.all(allSections.map(function (section) {
+        // (GAS) sección a sección, igual que en el modo real. Las vistas
+        // (home) no poseen datos propios y no se consultan.
+        var dataSections = allSections.filter(function (section) {
+          return SECTIONS[section] && SECTIONS[section].scope !== 'view';
+        });
+        var byChannel = staticOk ? Promise.resolve() : Promise.all(dataSections.map(function (section) {
           return loadRealSection(section).catch(function () { return []; });
         }));
         return byChannel.then(function () {
