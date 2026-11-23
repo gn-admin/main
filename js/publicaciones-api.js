@@ -18,6 +18,8 @@ var PublicacionesAPI = (function () {
   'use strict';
 
   var LOCAL_DATA_URL = 'data/blog-posts.json';
+  var STATIC_DATA_URL = 'data/publicaciones.json';
+  var STATIC_TAXONOMIAS_URL = 'data/taxonomias.json';
 
   var FALLBACK_IMAGE = 'assets/images/logo.jpg';
 
@@ -95,6 +97,8 @@ var PublicacionesAPI = (function () {
   var realPending = {};     // sección -> Promise
   var realServed = {};      // sección -> true si el canal respondió
   var realBySlug = {};      // slug -> sección real que lo sirvió
+  var staticData = null;    // { posts, site } de data/publicaciones.json
+  var staticPending = null;
 
   // ---------- configuración ----------
 
@@ -181,7 +185,7 @@ var PublicacionesAPI = (function () {
   function loadFake() {
     if (fake) return Promise.resolve(fake);
     if (!fakePending) {
-      fakePending = requestJson(LOCAL_DATA_URL).then(function (data) {
+      fakePending = requestJson(staticUrl(LOCAL_DATA_URL)).then(function (data) {
         fake = normalizeDataset(data);
         return fake;
       }).catch(function (err) {
@@ -194,6 +198,56 @@ var PublicacionesAPI = (function () {
       });
     }
     return fakePending;
+  }
+
+  // ---------- datos estáticos (Fase 1 del plan de datos) ----------
+
+  function staticMode() {
+    return !!config().staticMode;
+  }
+
+  // Las fichas estáticas viven en la raíz del sitio; las páginas de sección
+  // (gatos, perros, historias…) necesitan el prefijo ../ para llegar a data/.
+  function staticUrl(nombre) {
+    if (typeof document === 'undefined') return nombre;
+    var link = document.querySelector('link[rel="stylesheet"][href*="main.css"]');
+    if (link) {
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('../') === 0) return '../' + nombre;
+    }
+    return nombre;
+  }
+
+  function loadStatic() {
+    if (staticData) return Promise.resolve(staticData);
+    if (staticPending) return staticPending;
+    staticPending = requestJson(staticUrl(STATIC_DATA_URL)).then(function (data) {
+      var rows = (data && Array.isArray(data.posts)) ? data.posts
+        : (data && Array.isArray(data.data) ? data.data : []);
+      var posts = rows.map(function (row) { return normalizePost(row, { canal: true }); }).filter(Boolean);
+      var bySection = {};
+      posts.forEach(function (post) {
+        var owner = fakeSectionFor(post);
+        if (!bySection[owner]) bySection[owner] = [];
+        bySection[owner].push(post);
+      });
+      realSections().forEach(function (section) {
+        var list = bySection[section] || [];
+        realPosts[section] = list;
+        realServed[section] = true;
+        list.forEach(function (post) { if (post.slug) realBySlug[post.slug] = section; });
+      });
+      staticData = { posts: posts, site: (data && data.site) || {} };
+      return staticData;
+    }).catch(function (err) {
+      console.warn('[datos] no se pudo leer ' + STATIC_DATA_URL + '; se usa el canal: ' + (err && err.message));
+      staticData = { posts: [], site: {} };
+      throw err;
+    }).then(function (result) {
+      staticPending = null;
+      return result;
+    });
+    return staticPending;
   }
 
   // ---------- canal público (real, inactivo en Fase 1) ----------
@@ -452,6 +506,16 @@ var PublicacionesAPI = (function () {
     var def = SECTIONS[section];
     if (!def) return load();                 // sección desconocida: catálogo
     if (def.scope === 'view') return load(); // 'home' es una vista de todo
+    if (staticMode()) {
+      return loadStatic().then(function () {
+        return getPostsFor(section);
+      }).catch(function () {
+        if (modeFor(section) !== 'real') return loadFake();
+        return loadRealSection(section).catch(function () {
+          return options().fallbackOnError ? loadFake() : null;
+        });
+      });
+    }
     if (modeFor(section) === 'real') {
       return loadRealSection(section).catch(function () {
         return options().fallbackOnError ? loadFake() : null;
@@ -488,6 +552,28 @@ var PublicacionesAPI = (function () {
     }
     if (loaded) return Promise.resolve(loaded);
     if (pending) return pending;
+    if (staticMode()) {
+      pending = loadFake().then(function () {
+        return loadStatic().catch(function () { return null; });
+      }).then(function () {
+        var allSections = realSections();
+        var state = {};
+        allSections.forEach(function (section) {
+          state[section] = { mode: 'real', served: !!realServed[section] };
+        });
+        return { site: fake.site, posts: mergedPosts(), sections: state };
+      }).then(function (result) {
+        loaded = result;
+        pending = null;
+        return result;
+      }).catch(function (err) {
+        console.error('[publicaciones-api]', err);
+        pending = null;
+        loaded = { site: {}, posts: [], sections: {} };
+        return loaded;
+      });
+      return pending;
+    }
     pending = loadFake().then(function () {
       var allSections = realSections();
       if (!allSections.length) {
@@ -526,6 +612,13 @@ var PublicacionesAPI = (function () {
   function loadPost(slug) {
     var wanted = decodeURIComponent(String(slug || ''));
     if (!wanted) return Promise.resolve({ post: null, notFound: true });
+    if (staticMode()) {
+      return load().then(function () {
+        var post = getPostBySlug(wanted) || localPostBySlug(wanted);
+        if (post) return { post: post };
+        return { post: null, notFound: true };
+      });
+    }
     var api = detalleReal() ? cliente() : null;
     if (!api) {
       return loadFake().then(function () { return { post: getPostBySlug(wanted) || localPostBySlug(wanted) }; });
@@ -580,6 +673,15 @@ var PublicacionesAPI = (function () {
 
   // Taxonomías del canal (filtros). Devuelve la promesa del sobre.
   function taxonomias(type) {
+    if (staticMode()) {
+      return requestJson(staticUrl(STATIC_TAXONOMIAS_URL)).catch(function () {
+        var query = { endpoint: 'taxonomias' };
+        if (type) query.type = type;
+        var api = cliente();
+        if (api) return api.taxonomias(type);
+        return requestChannel(query);
+      });
+    }
     var query = { endpoint: 'taxonomias' };
     if (type) query.type = type;
     var api = cliente();

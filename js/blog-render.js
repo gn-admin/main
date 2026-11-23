@@ -1,6 +1,15 @@
 (function () {
   'use strict';
 
+  function raizRelativa() {
+    var link = document.querySelector('link[rel="stylesheet"][href*="main.css"]');
+    if (link) {
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('../') === 0) return '../';
+    }
+    return '';
+  }
+
   function esc(v) {
     return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }

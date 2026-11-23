@@ -8,7 +8,7 @@
 
 - [x] **Fase 1 · exportación estática**: `scripts/exportar-datos.js` descarga el listado paginado y escribe `data/publicaciones.json`, `data/retiradas.json`, `data/redirects.json`, `data/taxonomias.json` y `data/config-publica.json` de forma atómica. Integrado en `.github/workflows/pages.yml` con `--soft` (no bloquea el deploy). Los JSON quedan versionados como fallback.
 - [x] **Resiliencia básica**: si un endpoint opcional falla y existe un JSON previo, se conserva; `--soft` evita romper el build por datos.
-- [ ] **Fase 1 · cliente estático**: `publicaciones-api.js` aún no lee `data/publicaciones.json`; el siguiente paso es añadir el modo `static` y dejar GAS solo para detalle/fallback.
+- [x] **Fase 1 · cliente estático**: `publicaciones-api.js` lee `data/publicaciones.json` (listados y detalle), `data/taxonomias.json` para filtros; GAS queda como fallback si el JSON falta o falla.
 - [ ] **Fases 2–6**: caché SW/localStorage, reducción de peticiones, reintentos con backoff, cron cada 6 h y proxy opcional.
 
 ## 1. Problema y motivación

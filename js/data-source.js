@@ -15,6 +15,10 @@
   window.NEBAK_DATA_SOURCE = {
     version: 1,
 
+    // true = listados y fichas se leen de data/publicaciones.json (deploy).
+    // GAS queda como fallback si el JSON falta o es inválido.
+    staticMode: true,
+
     // 'fake' = data/blog-posts.json | 'real' = canal público.
     // Activado en las secciones que ya consume el canal (historias, gatos,
     // perros, home y detalle); acogidas/adoptados/casos siguen en fake
