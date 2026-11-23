@@ -28,7 +28,12 @@
 
   function imagen(src, fallbackImage) {
     var fn = typeof fallbackImage === 'function' ? fallbackImage : function (v) { return v || FALLBACK_IMAGE; };
-    return fn(src);
+    var result = fn(src);
+    if (typeof window !== 'undefined' && result && result.indexOf('http') !== 0 && result.indexOf('../') !== 0 && result.charAt(0) !== '/') {
+      var link = document.querySelector('link[rel="stylesheet"][href*="main.css"]');
+      if (link && (link.getAttribute('href') || '').indexOf('../') === 0) result = '../' + result;
+    }
+    return result;
   }
 
   function svgFor(label, icon, title, category) {

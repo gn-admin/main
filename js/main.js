@@ -1,4 +1,5 @@
 (function () {
+  window.__nebakImgFallback = function (el) { el.onerror = null; el.src = raizRelativa() + 'assets/images/logo.jpg'; };
   'use strict';
   document.documentElement.classList.add('js');
 
@@ -7,8 +8,17 @@
 
   // La canónica de una ficha es su página estática; si aún no existe, se usa
   // el enlace dinámico antiguo.
+  function raizRelativa() {
+    var link = document.querySelector('link[rel="stylesheet"][href*="main.css"]');
+    if (link) {
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('../') === 0) return '../';
+    }
+    return '';
+  }
+
   function fichaUrl(p, from) {
-    if (p && p.urlEstatica) return p.urlEstatica;
+    if (p && p.urlEstatica) return raizRelativa() + p.urlEstatica;
     return 'post/?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from || 'historias');
   }
 
@@ -108,7 +118,7 @@
     var containers = $$('[data-adoption-list]');
     if (!containers.length) return;
     function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-    function imgPath(p){ if(!p) return ''; return p; }
+    function imgPath(p){ if(!p) return ''; var s=String(p); if(s.indexOf('http://')===0 || s.indexOf('https://')===0 || s.indexOf('../')===0 || s.charAt(0)==='/') return s; return raizRelativa()+s; }
     function sameCat(a,b){ return norm(a) === norm(b); }
     function tagFlags(p){
       var t = norm([p.title,p.excerpt,p.content,(p.tags||[]).join(' ')].join(' '));
@@ -258,7 +268,7 @@
             if (flags.especial) badges.push('Necesidades especiales');
             var badgeHtml = badges.length ? '<p class="meta">' + badges.join(' · ') + '</p>' : '<p class="meta">' + (p.category||'Adopción') + '</p>';
             return '<article class="card listing-card reveal is-visible">' +
-              (img ? '<a href="'+href+'"><img src="'+img+'" alt="'+(p.title||'Animal en adopción')+'" loading="lazy" onerror="this.onerror=null;this.src=\'assets/images/logo.jpg\'"></a>' : '') +
+              (img ? '<a href="'+href+'"><img src="'+img+'" alt="'+(p.title||'Animal en adopción')+'" loading="lazy" onerror="window.__nebakImgFallback(this)"></a>' : '') +
               '<div class="card-body">' + badgeHtml + '<h3>'+(p.title||'')+'</h3><p>'+(p.excerpt||'')+'</p>' +
               '<a class="card-link" href="'+href+'">Ver ficha →</a></div></article>';
           }).join('');
@@ -607,7 +617,7 @@
       var c = normalize(cat);
       return c.indexOf('gatos en adopcion') !== -1 || c.indexOf('perros en adopcion') !== -1 || c.indexOf('otros en adopcion') !== -1 || c.indexOf('acogida') !== -1 || c.indexOf('caso externo') !== -1 || c.indexOf('adoptados') !== -1;
     }
-    function imgPath(p) { if (!p) return ''; return p; }
+    function imgPath(p){ if(!p) return ''; var s=String(p); if(s.indexOf('http://')===0 || s.indexOf('https://')===0 || s.indexOf('../')===0 || s.charAt(0)==='/') return s; return raizRelativa()+s; }
 
     function homeView() {
       body.innerHTML = ''+

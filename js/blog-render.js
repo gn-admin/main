@@ -46,7 +46,7 @@
       if (post && post.urlEstatica) {
         var estatica = post.urlEstatica;
         if (!/^https?:\/\//i.test(estatica)) {
-          try { estatica = new URL(estatica, window.location.href).href; } catch (e) { estatica = post.urlEstatica; }
+          estatica = raizRelativa() + post.urlEstatica;
         }
         var canonical = document.querySelector('link[rel="canonical"]');
         if (!canonical) {
@@ -71,7 +71,7 @@
         if (relacionadas.length) {
           var html = '<section class="post-related" style="margin-top:2rem"><h2>Más de ' + esc(post.category || 'esta categoría') + '</h2><ul>';
           relacionadas.forEach(function (p) {
-            var url = (p.urlEstatica) ? p.urlEstatica : ('post/?slug=' + encodeURIComponent(p.slug));
+            var url = (p.urlEstatica) ? (raizRelativa() + p.urlEstatica) : ('post/?slug=' + encodeURIComponent(p.slug));
             html += '<li><a href="' + esc(url) + '">' + esc(p.title) + '</a></li>';
           });
           html += '</ul></section>';

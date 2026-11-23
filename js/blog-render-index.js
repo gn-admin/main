@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  window.__nebakImgFallback = function (el) { el.onerror = null; el.src = raizRelativa() + 'assets/images/logo.jpg'; };
+  function raizRelativa() {
+    var link = document.querySelector('link[rel="stylesheet"][href*="main.css"]');
+    if (link) {
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('../') === 0) return '../';
+    }
+    return '';
+  }
+
   function esc(v) {
     return String(v == null ? '' : v)
       .replace(/&/g, '&amp;')
@@ -25,7 +35,7 @@
   // Preferimos la ficha estática cuando el prerender la generó (urlEstatica);
   // si no existe, mantenemos el enlace dinámico antiguo.
   function urlFicha(post, from) {
-    if (post && post.urlEstatica) return post.urlEstatica;
+    if (post && post.urlEstatica) return raizRelativa() + post.urlEstatica;
     return postUrl(post && post.slug, from);
   }
 
@@ -45,11 +55,12 @@
     var image = (typeof HistoriasAPI !== 'undefined' && HistoriasAPI.fallbackImage)
       ? HistoriasAPI.fallbackImage(post.image)
       : (post.image || 'assets/images/logo.jpg');
+    if (image && image.indexOf('http') !== 0 && image.indexOf('../') !== 0) image = raizRelativa() + image;
     var cat = post.category || 'Historias';
     var date = post.dateFormatted || post.date || '';
     return '<article class="card post-card story-feed-card reveal is-visible ' + categoryTone(cat) + '">' +
       '<a class="story-feed-media" href="' + url + '" aria-label="' + esc(post.title) + '">' +
-        '<img src="' + esc(image) + '" alt="' + esc(post.imageAlt || post.title) + '" loading="lazy" onerror="this.onerror=null;this.src=\'assets/images/logo.jpg\'">' +
+        '<img src="' + esc(image) + '" alt="' + esc(post.imageAlt || post.title) + '" loading="lazy" onerror="window.__nebakImgFallback(this)">' +
         '<span class="story-badge">' + esc(cat) + '</span>' +
       '</a>' +
       '<div class="card-body story-feed-body">' +
