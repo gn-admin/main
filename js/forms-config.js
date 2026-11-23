@@ -36,7 +36,7 @@ window.NEBAK_FORMS_CONFIG = {
     // 'v2-invisible': validado por EmailJS (única versión que soporta).
     // 'v3': solo genera token; exige verificación en servidor (GAS) para servir de algo.
     version: 'v2-invisible',
-    siteKey: '6Lf_hiEuAAAAAEiXRLOQ2-r1aKo46WJZmPYMfMAd=',
+    siteKey: '6Lf_hiEuAAAAAIPhzqJgNuXEJmO7Rghx6ZTMduI5',
     actionPrefix: 'form_',
     minScore: 0.5
   },
