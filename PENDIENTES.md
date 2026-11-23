@@ -25,7 +25,7 @@
 1. [x] Fixture `caso-externo-gate` retirado y actualizado en `main` (lápida 410, `noindex`, fuera del sitemap).
 2. [x] Media/Drive y ciclo publicar/ocultar/retirar/restaurar verificados en producción; el primer cambio disparó deploy y el resto se agrupó en cola.
 3. [x] Datos estáticos de `main` regenerados con el canal público (8 publicaciones, incluida `caso-externo-gate`).
-4. [ ] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público.
+4. [x] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público. `acogidas` ahora consulta `publicaciones&status=en_acogida` (incluye `animal_grupo` sin duplicar); `animales-publicos` conserva `type=animal`. Test añadido en `tests/publicaciones-api.test.js`.
 5. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
 6. [ ] Verificar que el cliente lea JSON local y use GAS solo como fallback.
 7. [ ] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS.

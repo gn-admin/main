@@ -1,0 +1,43 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "slug": "demo-lua-acogida",
+      "title": "Luna en acogida temporal",
+      "category": "Acogida",
+      "type": "animal",
+      "status": "en_acogida",
+      "excerpt": "Luna busca hogar definitivo tras su acogida.",
+      "contentHtml": "<p>Luna está en acogida temporal.</p>",
+      "publishedAt": "2026-11-20T10:00:00.000Z",
+      "coverImage": { "src": "https://img.test/luna.jpg", "alt": "Luna" },
+      "animal": { "species": "perro", "age": { "label": "2 años" } }
+    },
+    {
+      "slug": "demo-camada-otono-2026",
+      "title": "Camada Otoño 2026 en acogida",
+      "category": "Perros en adopción",
+      "type": "animal_grupo",
+      "isGroup": true,
+      "status": "en_acogida",
+      "excerpt": "Camada de 4 cachorros en acogida familiar.",
+      "contentHtml": "<p>Camada disponible para acogida conjunta.</p>",
+      "publishedAt": "2026-11-18T10:00:00.000Z",
+      "coverImage": { "src": "https://img.test/camada.jpg", "alt": "Camada Otoño 2026" },
+      "group": {
+        "groupName": "Camada Otoño 2026",
+        "count": 4,
+        "members": [
+          { "nombre": "Cachorro 1", "especie": "perro", "raza": "Mestizo", "sexo": "Macho", "edad": "2 meses", "size": "Pequeño", "foto": "https://img.test/c1.jpg" },
+          { "nombre": "Cachorro 2", "especie": "perro", "raza": "Mestizo", "sexo": "Hembra", "edad": "2 meses", "size": "Pequeño", "foto": "https://img.test/c2.jpg" }
+        ],
+        "species": "perro",
+        "sex": "Macho",
+        "age": { "label": "2 meses" },
+        "size": "Pequeño"
+      },
+      "animal": { "species": "perro", "age": { "label": "2 meses" } }
+    }
+  ],
+  "pagination": { "page": 1, "pageSize": 24, "total": 2 }
+}

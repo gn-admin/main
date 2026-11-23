@@ -25,6 +25,7 @@ const FIXTURES = {
   gatos: fixture('canal-gatos.json'),
   perros: fixture('canal-perros.json'),
   historias: fixture('canal-historias.json'),
+  acogidas: fixture('canal-acogidas.json'),
   fichaNube: fixture('ficha-nube.json'),
   fichaRetirada: fixture('ficha-retirada.json'),
   fichaRedirect: fixture('ficha-redirect.json'),
@@ -43,6 +44,7 @@ function responderPorDefecto(url) {
     return u.searchParams.get('species') === 'gato' ? FIXTURES.gatos : FIXTURES.perros;
   }
   if (endpoint === 'historias-publicas') return FIXTURES.historias;
+  if (endpoint === 'publicaciones' && u.searchParams.get('status') === 'en_acogida') return FIXTURES.acogidas;
   if (endpoint === 'publicacion') {
     const slug = u.searchParams.get('slug');
     if (slug === 'demo-nube') return FIXTURES.fichaNube;
@@ -102,7 +104,7 @@ function entorno(opciones) {
       historias: { mode: 'real' },
       gatos: { mode: 'real' },
       perros: { mode: 'real' },
-      acogidas: { mode: 'fake' },
+      acogidas: { mode: 'real' },
       adoptados: { mode: 'fake' },
       casosExternos: { mode: 'fake' },
       grupos: { mode: 'fake' },
@@ -178,6 +180,34 @@ test('historias: pide su feed y no el catálogo', async () => {
   assert.equal(new URL(canal[0]).searchParams.get('endpoint'), 'historias-publicas');
   assert.equal(llamadasAlJson(llamadas).length, 0);
   assert.deepEqual(Array.from(api.getPostsFor('historias').map(function (p) { return p.slug; })), ['demo-un-ano-de-adopciones']);
+});
+
+test('acogidas: usa el puente R1 (publicaciones&status=en_acogida) e incluye grupos', async () => {
+  const { api, llamadas } = entorno();
+  await api.load(['acogidas']);
+
+  const canal = llamadasAlCanal(llamadas);
+  assert.equal(canal.length, 1);
+  const url = new URL(canal[0]);
+  assert.equal(url.searchParams.get('endpoint'), 'publicaciones', 'acogidas debe usar publicaciones (puente R1)');
+  assert.equal(url.searchParams.get('status'), 'en_acogida');
+  assert.equal(url.searchParams.get('type'), null, 'sin type=animal: se incluyen grupos');
+  assert.equal(llamadasAlJson(llamadas).length, 0);
+
+  const posts = api.getPostsFor('acogidas');
+  assert.equal(posts.length, 2, 'incluye animal individual y grupo');
+  const slugs = posts.map(function (p) { return p.slug; });
+  assert.ok(slugs.indexOf('demo-lua-acogida') !== -1, 'animal individual en acogida');
+  assert.ok(slugs.indexOf('demo-camada-otono-2026') !== -1, 'grupo animal_grupo en acogida');
+
+  // El grupo trae bloque `group` con miembros públicos (sin IDs internos).
+  const grupo = posts.find(function (p) { return p.slug === 'demo-camada-otono-2026'; });
+  assert.ok(grupo, 'grupo encontrado');
+  assert.equal(grupo.isGroup, true);
+  assert.ok(Array.isArray(grupo.group.members), 'miembros del grupo');
+  assert.equal(grupo.group.members.length, 2);
+  assert.equal(grupo.group.members[0].nombre, 'Cachorro 1');
+  assert.equal(grupo.group.count, 4);
 });
 
 test('la misma sección se pide una sola vez', async () => {
@@ -317,7 +347,7 @@ test('modo estático: si falla publicaciones.json, load() pide las secciones al 
   );
   const canal = llamadasAlCanal(llamadas);
   const endpoints = canal.map(function (url) { return new URL(url).searchParams.get('endpoint'); }).sort();
-  assert.deepEqual(endpoints, ['animales-publicos', 'animales-publicos', 'historias-publicas']);
+  assert.deepEqual(endpoints, ['animales-publicos', 'animales-publicos', 'historias-publicas', 'publicaciones']);
   const especies = canal
     .map(function (url) { return new URL(url).searchParams.get('species'); })
     .filter(Boolean)

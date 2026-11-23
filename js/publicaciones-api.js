@@ -52,7 +52,10 @@ var PublicacionesAPI = (function () {
     acogidas: {
       scope: 'category',
       categories: ['Acogida', 'Acogidas'],
-      query: { endpoint: 'animales-publicos', status: 'en_acogida' }
+      // Puente R1: `publicaciones&status=en_acogida` incluye animales y
+      // grupos (`animal_grupo`) sin duplicar al miembro. `animales-publicos`
+      // mantiene `type=animal` y no llega a los grupos.
+      query: { endpoint: 'publicaciones', status: 'en_acogida' }
     },
     adoptados: {
       scope: 'category',
