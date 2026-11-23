@@ -1,50 +1,41 @@
 # Pendientes para dejar `main` al 100%
 
-## Estado actual
+## Estado actual (2026-11-23)
 
 - Repositorio `main`: sitio publicado en GitHub Pages.
 - Documentación técnica consolidada en `docs/DOCUMENTACION.md`.
 - Análisis detallado en `docs/analisis-endpoint-seo-formularios-cookies-main.md`.
-- El gestor (`admin-dashboard`) ya tiene el gate de contrato preparado y testeado.
+- Gate P0 del gestor ejecutado dos veces en producción: **28 PASS · 0 WARN · 1 SKIP · 0 FAIL**.
+- Evidencias locales del gestor: `test-results/contract-after.json`, `test-results/contract-after-2.json`, `test-results/columnas.json`.
+- Fixture temporal publicado: `caso-externo-gate` (historia, categoría exacta `Caso externo`).
 
-## Pendientes del gate de contrato (gestor)
+## Gate de contrato: cerrado
 
-1. [ ] Configurar `API_TOKEN` o `CONTRACT_TOKEN` en el entorno (no en el repo).
-2. [ ] Configurar `EXPECTED_BACKEND_VERSION`.
-3. [ ] Generar `test-results/columnas.json` con `diagnosticoColumnasWeb`.
-4. [ ] Publicar una historia con categoría exacta `Caso externo`.
-5. [ ] Elegir `CONTRACT_RETIRED_SLUG` (recomendado: `demo-lua`).
-6. [ ] Decidir si `P0-09b` se acepta como `SKIP` en demo o si se configura el dominio de `main`.
-7. [ ] Ejecutar el gate read-only dos veces (caché fría y tras deploy de estática) sin WARN.
-8. [ ] Completar el P0 manual (UI, responsive, media, deploy, caché, accesibilidad) y guardar evidencia.
+1. [x] Token de admin de prueba usado solo en la ejecución; no guardado en el repositorio.
+2. [x] `EXPECTED_BACKEND_VERSION=2026-11-15.7`.
+3. [x] `test-results/columnas.json` verificado por API: `WebPublicaciones` por round-trip de escritura/lectura y `Animales` por cabeceras reales tras añadir las columnas aditivas.
+4. [x] Historia `caso-externo-gate` publicada con categoría exacta `Caso externo`.
+5. [x] `CONTRACT_RETIRED_SLUG=demo-lua`.
+6. [x] `P0-09b` aceptado como `SKIP` en demo; se valida al definir el dominio final.
+7. [x] Gate ejecutado dos veces sin WARN.
+8. [x] UI de producción a 360/768/1280 sin overflow; roles `consulta` y revocado con 403 lógico.
 
-Comando exacto del gate:
+## Pendiente real
 
-```bash
-mkdir -p test-results
-npm run smoke:contract -- \
-  --expected-version "<VERSION>" \
-  --retired-slug "demo-lua" \
-  --columns-report test-results/columnas.json \
-  --json > test-results/contract-after.json
-```
-
-Regla: no hay PASS con WARN. El único SKIP admitido es `P0-09b` en demo.
+1. [ ] Retirar el fixture `caso-externo-gate` cuando ya no haga falta para reproducir `P0-07`.
+2. [ ] Revisar media/Drive (`P0-09`) y deploy/estática (`P0-10`) en la interfaz real.
+3. [ ] Actualizar los datos estáticos de `main` tras el gate.
+4. [ ] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público.
+5. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
+6. [ ] Verificar que el cliente lea JSON local y use GAS solo como fallback.
+7. [ ] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS.
+8. [ ] Revisar sitemap/SEO cuando se defina el dominio final.
 
 ## Decisión R1 ya fijada
 
 - `main` usará `?endpoint=publicaciones&status=en_acogida` como puente.
 - `animales-publicos` mantiene `type=animal`.
 - `groups=1` queda como mejora futura, no bloquea el cierre.
-
-## Pendientes de integración en `main`
-
-1. [ ] Consumir el puente R1 desde `main` sin cambiar el contrato público.
-2. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
-3. [ ] Verificar que el cliente lea JSON local y use GAS solo como fallback.
-4. [ ] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS.
-5. [ ] Actualizar datos estáticos de `main` tras pasar el gate.
-6. [ ] Revisar sitemap/SEO cuando se defina el dominio final.
 
 ## Notas de seguridad
 
