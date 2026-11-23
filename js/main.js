@@ -22,6 +22,25 @@
     return 'post/?slug=' + encodeURIComponent(p.slug) + '&from=' + encodeURIComponent(from || 'historias');
   }
 
+  // Envío de formularios: EmailJS + reCAPTCHA cuando hay configuración; si no,
+  // se mantiene el modo simulado (sin peticiones externas).
+  function submitFormPayload(payload) {
+    var transport = window.NebakFormsTransport;
+    if (transport && typeof transport.send === 'function') return transport.send(payload);
+    return new Promise(function (resolve) {
+      window.setTimeout(function () { resolve({ simulated: true }); }, 900);
+    });
+  }
+
+  function formErrorMessage(err) {
+    try { console.warn('[NebakForms] no se pudo enviar el formulario', err); } catch (_) {}
+    return 'No se ha podido enviar el formulario. Inténtalo de nuevo en unos segundos o escríbenos a nebakadopciones@gmail.com.';
+  }
+
+  if (window.NebakFormsTransport && typeof window.NebakFormsTransport.preload === 'function') {
+    try { window.NebakFormsTransport.preload(); } catch (_) {}
+  }
+
   // Year
   $$('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 
@@ -355,6 +374,7 @@
   // Typed contact/form modal system (conceptos para clasificación de email)
   var NebakForms = (function () {
     var modal, dialog, titleEl, introEl, formEl, successEl, conceptEl, pageEl, lastFocus;
+    var typeAliases = { adopt: 'adopcion-animal', acoge: 'acogida', vol: 'voluntariado', donar: 'donaciones' };
     var types = {
       'contacto-general': { title: 'Contacto general', intro: 'Cuéntanos en qué podemos ayudarte y te responderemos lo antes posible.', subject: 'Contacto general', fields: ['asunto','mensaje'], success: 'Gracias por tu mensaje. Hemos registrado tu consulta general.' },
       'voluntariado': { title: 'Voluntariado', intro: 'Cuéntanos cómo te gustaría colaborar, tu disponibilidad y tu zona.', subject: 'Voluntariado', fields: ['tipo_voluntariado','disponibilidad','zona','mensaje'], success: 'Gracias por tu interés en el voluntariado. Te responderemos pronto.' },
@@ -388,7 +408,7 @@
               '<div class="form-modal-grid" id="nebakFormFields"></div>'+
               '<div class="actions form-modal-actions"><button class="btn btn-primary" type="submit">Enviar</button><button class="btn btn-secondary" type="button" data-form-close>Cancelar</button></div>'+
               '<p class="form-success" id="nebakFormSuccess" role="status"></p>'+
-              '<p class="form-note">Formulario informativo (sitio estático): el envío se simula. Los datos incluirán tipo de formulario y contexto para su clasificación.</p>'+
+              '<p class="form-note">Formulario de contacto: incluimos el tipo de consulta y el contexto de la página para clasificar tu mensaje.</p>'+
             '</form>'+
           '</div>'+
         '</div>';
@@ -397,6 +417,9 @@
       titleEl = modal.querySelector('#nebakFormTitle');
       introEl = modal.querySelector('#nebakFormIntro');
       formEl = modal.querySelector('#nebakModalForm');
+      if (window.NebakFormsTransport && typeof window.NebakFormsTransport.installHoneypots === 'function') {
+        window.NebakFormsTransport.installHoneypots(formEl);
+      }
       successEl = modal.querySelector('#nebakFormSuccess');
       conceptEl = modal.querySelector('#nebakFormConcept');
       pageEl = modal.querySelector('#nebakFormPage');
@@ -412,17 +435,29 @@
         var payload = {};
         new FormData(formEl).forEach(function(v,k){ payload[k]=v; });
         window.__nebakLastFormPayload = payload; // preparado para integración email/backend
-        try { console.info('[NebakForms] envío simulado', payload); } catch(_){}
-        setTimeout(function(){
+        function restore() {
+          if (btn) { btn.disabled = false; btn.textContent = orig || 'Enviar'; }
+        }
+        function ok(result) {
           formEl.reset();
           modal.querySelector('#nebakFormType').value = payload.form_type || '';
           modal.querySelector('#nebakFormConceptValue').value = payload.concepto || '';
           modal.querySelector('#nebakFormPage').value = payload.origen_pagina || pageName();
           modal.querySelector('#nebakAnimalSlug').value = payload.animal_slug || '';
-          if (btn) { btn.disabled = false; btn.textContent = orig || 'Enviar'; }
-          if (successEl) { successEl.textContent = (types[payload.form_type] && types[payload.form_type].success) || 'Gracias. Hemos recibido tu mensaje.'; successEl.classList.add('show'); }
-          if (typeof showToast === 'function') showToast('Solicitud registrada (' + (payload.concepto || payload.form_type || 'formulario') + ')');
-        }, 900);
+          restore();
+          if (successEl) {
+            successEl.textContent = (types[payload.form_type] && types[payload.form_type].success) || 'Gracias. Hemos recibido tu mensaje.';
+            successEl.classList.add('show');
+          }
+          if (typeof showToast === 'function') {
+            showToast(result && result.simulated ? ('Solicitud registrada (' + (payload.concepto || payload.form_type || 'formulario') + ')') : 'Mensaje enviado correctamente');
+          }
+        }
+        function fail(err) {
+          restore();
+          if (successEl) { successEl.textContent = formErrorMessage(err); successEl.classList.add('show'); }
+        }
+        submitFormPayload(payload).then(ok, fail);
       });
       formEl.addEventListener('input', function(){ if (successEl) successEl.classList.remove('show'); });
       return modal;
@@ -458,6 +493,7 @@
     function open(type, ctx) {
       ensure();
       ctx = ctx || {};
+      type = typeAliases[type] || type;
       var cfg = types[type] || types['contacto-general'];
       var concept = (ctx.concept || cfg.subject || type);
       titleEl.textContent = cfg.title;
@@ -509,9 +545,10 @@
   })();
   window.NebakForms = NebakForms;
 
-  // Contact/forms (static simulation) with concept metadata
+  // Contact/forms (static) with concept metadata
   $$('form[data-static-form]').forEach(function (form) {
     var success = form.querySelector('.form-success');
+    var successText = success ? success.textContent : '';
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -524,13 +561,28 @@
       payload.concepto = form.getAttribute('data-form-concept') || payload.concepto || payload.form_type;
       payload.origen_pagina = document.title || location.pathname;
       window.__nebakLastFormPayload = payload;
-      try { console.info('[NebakForm] envío simulado', payload); } catch(_){}
-      window.setTimeout(function () {
+      function restore() {
+        if (!btn) return;
+        btn.disabled = false;
+        if (btn.textContent !== undefined && orig) btn.textContent = orig;
+        else if (orig) btn.value = orig;
+      }
+      submitFormPayload(payload).then(function (result) {
         form.reset();
-        if (btn) { btn.disabled = false; if (btn.textContent !== undefined && orig) btn.textContent = orig; else if (orig) btn.value = orig; }
-        if (success) success.classList.add('show');
-        if (typeof showToast === 'function') showToast('Solicitud registrada (' + (payload.concepto || payload.form_type) + ')');
-      }, 900);
+        // reset() vacía también los campos ocultos: se reponen para el siguiente envío.
+        var typeInput = form.querySelector('input[name="form_type"]');
+        var conceptInput = form.querySelector('input[name="concepto"]');
+        if (typeInput) typeInput.value = payload.form_type;
+        if (conceptInput) conceptInput.value = payload.concepto;
+        restore();
+        if (success) { success.textContent = successText; success.classList.add('show'); }
+        if (typeof showToast === 'function') {
+          showToast(result && result.simulated ? ('Solicitud registrada (' + (payload.concepto || payload.form_type) + ')') : 'Mensaje enviado correctamente');
+        }
+      }, function (err) {
+        restore();
+        if (success) { success.textContent = formErrorMessage(err); success.classList.add('show'); }
+      });
     });
     form.addEventListener('input', function () {
       if (success) success.classList.remove('show');
@@ -613,22 +665,20 @@
       }).catch(function () { cb([]); });
     }
     function normalize(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-    function isAnimalCategory(cat) {
-      var c = normalize(cat);
-      return c.indexOf('gatos en adopcion') !== -1 || c.indexOf('perros en adopcion') !== -1 || c.indexOf('otros en adopcion') !== -1 || c.indexOf('acogida') !== -1 || c.indexOf('caso externo') !== -1 || c.indexOf('adoptados') !== -1;
-    }
     function imgPath(p){ if(!p) return ''; var s=String(p); if(s.indexOf('http://')===0 || s.indexOf('https://')===0 || s.indexOf('../')===0 || s.charAt(0)==='/') return s; return raizRelativa()+s; }
 
     function homeView() {
       body.innerHTML = ''+
-        '<div class="chat-msg"><strong>Hola, soy Nebi 🐾</strong><br>Te ayudo a buscar animales en adopción o acogida y a rellenar formularios aquí mismo.</div>'+
-        '<p class="chat-hint">Prueba con “Lola”, “perro senior”, “acoger” o “voluntariado”.</p>'+
-        '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal o escribe tu consulta..." aria-label="Buscar o escribir consulta"><button type="button" id="chatSearchBtn">Enviar</button></div>'+
+        '<div class="chat-msg"><strong>Hola, soy Nebi 🐾</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.</div>'+
+        '<p class="chat-hint">Prueba con “Trufa”, “perro senior”, “evento”, “acogida” o “voluntariado”.</p>'+
+        '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta"><button type="button" id="chatSearchBtn">Enviar</button></div>'+
         '<div class="chat-quick">'+
           '<button type="button" data-quick="adoptar">Adoptar</button>'+
           '<button type="button" data-quick="acoger">Acoger</button>'+
           '<button type="button" data-quick="voluntariado">Voluntariado</button>'+
           '<button type="button" data-quick="donar">Donar</button>'+
+          '<button type="button" data-quick="eventos">Eventos</button>'+
+          '<button type="button" data-quick="historias">Historias</button>'+
         '</div>'+
         '<div id="chatResults"></div>'+
         '<div class="chat-opts">'+
@@ -640,59 +690,124 @@
       wireHome();
     }
 
+    function escHtml(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function chatForm(type) {
+      if (type === 'adopcion-animal') formAdopt();
+      else if (type === 'acogida') formAcoge();
+      else if (type === 'voluntariado') formVol();
+      else formContact();
+    }
+
     function routeIntent(q) {
       var raw = (q || '').trim();
       var t = normalize(raw);
       if (!t) return;
       var res = $('#chatResults');
-      if (res) res.innerHTML = '<div class="chat-msg user">'+raw.replace(/</g,'&lt;')+'</div>';
+      if (res) res.innerHTML = '<div class="chat-msg user">' + escHtml(raw) + '</div><div class="chat-out"></div>';
 
-      if (/(^|\s)(adoptar|adopcion|adopción)(\s|$)/.test(t) || /(quiero adoptar|rellenar.*adop)/.test(t)) { formAdopt(raw); return; }
-      if (/acog/.test(t)) { if (/(form|solicitud|rellen|quiero acoger)/.test(t)) { formAcoge(raw); return; } }
-      if (/volunt|ayud/.test(t)) { formVol(raw); return; }
-      if (/don|teaming|socio|material/.test(t)) {
-        if (res) res.innerHTML += '<div class="chat-msg">Puedes colaborar con transferencia, Teaming, cuota de socio o donación de material. Si quieres, te abro el formulario de contacto para que te indiquemos los pasos.</div>';
-        setTimeout(function(){ formContact('Donación / colaboración'); }, 150);
-        return;
+      var wantsForm = /\b(formulario|solicitud|rellenar|inscrib|apuntarme|apuntar)\b/.test(t);
+      var wantsTo = /(quiero|me gustaria|me interesa|necesito)\s+(adoptar|acoger|ser voluntari|colaborar|donar|hacerme socio)/.test(t);
+
+      if (/adop/.test(t) && (wantsForm || wantsTo)) { formAdopt(raw); return; }
+      if (/acog/.test(t) && (wantsForm || wantsTo)) { formAcoge(raw); return; }
+      if (/(volunt|colabor)/.test(t) && (wantsForm || wantsTo)) { formVol(raw); return; }
+      if (/(don|teaming|bizum|socio|material)/.test(t) && (wantsForm || wantsTo)) { formContact('Donación / colaboración'); return; }
+
+      // Palabra suelta de intención: atajo directo al formulario.
+      if (t.split(/\s+/).filter(Boolean).length === 1) {
+        if (/^(adoptar|adopcion|adopciones)$/.test(t)) { formAdopt(raw); return; }
+        if (/^(acoger|acogida|acogidas)$/.test(t)) { formAcoge(raw); return; }
+        if (/^(voluntariado|voluntario|voluntaria)$/.test(t)) { formVol(raw); return; }
+        if (/^(donar|donacion|donaciones|socio|socia|teaming|bizum)$/.test(t)) { formContact('Donación / colaboración'); return; }
+        if (/^(contacto|contactar|escribir|consulta)$/.test(t)) { formContact(); return; }
       }
-      if (/contact|pregunt|inform|duda/.test(t)) { formContact(); return; }
-      if (/acog/.test(t)) { doAnimalSearch(raw, 'acogida'); return; }
-      if (/adopt|gato|perro/.test(t)) { doAnimalSearch(raw, 'adopcion'); return; }
-      doAnimalSearch(raw, 'auto');
+
+      doSearch(raw, '');
     }
 
-    function doAnimalSearch(q, mode) {
-      var res = $('#chatResults');
-      if (res) res.innerHTML = (res.innerHTML || '') + '<div class="chat-msg">Buscando coincidencias...</div>';
+    function chatOut(html) {
+      var out = $('#chatResults .chat-out') || $('#chatResults');
+      if (out) out.innerHTML = html;
+      return out;
+    }
+
+    function searchSuggestions() {
+      return '<div class="chat-quick">' +
+        '<button type="button" data-chat-search="gato">Gatos</button>' +
+        '<button type="button" data-chat-search="perro">Perros</button>' +
+        '<button type="button" data-chat-filter="acogida">Acogida</button>' +
+        '<button type="button" data-chat-search="evento">Eventos</button>' +
+        '<button type="button" data-chat-search="historia">Historias</button>' +
+      '</div>';
+    }
+
+    function wireSearchSuggestions() {
+      $$('[data-chat-search]', body).forEach(function (b) {
+        b.addEventListener('click', function () { doSearch(b.getAttribute('data-chat-search') || '', ''); });
+      });
+      $$('[data-chat-filter]', body).forEach(function (b) {
+        b.addEventListener('click', function () { doSearch('', b.getAttribute('data-chat-filter') || ''); });
+      });
+      $$('[data-chat-form]', body).forEach(function (b) {
+        b.addEventListener('click', function () { chatForm(b.getAttribute('data-chat-form') || ''); });
+      });
+    }
+
+    function resultUrl(post) {
+      var c = normalize(post.category);
+      var from = 'historias';
+      if (post.type === 'evento' || (post.event && !post.animal)) from = 'eventos';
+      else if (c.indexOf('gatos') !== -1) from = 'gatos';
+      else if (c.indexOf('perros') !== -1) from = 'perros';
+      else if (/adopcion|acogida|adoptados|caso externo|grupo/.test(c)) from = 'acogidas';
+      return fichaUrl(post, from);
+    }
+
+    function renderSearchResults(items, q) {
+      if (!items.length) {
+        chatOut('<div class="chat-msg chat-empty">No he encontrado “' + escHtml(q || '') + '”. Puedes probar con otro nombre, una especie o un tipo de publicación:' +
+          searchSuggestions() + '</div>');
+        wireSearchSuggestions();
+        return;
+      }
+      var rows = items.map(function (item) {
+        var p = item.post || {};
+        var img = imgPath(p.image);
+        var meta = [item.etiqueta, p.category, p.dateFormatted].filter(Boolean).join(' · ');
+        return '<div class="chat-result">' +
+          (img ? ('<img src="' + escHtml(img) + '" alt="">') : '<div></div>') +
+          '<div><h4>' + escHtml(p.title) + '</h4><p>' + escHtml(meta) + '</p><a href="' + escHtml(resultUrl(p)) + '">Ver ficha →</a></div>' +
+        '</div>';
+      }).join('');
+      var count = items.length === 1 ? '1 coincidencia' : items.length + ' coincidencias';
+      chatOut('<div class="chat-msg">' + count + (q ? ' para “' + escHtml(q) + '”' : '') + ':</div><div class="chat-results">' + rows + '</div>');
+    }
+
+    function doSearch(q, filtro) {
+      chatOut('<div class="chat-msg">Buscando coincidencias…</div>');
       loadPosts(function (posts) {
-        var hasData = posts && posts.length;
-        var list = hasData ? posts.filter(function (p) { return isAnimalCategory(p.category); }) : [];
-        var nq = normalize(q);
-        if (nq) {
-          list = list.filter(function (p) { return (normalize(p.title)+' '+normalize(p.excerpt)+' '+normalize(p.category)+' '+(p.tags||[]).join(' ').toLowerCase()).indexOf(nq) !== -1; });
-        } else {
-          list = list.filter(function (p) {
-            var c = normalize(p.category);
-            return c.indexOf('gatos en adopcion') !== -1 || c.indexOf('perros en adopcion') !== -1 || c.indexOf('acogida') !== -1;
-          });
-        }
-        if (mode === 'acogida') list = list.filter(function(p){ return /acog/i.test(p.category || ''); });
-        if (mode === 'adopcion') list = list.filter(function(p){ var c = normalize(p.category); return c.indexOf('adopcion') !== -1 || c.indexOf('caso externo') !== -1; });
-        list = list.slice(0, 8);
-        if (!res) return;
-        if (!hasData) {
-          res.innerHTML = '<div class="chat-msg chat-empty">No he podido cargar el buscador ahora mismo (necesita abrirse por HTTP). Aun así puedo ayudarte con formularios: <button class="chat-back" type="button" data-open-form="adopt">adopción</button> <button class="chat-back" type="button" data-open-form="acoge">acogida</button> <button class="chat-back" type="button" data-open-form="vol">voluntariado</button>.</div>';
-          $$('[data-open-form]', res).forEach(function(b){ b.addEventListener('click', function(){ var v=b.getAttribute('data-open-form'); if(v==='adopt') formAdopt(); else if(v==='acoge') formAcoge(); else formVol(); }); });
+        if (!posts || !posts.length) {
+          chatOut('<div class="chat-msg chat-empty">No he podido cargar el buscador ahora mismo (necesita abrirse por HTTP). Aun así puedo abrirte un formulario: ' +
+            '<button class="chat-back" type="button" data-chat-form="adopcion-animal">adopción</button> ' +
+            '<button class="chat-back" type="button" data-chat-form="acogida">acogida</button> ' +
+            '<button class="chat-back" type="button" data-chat-form="voluntariado">voluntariado</button>.</div>');
+          wireSearchSuggestions();
           return;
         }
-        if (!list.length) { res.innerHTML = '<div class="chat-msg chat-empty">No he encontrado coincidencias para “'+(q||'').replace(/</g,'&lt;')+'”. Prueba con otro nombre o usa los formularios de adopción, acogida o voluntariado.</div>'; return; }
-        res.innerHTML = '<div class="chat-results">' + list.map(function (p) {
-          var img = imgPath(p.image);
-          var c = normalize(p.category);
-          var from = (c.indexOf('gatos') !== -1) ? 'gatos' : (c.indexOf('perros') !== -1 ? 'perros' : 'historias');
-          var href = fichaUrl(p, from);
-          return '<div class="chat-result">'+(img?('<img src="'+img+'" alt="">'):'<div></div>')+'<div><h4>'+p.title+'</h4><p>'+ (p.category||'') +'</p><a href="'+href+'">Ver ficha →</a></div></div>';
-        }).join('') + '</div>';
+        var items = [];
+        if (window.NebakBusqueda && typeof window.NebakBusqueda.buscar === 'function') {
+          items = window.NebakBusqueda.buscar(posts, q, filtro);
+        } else {
+          // Respaldo mínimo si no se cargó js/busqueda-publicaciones.js.
+          var nq = normalize(q);
+          items = posts.filter(function (p) {
+            return !nq || (normalize(p.title) + ' ' + normalize(p.excerpt) + ' ' + normalize(p.category)).indexOf(nq) !== -1;
+          }).slice(0, 8).map(function (p) { return { post: p, etiqueta: p.category || '' }; });
+        }
+        renderSearchResults(items, q);
       });
     }
 
@@ -726,18 +841,33 @@
         '<input type="hidden" name="origen_pagina" value="'+(document.title||'main')+'">' +
         fieldsHtml +
         '<div class="chat-actions-row"><button class="chat-btn" type="submit">Enviar</button><button class="chat-btn chat-btn-ghost" type="button" data-back>Cancelar</button></div>' +
-        '<p class="form-note">Formulario informativo (sitio estático): el envío se simula e incluye concepto/tipo para clasificación.</p></form>';
+        '<p class="form-note">Formulario de contacto: incluimos el tipo de consulta para clasificar tu mensaje.</p></form>';
       $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
       var f = $('[data-chat-inline-form]', body);
+      if (f && window.NebakFormsTransport && typeof window.NebakFormsTransport.installHoneypots === 'function') {
+        window.NebakFormsTransport.installHoneypots(f);
+      }
       if (f) f.addEventListener('submit', function (e) {
         e.preventDefault();
         if (!f.checkValidity()) { f.reportValidity(); return; }
         var payload = {};
         try { new FormData(f).forEach(function(v,k){ payload[k]=v; }); } catch(_){}
         window.__nebakLastFormPayload = payload;
-        try { console.info('[NebakChatForm] envío simulado', payload); } catch(_){}
-        body.innerHTML = backBtn() + successMsg(successText) + '<div class="chat-actions-row" style="margin-top:.5rem"><button class="chat-btn" type="button" data-back>Volver al inicio</button></div>';
-        $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
+        var btn = f.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+        submitFormPayload(payload).then(function () {
+          body.innerHTML = backBtn() + successMsg(successText) + '<div class="chat-actions-row" style="margin-top:.5rem"><button class="chat-btn" type="button" data-back>Volver al inicio</button></div>';
+          $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
+        }, function (err) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; }
+          var notice = $('.chat-form-error', body);
+          if (!notice) {
+            notice = document.createElement('p');
+            notice.className = 'chat-msg chat-empty chat-form-error';
+            f.appendChild(notice);
+          }
+          notice.textContent = formErrorMessage(err);
+        });
       });
     }
 

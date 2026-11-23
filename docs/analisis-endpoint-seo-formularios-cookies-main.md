@@ -338,6 +338,8 @@ Pasar de “envío simulado” a recepción real: **persistencia (opcional en Sh
 
 ### 5.4 reCAPTCHA (recomendación)
 
+> **Implementado en 2026-11:** con EmailJS se usa **reCAPTCHA v2 invisible** (EmailJS solo verifica v2); v3 queda para un backend GAS. Ver `docs/formularios-recaptcha-emailjs.md`.
+
 - **reCAPTCHA v3** (invisible, por acción) para mejor UX en formularios de protectora; definir umbral de score y fallback (v2 checkbox) si hay muchos falsos positivos.
 - Claves site/secret en configuración segura (PropertiesService en GAS para secret; site key en front). Registrar dominios autorizados.
 - Informar en privacidad/cookies si reCAPTCHA introduce cookies/transferencias a Google (y actuar en consecuencia en el banner/capa de consentimiento según implementación).
