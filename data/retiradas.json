@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T15:14:49.865Z",
+  "generatedAt": "2026-11-23T15:22:10.265Z",
   "source": "gas-canal",
   "status": "success",
   "data": [
@@ -27,6 +27,11 @@
       "slug": "demo-mercadillo-primavera",
       "tipo": "evento",
       "retiradoEn": "2026-11-20T09:58:47.386Z"
+    },
+    {
+      "slug": "caso-externo-gate",
+      "tipo": "historia",
+      "retiradoEn": "2026-11-23T15:21:39.573Z"
     }
   ]
 }

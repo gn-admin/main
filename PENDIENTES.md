@@ -7,7 +7,7 @@
 - Análisis detallado en `docs/analisis-endpoint-seo-formularios-cookies-main.md`.
 - Gate P0 del gestor ejecutado dos veces en producción: **28 PASS · 0 WARN · 1 SKIP · 0 FAIL**.
 - Evidencias locales del gestor: `test-results/contract-after.json`, `test-results/contract-after-2.json`, `test-results/columnas.json`.
-- Fixture temporal publicado: `caso-externo-gate` (historia, categoría exacta `Caso externo`, indexable para que `main` genere su página estática).
+- Fixture temporal **retirado**: `caso-externo-gate` ya no aparece en el listado público; queda lápida 410 `noindex`, fuera del sitemap.
 
 ## Gate de contrato: cerrado
 
@@ -22,8 +22,8 @@
 
 ## Pendiente real
 
-1. [ ] Retirar el fixture `caso-externo-gate` cuando ya no haga falta para reproducir `P0-07`.
-2. [ ] Revisar media/Drive (`P0-09`) y deploy/estática (`P0-10`) en la interfaz real.
+1. [x] Fixture `caso-externo-gate` retirado y actualizado en `main` (lápida 410, `noindex`, fuera del sitemap).
+2. [x] Media/Drive y ciclo publicar/ocultar/retirar/restaurar verificados en producción; el primer cambio disparó deploy y el resto se agrupó en cola.
 3. [x] Datos estáticos de `main` regenerados con el canal público (8 publicaciones, incluida `caso-externo-gate`).
 4. [ ] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público.
 5. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
