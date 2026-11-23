@@ -173,7 +173,7 @@ function generarHtml(post, pagina, shell, siteUrl) {
   );
   html = html.replace(
     '</body>',
-    '<script src="../js/post-template.js?v=13"></script>\n' +
+    '<script src="../js/post-template.js?v=21"></script>\n' +
     '<script>PostTemplate.initCarousels(document);</script>\n\n' +
     '</body>'
   );
@@ -228,7 +228,7 @@ function paginaRedirect(destino) {
     '  <meta name="robots" content="noindex,follow">\n' +
     '  <link rel="canonical" href="' + url + '">\n' +
     '  <meta http-equiv="refresh" content="0; url=' + url + '">\n' +
-    '  <link rel="stylesheet" href="../css/main.css?v=3">\n' +
+    '  <link rel="stylesheet" href="../css/main.css?v=4">\n' +
     '  <script>location.replace(' + json + ');</script>\n' +
     '</head>\n<body>\n' +
     '  <main id="contenido" class="section"><div class="container" style="max-width:720px">\n' +

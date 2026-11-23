@@ -858,3 +858,5 @@ body.modal-open { overflow: hidden; }
 .post-share-fallback { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 9999; width: min(92vw, 32rem); background: #fff; border: 1px solid rgba(0,0,0,.12); border-radius: .75rem; box-shadow: 0 12px 30px rgba(0,0,0,.18); padding: .85rem; }
 .post-share-fallback p { margin: 0 0 .5rem; font-size: .9rem; }
 .post-share-fallback input { width: 100%; padding: .55rem .65rem; border: 1px solid rgba(0,0,0,.18); border-radius: .5rem; font: inherit; }
+
+.post-share-toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 10000; background: #1b3a2a; color: #fff; padding: .7rem 1rem; border-radius: .6rem; box-shadow: 0 10px 24px rgba(0,0,0,.22); font-size: .9rem; max-width: 92vw; text-align: center; }

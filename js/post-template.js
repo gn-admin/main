@@ -61,6 +61,18 @@
   return { svg: heart, tone: 'tone-mint' };
   }
 
+  // Aviso flotante independiente del botón: algunos navegadores reescriben su
+  // texto y el usuario necesita ver que la acción ocurrió.
+  function showShareToast(msg) {
+    if (typeof document === 'undefined' || !document.body) return;
+    var el = document.createElement('div');
+    el.className = 'post-share-toast';
+    el.setAttribute('role', 'status');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 2200);
+  }
+
   function initShare(root) {
     var scope = root || (typeof document !== 'undefined' ? document : null);
     if (!scope || !scope.querySelectorAll) return;
@@ -68,6 +80,7 @@
       var original = btn.textContent || 'Compartir';
       var done = function () {
         btn.textContent = 'Copiado';
+        showShareToast('Enlace copiado');
         setTimeout(function () { btn.textContent = original; }, 2000);
       };
       var showFallback = function () {
@@ -106,9 +119,12 @@
       };
       setTimeout(attempt, 0);
     }
-    if (!scope.addEventListener || scope.__shareInit) return;
-    scope.__shareInit = true;
-    scope.addEventListener('click', function (e) {
+    // Delegación en window: un listener puesto en document durante
+    // DOMContentLoaded puede quedar inerte en algunos navegadores.
+    var target = (typeof window !== 'undefined') ? window : scope;
+    if (!target.addEventListener || target.__shareInit) return;
+    target.__shareInit = true;
+    target.addEventListener('click', function (e) {
       var btn = e.target && e.target.closest ? e.target.closest('.post-share-btn') : null;
       if (!btn) return;
       e.preventDefault();
@@ -119,15 +135,16 @@
       } else {
         copyLink(url, btn);
       }
-    });
+    }, true);
   }
 
   if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () { initShare(document); });
-    } else {
-      initShare(document);
-    }
+    // Se engancha tras la carga completa: en algunos navegadores un listener
+    // añadido durante DOMContentLoaded queda inerte.
+    var bootShare = function () { setTimeout(function () { initShare(document); }, 0); };
+    if (document.readyState === 'complete') bootShare();
+    else if (typeof window !== 'undefined') window.addEventListener('load', bootShare);
+    else bootShare();
   }
 
   function backTarget(post, fromParam) {
