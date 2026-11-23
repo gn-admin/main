@@ -204,12 +204,13 @@ window.NEBAK_FORMS_CONFIG = {
 - Envío real (23/11/2026): aceptado por EmailJS con `POST /api/v1.0/email/send` → **200** desde `gn-admin.github.io/main/contacto/`, en dos pruebas independientes. Asunto `[Web] Contacto general · Prueba Codebuff` / `· Prueba de cierre`, Reply-To `prueba.codebuff@example.com`. Pendiente de confirmar la recepción en el buzón.
 - Un intento intermedio fue rechazado por reCAPTCHA con `The bot is detected` al usar un navegador automatizado; con interacción normal se aceptó. No es un fallo de la configuración.
 - Los bloqueos por honeypot y por límite de sesión muestran su mensaje específico en el formulario; verificado en navegador además de en los tests.
-- **Rotación de claves:** ver [`docs/rotacion-recaptcha.md`](rotacion-recaptcha.md).
+- **Rotación de claves:** criterio, decisión actual y procedimiento en [`docs/rotacion-recaptcha.md`](rotacion-recaptcha.md).
 
 ### Estado de cierre (23/11/2026)
 
 - **Activo:** `enabled: true`; `service_k6jkxaq`; `tpl_contacto_general`; site key v2 de `grupo-nebak`; buzón `nebakadopciones@gmail.com`.
 - **Desplegado:** `forms-config.js?v=4`, `forms-transport.js?v=4` y `main.js?v=12` en las 17 páginas y en `404.html`.
 - **Suite:** 9 transporte + 6 plantillas + 8 buscador + 16 publicaciones + 30 prerender = **69 pruebas en verde**.
-- **Pendiente del usuario:** confirmar el correo en el buzón (y en spam), y decidir la rotación de la secret filtrada siguiendo el runbook.
+- **Verificación pendiente:** confirmar la recepción en el buzón (y en spam). Es lo único que falta para dar el envío por confirmado de extremo a extremo.
+- **Rotación de la secret filtrada:** no es una tarea abierta. El 23/11/2026 se decide **no rotar ahora**; se revisa anualmente o ante incidente. Riesgo aceptado y procedimiento en el runbook.
 - **Opcional:** añadir `localhost` y `127.0.0.1` a los dominios de la clave para probar en local; hoy reCAPTCHA los rechaza.

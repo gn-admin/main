@@ -12,7 +12,7 @@
 - Requiere coordinar a todo el mundo, rompe clones y deja el valor en reflogs, forks y cachés.
 - Google puede marcar la clave como filtrada y revocarla, así que hay que asumir que el valor es público.
 
-**Regla:** una credencial expuesta se rota, no se intenta borrar.
+**Regla general:** una credencial expuesta se rota, no se intenta borrar. Si se decide aplazar, la excepción debe quedar documentada y con fecha de revisión (ver §2).
 
 ## 2. Estado actual (23/11/2026)
 
@@ -26,6 +26,14 @@
 | Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200 en dos envíos reales) |
 
 El error de dominio local se comprobó abriendo el iframe de reCAPTCHA: *«El host local no está en la lista de dominios admitidos para esta clave del sitio web»*. En `gn-admin.github.io` el reto se carga sin ese error.
+
+### Cadencia y decisión actual
+
+- **Las claves de reCAPTCHA no caducan** y Google no impone una rotación periódica. La frecuencia es una decisión del propietario del proyecto.
+- **Criterio adoptado:** revisión **anual** y rotación **por evento**: filtración, salida de alguien con acceso, abuso sospechoso del formulario, cambio de dominio o migración a v3.
+- **Decisión (23/11/2026): no rotar ahora.** La secret filtrada no permite enviar correos ni fabricar tokens (EmailJS guarda su copia y la validación la hace Google); el riesgo aceptado es que alguien llame a `siteverify` con ella o que Google revoque la clave. Se revisa en la revisión anual o antes si hay un incidente.
+- **No es una tarea abierta ni un bloqueante del formulario.** Es una decisión manual que se toma cuando toca; el procedimiento queda listo por si se elige ejecutarla.
+- **Qué es manual y qué no:** crear la clave y copiar su legacy secret (consola de Google) y pegarla en EmailJS → Settings son pasos manuales; actualizar `siteKey`, versiones, tests y despliegue se puede automatizar con un script si algún día se decide rotar.
 
 ## 3. Antes de empezar
 
@@ -46,9 +54,9 @@ Google ya no permite crear claves **v2 Invisible** desde Cloud; solo **Checkbox 
 
 EmailJS solo valida v2, así que v3 obliga a verificar el token en el backend (`forms/submit` en Apps Script) y a sustituir EmailJS en ese camino. Más trabajo, pero elimina la dependencia de EmailJS y el límite de 2 plantillas.
 
-### C. No rotar y aceptar el riesgo
+### C. No rotar y aceptar el riesgo (decisión actual)
 
-La secret filtrada no permite enviar correos (EmailJS guarda su copia) ni fabricar tokens, pero sí llamar a `siteverify` y puede ser revocada por Google. Aceptable solo como decisión temporal documentada.
+La secret filtrada no permite enviar correos (EmailJS guarda su copia) ni fabricar tokens, pero sí llamar a `siteverify` y puede ser revocada por Google. Es la opción elegida el 23/11/2026: queda documentada aquí y se revisa cada año o ante incidente, sin bloquear el formulario.
 
 ## 5. Procedimiento A: rotar a una clave nueva (sin tocar el historial)
 
