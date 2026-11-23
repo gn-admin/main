@@ -142,7 +142,7 @@
     api.load(faltaSeccion ? undefined : secciones).then(function(){
       // Pequeño retraso para que el card "Cargando datos" sea visible
       // aunque el endpoint responda rápido (mejor UX).
-      return new Promise(function (resolve) { setTimeout(resolve, 450); });
+      return new Promise(function (resolve) { setTimeout(resolve, 600); });
     }).then(function(){
       var posts = api.getAllPosts();
       containers.forEach(function(root){
@@ -227,7 +227,7 @@
           else filtered.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
           if (meta) meta.textContent = filtered.length + ' caso' + (filtered.length===1?'':'s') + ' mostrado' + (filtered.length===1?'':'s');
           if (!filtered.length) {
-            root.innerHTML = '<div class="listing-empty">No hay resultados con esos filtros. Prueba a borrar la búsqueda o cambia el filtro.</div>';
+            root.innerHTML = '<div class="listing-empty">No hay animales disponibles en este momento.</div>';
             return;
           }
           root.innerHTML = filtered.map(function(p){

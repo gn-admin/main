@@ -326,6 +326,7 @@ input:focus, textarea:focus { border-color: var(--brand); outline: none; box-sha
 .listing-card { display: flex; flex-direction: column; height: 100%; }
 .listing-card .card-body { display: flex; flex-direction: column; gap: .35rem; flex: 1; }
 .listing-empty { padding: 1rem 1.1rem; border: 1px dashed #cfe0d6; border-radius: 16px; background: #fff; color: var(--ink-soft); }
+.listing-grid .listing-empty { grid-column: 1 / -1; }
 .listing-grid .listing-loading { grid-column: 1 / -1; }
 .listing-loading { display: grid; place-items: center; min-height: 120px; padding: 1.1rem 1.15rem; background: linear-gradient(180deg,#ffffff 0%, #fbfdfc 100%); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-sm); color: var(--ink-soft); text-align: center; }
 @media (min-width: 860px) { .search-row { grid-template-columns: 1.4fr .8fr .8fr auto; align-items: end; } }
