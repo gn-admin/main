@@ -29,7 +29,8 @@
     sections: {
       historias:      { mode: 'real' },
       gatos:          { mode: 'real' },
-      perros:         { mode: 'real' },
+            perros:          { mode: 'real' },
+      otros:           { mode: 'fake' },
       acogidas:       { mode: 'real' },
       adoptados:      { mode: 'real' },
       casosExternos:  { mode: 'real' },

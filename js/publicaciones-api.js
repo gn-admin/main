@@ -42,6 +42,11 @@ var PublicacionesAPI = (function () {
       categories: ['Perros en adopción'],
       query: { endpoint: 'animales-publicos', species: 'perro', status: 'en_adopcion' }
     },
+    otros: {
+      scope: 'category',
+      categories: ['Otros en adopción', 'Otros'],
+      query: { endpoint: 'animales-publicos', status: 'en_adopcion' }
+    },
     acogidas: {
       scope: 'category',
       categories: ['Acogida', 'Acogidas'],
@@ -80,7 +85,7 @@ var PublicacionesAPI = (function () {
 
   // Categorías que el índice de historias nunca muestra (espejo de
   // blog-render-index.js): su feed es el resto editorial.
-  var HISTORIAS_EXCLUDED = ['Acogida', 'Acogidas', 'Gatos en adopción', 'Perros en adopción', 'SC'];
+  var HISTORIAS_EXCLUDED = ['Acogida', 'Acogidas', 'Gatos en adopción', 'Perros en adopción', 'Otros en adopción', 'Otros', 'SC'];
 
   var fake = null;          // { site, posts }
   var fakePending = null;
