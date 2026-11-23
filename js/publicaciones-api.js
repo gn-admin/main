@@ -554,14 +554,21 @@ var PublicacionesAPI = (function () {
     if (pending) return pending;
     if (staticMode()) {
       pending = loadFake().then(function () {
-        return loadStatic().catch(function () { return null; });
-      }).then(function () {
+        return loadStatic().then(function () { return true; }).catch(function () { return false; });
+      }).then(function (staticOk) {
         var allSections = realSections();
-        var state = {};
-        allSections.forEach(function (section) {
-          state[section] = { mode: 'real', served: !!realServed[section] };
+        // Si el JSON estático no está disponible, se pide el catálogo al canal
+        // (GAS) sección a sección, igual que en el modo real.
+        var byChannel = staticOk ? Promise.resolve() : Promise.all(allSections.map(function (section) {
+          return loadRealSection(section).catch(function () { return []; });
+        }));
+        return byChannel.then(function () {
+          var state = {};
+          allSections.forEach(function (section) {
+            state[section] = { mode: 'real', served: !!realServed[section] };
+          });
+          return { site: fake.site, posts: mergedPosts(), sections: state };
         });
-        return { site: fake.site, posts: mergedPosts(), sections: state };
       }).then(function (result) {
         loaded = result;
         pending = null;
@@ -616,7 +623,24 @@ var PublicacionesAPI = (function () {
       return load().then(function () {
         var post = getPostBySlug(wanted) || localPostBySlug(wanted);
         if (post) return { post: post };
-        return { post: null, notFound: true };
+        // El slug puede ser nuevo y no estar aún en el JSON estático: se
+        // pregunta al canal (GAS) antes de dar la ficha por inexistente.
+        var api = cliente();
+        if (!api) return { post: null, notFound: true };
+        return api.ficha(wanted).then(function (res) {
+          if (res && res.status === 'gone') return { post: null, gone: true, message: res.error || '' };
+          if (!res || res.status !== 'success') {
+            return { post: null, notFound: true, message: (res && res.error) || '' };
+          }
+          var found = normalizePost(res.data, { canal: true });
+          if (found && found.slug) {
+            found.url = 'post/?slug=' + encodeURIComponent(found.slug);
+            realBySlug[found.slug] = 'detalle';
+          }
+          return { post: found, redirect: res.redirect || null };
+        }).catch(function () {
+          return { post: null, notFound: true };
+        });
       });
     }
     var api = detalleReal() ? cliente() : null;

@@ -65,54 +65,60 @@
     var scope = root || (typeof document !== 'undefined' ? document : null);
     if (!scope || !scope.querySelectorAll) return;
     function copyLink(url, btn) {
-      var settled = false;
-      var finish = function (fn) { if (settled) return; settled = true; fn(); };
+      var original = btn.textContent || 'Compartir';
       var done = function () {
-        var prev = btn.textContent;
         btn.textContent = 'Copiado';
-        setTimeout(function () { btn.textContent = prev || 'Compartir'; }, 2000);
+        setTimeout(function () { btn.textContent = original; }, 2000);
       };
-      var manual = function () {
-        var ta = document.createElement('textarea');
-        ta.value = url;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        var ok = false;
-        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-        document.body.removeChild(ta);
-        if (ok) done();
-        else window.prompt('Copia el enlace:', url);
+      var showFallback = function () {
+        btn.textContent = 'Enlace listo';
+        setTimeout(function () { btn.textContent = original; }, 3000);
+        if (document.querySelector('.post-share-fallback')) return;
+        var box = document.createElement('div');
+        box.className = 'post-share-fallback';
+        box.setAttribute('role', 'status');
+        box.innerHTML = '<p>No se pudo copiar automáticamente. Copia este enlace:</p>';
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.readOnly = true;
+        input.value = url;
+        box.appendChild(input);
+        document.body.appendChild(box);
+        try { input.focus(); input.select(); } catch (e) {}
       };
-      if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        var timer = setTimeout(function () { finish(manual); }, 900);
-        navigator.clipboard.writeText(url).then(function () {
-          clearTimeout(timer);
-          finish(done);
-        }).catch(function () {
-          clearTimeout(timer);
-          finish(manual);
-        });
-      } else {
-        manual();
-      }
-    }
-    var buttons = scope.querySelectorAll('.post-share-btn');
-    Array.prototype.forEach.call(buttons, function (btn) {
-      if (btn.__shareInit) return;
-      btn.__shareInit = true;
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        var url = (typeof window !== 'undefined' && window.location) ? window.location.href : '';
-        var title = btn.getAttribute('data-title') || (typeof document !== 'undefined' ? document.title : '');
-        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-          navigator.share({ title: title, url: url }).catch(function () { copyLink(url, btn); });
+      // Feedback inmediato: el portapapeles puede tardar o quedar pendiente.
+      btn.textContent = 'Copiando…';
+      var attempt = function () {
+        // Solo Clipboard API: execCommand puede abrir un permiso que bloquea
+        // el hilo y deja el botón sin respuesta. Si no responde, mostramos el enlace.
+        if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          var timer = setTimeout(showFallback, 900);
+          navigator.clipboard.writeText(url).then(function () {
+            clearTimeout(timer);
+            done();
+          }).catch(function () {
+            clearTimeout(timer);
+            showFallback();
+          });
         } else {
-          copyLink(url, btn);
+          showFallback();
         }
-      });
+      };
+      setTimeout(attempt, 0);
+    }
+    if (!scope.addEventListener || scope.__shareInit) return;
+    scope.__shareInit = true;
+    scope.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('.post-share-btn') : null;
+      if (!btn) return;
+      e.preventDefault();
+      var url = (typeof window !== 'undefined' && window.location) ? window.location.href : '';
+      var title = btn.getAttribute('data-title') || (typeof document !== 'undefined' ? document.title : '');
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        navigator.share({ title: title, url: url }).catch(function () { copyLink(url, btn); });
+      } else {
+        copyLink(url, btn);
+      }
     });
   }
 
