@@ -140,6 +140,10 @@
       else if (secciones.indexOf(s) === -1) secciones.push(s);
     });
     api.load(faltaSeccion ? undefined : secciones).then(function(){
+      // Pequeño retraso para que el card "Cargando datos" sea visible
+      // aunque el endpoint responda rápido (mejor UX).
+      return new Promise(function (resolve) { setTimeout(resolve, 450); });
+    }).then(function(){
       var posts = api.getAllPosts();
       containers.forEach(function(root){
         var cat = root.getAttribute('data-adoption-list');

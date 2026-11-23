@@ -28,7 +28,7 @@ const PAGINAS_FIJAS = [
   'gatos-en-adopcion/',
   'perros-en-adopcion/',
   'historias/',
-  'sobre-nosotros/',
+  'sobre-nebak/',
   'adopciones/',
   'protocolo/',
   'contacto/'
