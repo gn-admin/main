@@ -34,6 +34,8 @@
 
   function formErrorMessage(err) {
     try { console.warn('[NebakForms] no se pudo enviar el formulario', err); } catch (_) {}
+    var transport = window.NebakFormsTransport;
+    if (transport && typeof transport.errorMessage === 'function') return transport.errorMessage(err);
     return 'No se ha podido enviar el formulario. Inténtalo de nuevo en unos segundos o escríbenos a nebakadopciones@gmail.com.';
   }
 

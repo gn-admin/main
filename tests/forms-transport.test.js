@@ -136,6 +136,35 @@ test('el límite se libera al pasar la ventana y al reiniciar', async () => {
   assert.equal(transporte.rateLimitStatus().used, 0);
 });
 
+test('cada bloqueo tiene su mensaje específico', () => {
+  assert.match(transporte.errorMessage({ reason: 'honeypot' }), /parece automático/i);
+  const limite = transporte.errorMessage({ reason: 'rate-limit' });
+  assert.match(limite, /límite de 5 envíos/i);
+  assert.match(limite, /nebakadopciones@gmail\.com/);
+  assert.match(transporte.errorMessage(new Error('otro')), /No se ha podido enviar el formulario/);
+  assert.match(transporte.errorMessage(null), /No se ha podido enviar el formulario/);
+});
+
+test('send rechaza con el mensaje específico de cada bloqueo', async () => {
+  transporte.resetRateLimit();
+  const honeypot = await transporte.send({ form_type: 'contacto-general', website: 'spam' }).then(
+    () => null,
+    (err) => ({ reason: err.reason, message: err.message })
+  );
+  assert.equal(honeypot.reason, 'honeypot');
+  assert.equal(honeypot.message, transporte.errorMessage({ reason: 'honeypot' }));
+
+  for (let i = 0; i < 5; i++) transporte.recordSend();
+  const limite = await transporte.send({ form_type: 'contacto-general' }).then(
+    () => null,
+    (err) => ({ reason: err.reason, message: err.message, retryAfterMs: err.retryAfterMs })
+  );
+  assert.equal(limite.reason, 'rate-limit');
+  assert.equal(limite.message, transporte.errorMessage({ reason: 'rate-limit' }));
+  assert.ok(limite.retryAfterMs > 0);
+  transporte.resetRateLimit();
+});
+
 test('el honeypot no viaja en los parámetros de la plantilla ni en detalle', () => {
   const params = transporte.templateParams(transporte.buildPayload({
     form_type: 'contacto-general',

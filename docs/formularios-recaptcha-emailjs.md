@@ -140,6 +140,19 @@ La plantilla permite *Test it* con valores de ejemplo: usar `{{nombre}} = Ana`, 
 
 ## 6. Puesta en marcha (checklist)
 
+### Dónde sale cada credencial
+
+| Credencial | Dónde se obtiene | Dónde se usa |
+|---|---|---|
+| EmailJS **public key** | EmailJS → **Account** → *General / API Keys* | `emailjs.publicKey`; es pública y viaja al navegador |
+| EmailJS **service ID** | EmailJS → **Email Services** → servicio de Gmail conectado | `emailjs.serviceId` (`service_k6jkxaq`) |
+| EmailJS **template ID** | EmailJS → **Email Templates** → abrir la plantilla | `emailjs.defaultTemplate` (`tpl_contacto_general`) |
+| reCAPTCHA **site key** | Cloud → **reCAPTCHA** (`grupo-nebak`) → clave → **Key ID** | `recaptcha.siteKey`; es pública |
+| reCAPTCHA **secret** | Cloud → clave → pestaña **Integration** → **Use legacy key** | Solo EmailJS → plantilla → **Settings**; nunca en el repo |
+| **Buzón destino** | — | `mail.toEmail` y *To Email* de la plantilla (`{{to_email}}`) |
+
+La secret no se copia a `js/forms-config.js`, tests, documentación ni capturas. Si alguna vez se filtra, el procedimiento está en [`docs/rotacion-recaptcha.md`](rotacion-recaptcha.md).
+
 1. EmailJS → **Email Services** → conectar Gmail (`nebakadopciones@gmail.com`) y copiar el `serviceId`.
 2. EmailJS → **Email Templates** → crear **una** plantilla con el asunto y HTML de [`docs/plantillas-emailjs.md`](plantillas-emailjs.md) y copiar el ID automático (`template_xxxxxxx`).
 3. En la plantilla → *Settings* → marcar **Enable reCAPTCHA V2 verification** y pegar la **secret key** de reCAPTCHA (la site key va en `js/forms-config.js`; la secret no debe estar en el repo).
@@ -187,4 +200,6 @@ window.NEBAK_FORMS_CONFIG = {
 - `tests/forms-transport.test.js`: honeypot (bloqueo, inyección única y por documento) y límite de 5 envíos por sesión, con liberación al caducar la ventana.
 - `tests/busqueda-chat.test.js`: buscador del chat con fichas sintéticas (especie, sinónimos, filtros, estados, límite y sin resultados) y con `data/publicaciones.json`.
 - `tests/publicaciones-api.test.js`: 16/16 y `tests/prerender.test.js --dry`: 30/30 en verde.
-- Envío probado en modo simulado (sin configuración): devuelve `{simulated: true}` y no hace peticiones. **No** se ha probado un envío real: faltan el `serviceId`, el ID de la plantilla y la site key de reCAPTCHA.
+- Envío probado en modo simulado (sin configuración): devuelve `{simulated: true}` y no hace peticiones.
+- Envío real (23/11/2026): reCAPTCHA v2 se carga correctamente en `gn-admin.github.io`; EmailJS rechazó con `400 The service ID not found` al estar mal el `serviceId`. Corregido a `service_k6jkxaq`, pendiente de repetir la prueba.
+- **Rotación de claves:** ver [`docs/rotacion-recaptcha.md`](rotacion-recaptcha.md).

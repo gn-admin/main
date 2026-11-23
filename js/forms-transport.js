@@ -28,6 +28,12 @@ var NebakFormsTransport = (function () {
   var RATE_KEY = 'nebak_forms_sent';
   var memoriaEnvios = [];
 
+  var ERROR_MESSAGES = {
+    honeypot: 'No hemos podido validar el envío: parece automático. Recarga la página e inténtalo de nuevo o escríbenos a nebakadopciones@gmail.com.',
+    'rate-limit': 'Has alcanzado el límite de 5 envíos en esta sesión. Espera unos minutos o escríbenos a nebakadopciones@gmail.com.',
+    generic: 'No se ha podido enviar el formulario. Inténtalo de nuevo en unos segundos o escríbenos a nebakadopciones@gmail.com.'
+  };
+
   var TYPE_ALIASES = {
     adopt: 'adopcion-animal',
     adopcion: 'adopcion-animal',
@@ -141,11 +147,14 @@ var NebakFormsTransport = (function () {
     return value != null && String(value).trim() !== '';
   }
 
+  function errorMessage(err) {
+    return (err && err.reason && ERROR_MESSAGES[err.reason]) || ERROR_MESSAGES.generic;
+  }
+
   function blockedError(reason) {
-    var err = new Error(reason === 'honeypot'
-      ? 'Envío bloqueado por el filtro anti-spam.'
-      : 'Has alcanzado el límite de envíos de esta sesión. Inténtalo más tarde o escríbenos por email.');
+    var err = new Error(ERROR_MESSAGES[reason] || ERROR_MESSAGES.generic);
     err.reason = reason;
+    if (reason === 'rate-limit') err.retryAfterMs = rateLimitStatus().retryAfterMs;
     return err;
   }
 
@@ -382,6 +391,7 @@ var NebakFormsTransport = (function () {
     templateId: templateId,
     isActive: isActive,
     normalizeType: normalizeType,
+    errorMessage: errorMessage,
     installHoneypots: installHoneypots,
     rateLimit: RATE_LIMIT,
     rateLimitStatus: rateLimitStatus,

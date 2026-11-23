@@ -24,7 +24,7 @@ window.NEBAK_FORMS_CONFIG = {
   emailjs: {
     // Clave pública de la cuenta (segura en cliente; no es la private key).
     publicKey: 'kvMkVgkUCHek0kvc7',
-    serviceId: 'swpszlk',
+    serviceId: 'service_k6jkxaq',
     // Una sola plantilla para todos los tipos (plan gratuito: 2 plantillas).
     // Si algún tipo necesita formato o destinatario propio, se rellena aquí
     // su ID y `templateId()` prioriza esa entrada sobre `defaultTemplate`.
