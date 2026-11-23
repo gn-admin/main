@@ -1,35 +1,22 @@
-# Pendientes para dejar `main` al 100%
+# Pendientes para dejar `main` al 100% — todas las fases cerradas
 
-## Estado actual (2026-11-23)
-
-- Repositorio `main`: sitio publicado en GitHub Pages.
-- Documentación técnica consolidada en `docs/DOCUMENTACION.md`.
-- Análisis detallado en `docs/analisis-endpoint-seo-formularios-cookies-main.md`.
-- Gate P0 del gestor ejecutado dos veces en producción: **28 PASS · 0 WARN · 1 SKIP · 0 FAIL**.
-- Evidencias locales del gestor: `test-results/contract-after.json`, `test-results/contract-after-2.json`, `test-results/columnas.json`.
-- Fixture temporal **retirado**: `caso-externo-gate` ya no aparece en el listado público; queda lápida 410 `noindex`, fuera del sitemap.
-
-## Gate de contrato: cerrado
-
-1. [x] Token de admin de prueba usado solo en la ejecución; no guardado en el repositorio.
-2. [x] `EXPECTED_BACKEND_VERSION=2026-11-15.7`.
-3. [x] `test-results/columnas.json` verificado por API: `WebPublicaciones` por round-trip de escritura/lectura y `Animales` por cabeceras reales tras añadir las columnas aditivas.
-4. [x] Historia `caso-externo-gate` publicada con categoría exacta `Caso externo`.
-5. [x] `CONTRACT_RETIRED_SLUG=demo-lua`.
-6. [x] `P0-09b` aceptado como `SKIP` en demo; se valida al definir el dominio final.
-7. [x] Gate ejecutado dos veces sin WARN.
-8. [x] UI de producción a 360/768/1280 sin overflow; roles `consulta` y revocado con 403 lógico.
-
-## Pendiente real
+> Última actualización: 2026-11-23. Todas las fases del port de `main` están implementadas y verificadas con fixtures locales. Queda solo el despliegue operativo del lote `.gs` en el backend (ver § Pendiente operativo).
 
 1. [x] Fixture `caso-externo-gate` retirado y actualizado en `main` (lápida 410, `noindex`, fuera del sitemap).
 2. [x] Media/Drive y ciclo publicar/ocultar/retirar/restaurar verificados en producción; el primer cambio disparó deploy y el resto se agrupó en cola.
 3. [x] Datos estáticos de `main` regenerados con el canal público (8 publicaciones, incluida `caso-externo-gate`).
 4. [x] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público. `acogidas` ahora consulta `publicaciones&status=en_acogida` (incluye `animal_grupo` sin duplicar); `animales-publicos` conserva `type=animal`. Test añadido en `tests/publicaciones-api.test.js`.
-5. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
-6. [ ] Verificar que el cliente lea JSON local y use GAS solo como fallback.
-7. [ ] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS.
-8. [ ] Revisar sitemap/SEO cuando se defina el dominio final.
+5. [x] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy. El workflow `.github/workflows/pages.yml` ya ejecuta `node scripts/exportar-datos.js --soft` (línea 39) antes del prerender. Verificado con `--dry --fixture`: 7 publicaciones, sin errores.
+6. [x] Verificar que el cliente lea JSON local y use GAS solo como fallback. `js/data-source.js` tiene `staticMode: true`; `publicaciones-api.js` lee `data/publicaciones.json` primero (`loadStatic`) y cae al canal solo si falla (`loadRealSection`). Prerender y check-links verificados con fixtures.
+7. [x] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS. `main` no tiene service worker propio; el cliente usa `cache: 'no-store'` y el canal de GAS gestiona su propia caché (~60 s con invalidación por versión al guardar). No hay SW que invalidar.
+8. [x] Revisar sitemap/SEO con el dominio final `https://gn-admin.github.io/main`. `sitemap.xml` y `robots.txt` existen en la raíz y `scripts/prerender.js` los regenera en cada deploy (F3). El dominio ya está configurado en `SITE_URL` del workflow y en `prerender.js` (`SITE_POR_DEFECTO`). `check-links.js`: 45 HTML sin enlaces rotos.
+
+## Pendiente operativo (backend GAS, fuera de este repo)
+
+- Subir `WebPublicaciones.gs` + `Code.gs` a GAS (lote del canal ya desplegado en admin-dashboard).
+- Configurar propiedades del script: `GITHUB_DEPLOY_REPO_MAIN=gn-admin/main`, `GITHUB_DEPLOY_WORKFLOW_MAIN=pages.yml`.
+- Verificar disparo E2E: publicar en el gestor → run de `pages.yml` en `main` en < 5 min.
+- Confirmar que `main` es la única canónica indexable (sitemap de `main` sin URLs de `admin-dashboard`).
 
 ## Decisión R1 ya fijada
 
