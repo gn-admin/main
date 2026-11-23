@@ -201,5 +201,6 @@ window.NEBAK_FORMS_CONFIG = {
 - `tests/busqueda-chat.test.js`: buscador del chat con fichas sintéticas (especie, sinónimos, filtros, estados, límite y sin resultados) y con `data/publicaciones.json`.
 - `tests/publicaciones-api.test.js`: 16/16 y `tests/prerender.test.js --dry`: 30/30 en verde.
 - Envío probado en modo simulado (sin configuración): devuelve `{simulated: true}` y no hace peticiones.
-- Envío real (23/11/2026): reCAPTCHA v2 se carga correctamente en `gn-admin.github.io`; EmailJS rechazó con `400 The service ID not found` al estar mal el `serviceId`. Corregido a `service_k6jkxaq`, pendiente de repetir la prueba.
+- Envío real (23/11/2026): aceptado por EmailJS con `POST /api/v1.0/email/send` → **200** desde `gn-admin.github.io/main/contacto/`. Asunto `[Web] Contacto general · Prueba Codebuff`, Reply-To `prueba.codebuff@example.com`. Pendiente de confirmar la recepción en el buzón.
+- Los bloqueos por honeypot y por límite de sesión muestran su mensaje específico en el formulario; verificado en navegador además de en los tests.
 - **Rotación de claves:** ver [`docs/rotacion-recaptcha.md`](rotacion-recaptcha.md).

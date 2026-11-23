@@ -22,8 +22,8 @@
 | Site key en producción | `6Lf_hiEuAAAAAIPhzqJgNuXEJmO7Rghx6ZTMduI5` (v2) |
 | Dominios autorizados | `gn-admin.github.io` funciona; `localhost` y `127.0.0.1` **no** están autorizados |
 | Secret en EmailJS | Pegada en plantilla → Settings |
-| Service ID de EmailJS | `service_k6jkxaq` (corregido el 23/11/2026; antes `swpszlk` daba `400 The service ID not found`) |
-| Template ID | `tpl_contacto_general` (pendiente de validar con un envío real) |
+| Service ID de EmailJS | `service_k6jkxaq` (validado el 23/11/2026 con un envío real) |
+| Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200) |
 
 El error de dominio local se comprobó abriendo el iframe de reCAPTCHA: *«El host local no está en la lista de dominios admitidos para esta clave del sitio web»*. En `gn-admin.github.io` el reto se carga sin ese error.
 
