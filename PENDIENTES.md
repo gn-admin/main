@@ -24,7 +24,7 @@
 
 1. [ ] Retirar el fixture `caso-externo-gate` cuando ya no haga falta para reproducir `P0-07`.
 2. [ ] Revisar media/Drive (`P0-09`) y deploy/estática (`P0-10`) en la interfaz real.
-3. [ ] Actualizar los datos estáticos de `main` tras el gate.
+3. [x] Datos estáticos de `main` regenerados con el canal público (8 publicaciones, incluida `caso-externo-gate`).
 4. [ ] Consumir el puente R1 (`publicaciones&status=en_acogida`) sin cambiar el contrato público.
 5. [ ] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy.
 6. [ ] Verificar que el cliente lea JSON local y use GAS solo como fallback.

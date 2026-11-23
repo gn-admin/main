@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T11:55:38.511Z",
+  "generatedAt": "2026-11-23T15:14:47.613Z",
   "source": "gas-canal",
   "site": {
     "name": "Grupo Nebak",
@@ -100,6 +100,50 @@
         "monthlyEur": null,
         "notes": ""
       }
+    },
+    {
+      "id": "web_cf0ff4c8-3455-4bf3-b06d-3e8db00cc517",
+      "slug": "caso-externo-gate",
+      "type": "historia",
+      "category": "Caso externo",
+      "status": "publicado",
+      "title": "Caso externo — prueba de contrato",
+      "excerpt": "Publicación temporal para verificar el filtro de Caso externo del gate P0.",
+      "publishedAt": "2026-11-23T14:52:30.181Z",
+      "updatedAt": "2026-11-23T15:12:31.449Z",
+      "coverImage": {
+        "src": "https://gn-admin.github.io/main/assets/images/about-dog.jpg",
+        "alt": "Caso externo de prueba"
+      },
+      "contentHtml": "<p>Publicación temporal creada para verificar el filtro de categoría Caso externo del gate de contrato. Se retirará al cerrar la verificación.</p>",
+      "author": "Equipo técnico",
+      "tags": [
+        "prueba",
+        "gate"
+      ],
+      "icons": [],
+      "gallery": [],
+      "videos": [],
+      "featured": false,
+      "orden": 0,
+      "listed": true,
+      "url": "/historias/caso-externo-gate",
+      "canonical": "",
+      "urgent": false,
+      "isGroup": false,
+      "seo": {
+        "metaTitle": "Caso externo — prueba de contrato",
+        "metaDescription": "Publicación temporal para verificar el filtro de Caso externo del gate P0.",
+        "ogImage": "https://gn-admin.github.io/main/assets/images/about-dog.jpg",
+        "canonical": "",
+        "robots": "index,follow",
+        "og": null,
+        "twitter": null
+      },
+      "image": "https://gn-admin.github.io/main/assets/images/about-dog.jpg",
+      "imageAlt": "Caso externo de prueba",
+      "dateFormatted": "23 de noviembre de 2026",
+      "readTime": 1
     },
     {
       "id": "web_1f23975c-207e-47fc-8831-b4e581128212",
@@ -607,6 +651,6 @@
     "page": 1,
     "pageSize": 24,
     "totalPages": 1,
-    "total": 7
+    "total": 8
   }
 }

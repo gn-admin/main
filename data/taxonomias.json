@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T11:55:44.004Z",
+  "generatedAt": "2026-11-23T15:14:55.318Z",
   "source": "gas-canal",
   "status": "success",
   "data": {
@@ -13,7 +13,8 @@
       "Perros en adopción",
       "Gatos en adopción",
       "Eventos",
-      "Historias"
+      "Historias",
+      "Caso externo"
     ],
     "status": [
       "en_adopcion",
