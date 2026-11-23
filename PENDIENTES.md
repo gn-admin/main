@@ -7,7 +7,7 @@
 - Análisis detallado en `docs/analisis-endpoint-seo-formularios-cookies-main.md`.
 - Gate P0 del gestor ejecutado dos veces en producción: **28 PASS · 0 WARN · 1 SKIP · 0 FAIL**.
 - Evidencias locales del gestor: `test-results/contract-after.json`, `test-results/contract-after-2.json`, `test-results/columnas.json`.
-- Fixture temporal publicado: `caso-externo-gate` (historia, categoría exacta `Caso externo`).
+- Fixture temporal publicado: `caso-externo-gate` (historia, categoría exacta `Caso externo`, indexable para que `main` genere su página estática).
 
 ## Gate de contrato: cerrado
 
