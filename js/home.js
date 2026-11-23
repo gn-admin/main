@@ -6,6 +6,17 @@
   }
   function escAttr(v) { return esc(v); }
 
+  function animalName(post) {
+    if (post && post.animal && Array.isArray(post.animal.names) && post.animal.names.length) {
+      return post.animal.names.join(' & ');
+    }
+    var t = (post && post.title) || '';
+    // Algunos títulos del canal incluyen descripción tras la coma
+    // ("Nube, mestizo de 2 años"); en la marquesina solo el nombre.
+    if (t.indexOf(',') !== -1) t = t.split(',')[0];
+    return String(t).trim();
+  }
+
   function animalIcon(post) {
     var species = '';
     if (post && post.animal && post.animal.species) species = post.animal.species;
@@ -119,7 +130,7 @@
       // Marquee: only names + icon
       if (marquee) {
         var chips = animals.map(function (p) {
-          return '<span class="chip"><span class="chip-dot"></span>' + animalIcon(p) + ' ' + esc(p.title) + '</span>';
+          return '<span class="chip"><span class="chip-dot"></span>' + animalIcon(p) + ' ' + esc(animalName(p)) + '</span>';
         });
         // duplicate for seamless loop
         marquee.innerHTML = chips.concat(chips).join('');
