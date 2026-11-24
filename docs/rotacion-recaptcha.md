@@ -24,7 +24,7 @@
 | Secret en EmailJS | Pegada en plantilla → Settings |
 | Service ID de EmailJS | `service_k6jkxaq` (validado el 23/11/2026 con un envío real) |
 | Template ID | `tpl_contacto_general` (validado el 23/11/2026: EmailJS respondió 200 en dos envíos reales) |
-| Versiones desplegadas | `forms-config.js?v=4`, `forms-transport.js?v=4`, `main.js?v=12` |
+| Versiones desplegadas | `forms-config.js?v=4`, `forms-transport.js?v=4`, `main.js?v=13`, `busqueda-publicaciones.js?v=2`, `main.css?v=5` |
 
 El error de dominio local se comprobó abriendo el iframe de reCAPTCHA: *«El host local no está en la lista de dominios admitidos para esta clave del sitio web»*. En `gn-admin.github.io` el reto se carga sin ese error.
 
@@ -78,7 +78,7 @@ La secret filtrada no permite enviar correos (EmailJS guarda su copia) ni fabric
 
 1. Cambiar `recaptcha.siteKey` en `js/forms-config.js`.
 2. Adaptar `recaptchaToken()` en `js/forms-transport.js` al widget Checkbox (render visible en el formulario y lectura del token al enviar).
-3. Subir `forms-config.js?v=5` y `forms-transport.js?v=5` en las páginas: hoy están en `v=4`, y el número debe incrementarse para saltar la caché. Si también cambia `js/main.js`, subir su versión (hoy `v=12`).
+3. Subir `forms-config.js?v=5` y `forms-transport.js?v=5` en las páginas: hoy están en `v=4`, y el número debe incrementarse para saltar la caché. Si también cambia `js/main.js`, subir su versión (hoy `v=13`).
 4. Actualizar `SITE_KEY_PUBLICA` en `tests/plantillas-emailjs.test.js`: el test falla si `siteKey` no es la clave pública.
 5. Ejecutar `node tests/forms-transport.test.js` y `node tests/plantillas-emailjs.test.js`.
 6. Probar en local: requiere que `localhost` esté en la lista de dominios y que el service ID de EmailJS sea correcto.

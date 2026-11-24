@@ -27,4 +27,5 @@ Este repositorio contiene la **versión publicada** del sitio web de Grupo Nebak
 
 - `docs/DOCUMENTACION.md`: documentación técnica consolidada.
 - `docs/analisis-endpoint-seo-formularios-cookies-main.md`: análisis detallado.
+- `docs/auditoria-chat-formularios.md`: auditoría del asistente, formularios y búsqueda.
 - `PENDIENTES.md`: checklist de lo que falta para dejar `main` al 100%.

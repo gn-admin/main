@@ -8,10 +8,12 @@
  * carácter, ubicación o tipo de publicación.
  *
  * API:
- *   window.NebakBusqueda.buscar(posts, consulta, filtro)
- *     -> [{ post, score, tipo, etiqueta }]  (máximo 8, mejor puntuación primero)
+ *   window.NebakBusqueda.buscar(posts, consulta, filtro, limite)
+ *     -> [{ post, score, tipo, etiqueta }]  (mejor puntuación primero; 8 por defecto)
  *   filtro: '' | 'animales' | 'eventos' | 'historias' | 'acogida' |
  *           'adopcion' | 'gatos' | 'perros'
+ *   Una consulta con texto pero sin palabras útiles (solo artículos,
+ *   preposiciones o palabras de una letra) devuelve [] en vez del catálogo.
  *   window.NebakBusqueda.tipo(post)     -> 'animal' | 'evento' | 'historia'
  *   window.NebakBusqueda.etiqueta(post) -> 'En adopción' | 'En acogida' | ...
  */
@@ -250,7 +252,7 @@
     }
   }
 
-  function buscar(posts, consulta, filtro) {
+  function buscar(posts, consulta, filtro, limite) {
     var speciesWanted = {};
     normalizar(consulta).split(' ').forEach(function (word) {
       if (SPECIES_FOR_WORD[word]) speciesWanted[SPECIES_FOR_WORD[word]] = 1;
@@ -263,9 +265,13 @@
       return true;
     });
     var groups = queryGroups(consulta);
-    var limit = 8;
+    var pedido = Number(limite);
+    var limit = isFinite(pedido) && pedido > 0 ? Math.min(50, Math.floor(pedido)) : 8;
 
     if (!groups.length) {
+      // Sin consulta se listan los primeros; con consulta pero sin palabras
+      // útiles no tiene sentido devolver un catálogo arbitrario.
+      if (normalizar(consulta)) return [];
       return pool.slice(0, limit).map(function (post) {
         return { post: post, score: 0, tipo: tipo(post), etiqueta: etiqueta(post) };
       });

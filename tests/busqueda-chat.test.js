@@ -115,6 +115,28 @@ test('sin coincidencias devuelve vacío y sin consulta limita a 8', () => {
   assert.equal(busqueda.buscar(muchos, 'gato').length, 8);
 });
 
+test('una consulta sin palabras útiles no devuelve el catálogo', () => {
+  assert.deepEqual(busqueda.buscar(FIXTURE, 'de la'), []);
+  assert.deepEqual(busqueda.buscar(FIXTURE, 'quiero'), []);
+  assert.deepEqual(busqueda.buscar(FIXTURE, 'a'), []);
+  // Sin consulta sí se listan fichas (comportamiento del inicio del chat).
+  assert.ok(busqueda.buscar(FIXTURE, '').length > 0);
+});
+
+test('el límite es configurable y el filtro se combina con la consulta', () => {
+  const muchos = Array.from({ length: 12 }, (_, i) => ficha({
+    slug: 'gato-' + i,
+    title: 'Gato ' + i,
+    animal: { species: 'gato', names: ['Gato ' + i] }
+  }));
+  assert.equal(busqueda.buscar(muchos, '', '', 3).length, 3);
+  assert.equal(busqueda.buscar(muchos, 'gato', 'gatos', 5).length, 5);
+
+  assert.deepEqual(slugs(busqueda.buscar(FIXTURE, 'trufa', 'gatos')), ['gata-trufa']);
+  assert.deepEqual(busqueda.buscar(FIXTURE, 'trufa', 'perros'), []);
+  assert.deepEqual(busqueda.buscar(FIXTURE, 'nube', 'gatos'), []);
+});
+
 test('datos reales: gatos y eventos del catálogo', () => {
   const canal = require('../data/publicaciones.json').posts;
   const gatos = busqueda.buscar(canal, 'gato');

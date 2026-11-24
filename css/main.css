@@ -305,6 +305,7 @@ input:focus, textarea:focus { border-color: var(--brand); outline: none; box-sha
 .form-note { font-size: .9rem; color: var(--muted); }
 .form-success { display: none; margin-top: .25rem; padding: .85rem 1rem; border-radius: 14px; background: var(--brand-soft); color: #0f5132; border: 1px solid #cfead9; }
 .form-success.show { display: block; }
+.form-success.is-error { background: #fdecec; color: #8a1c1c; border-color: #f3c2c2; }
 
 /* Map */
 .map-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-sm); background: #e8f0ea; margin-top: 1rem; }
@@ -599,6 +600,11 @@ body.has-cookie .chat-widget { bottom: 6.5rem; }
 .chat-quick { display: flex; flex-wrap: wrap; gap: .4rem; }
 .chat-quick button { border: 1px solid #d8eadf; background: #fff; color: var(--brand-deep); border-radius: 999px; padding: .42rem .7rem; font-size: .85rem; cursor: pointer; }
 .chat-quick button:hover { background: var(--brand-softer); }
+.chat-quick button.is-active { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+.chat-filters { margin: .15rem 0 .25rem; }
+.chat-form-error { border-color: #f3c2c2; }
+.chat-form-error.is-error { background: #fdecec; color: #8a1c1c; }
+.chat-panel :focus-visible { outline: 3px solid rgba(31, 191, 91, .45); outline-offset: 2px; }
 .chat-opts { display: grid; gap: .45rem; }
 .chat-opt { text-align: left; border: 1px solid var(--border); background: #fff; border-radius: 14px; padding: .7rem .8rem; cursor: pointer; color: var(--ink); font-weight: 500; display:flex; justify-content:space-between; gap:.5rem; }
 .chat-opt::after { content:"→"; color: var(--muted); }
