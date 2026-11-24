@@ -788,20 +788,22 @@
       var wantsForm = /\b(formulario|solicitud|rellenar|inscrib|apuntarme|apuntar)\b/.test(t);
       var wantsTo = /(quiero|me gustaria|me interesa|necesito)\s+(adoptar|acoger|ser voluntari|ser socio|ser socia|colaborar|donar|hacerme socio)/.test(t);
 
-      if (/adop/.test(t) && (wantsForm || wantsTo)) { formAdopt(raw); return; }
-      if (/acog/.test(t) && (wantsForm || wantsTo)) { formAcoge(raw); return; }
-      if (/(volunt|colabor)/.test(t) && (wantsForm || wantsTo)) { formVol(raw); return; }
-      if (/\b(socio|socia|socios|socias)\b/.test(t) && (wantsForm || wantsTo)) { formSocio(raw); return; }
-      if (/\b(donar|donacion|donaciones|donativo|donativos|teaming|bizum|material|cuota)\b/.test(t) && (wantsForm || wantsTo)) { formDonar(raw); return; }
+      if (/adop/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la solicitud de adopci\\u00f3n.', ''); formAdopt(raw); return; }
+      if (/acog/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la solicitud de acogida.', ''); formAcoge(raw); return; }
+      if (/(volunt|colabor)/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro el formulario de voluntariado.', ''); formVol(raw); return; }
+      if (/\b(socio|socia|socios|socias)\b/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro el formulario de socio/a.', ''); formSocio(raw); return; }
+      if (/\b(donar|donacion|donaciones|donativo|donativos|teaming|bizum|material|cuota)\b/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la consulta sobre donaciones.', ''); formDonar(raw); return; }
 
       // Palabra suelta de intención: atajo directo al formulario.
       if (t.split(/\s+/).filter(Boolean).length === 1) {
-        if (/^(adoptar|adopcion|adopciones)$/.test(t)) { formAdopt(raw); return; }
-        if (/^(acoger|acogida|acogidas)$/.test(t)) { formAcoge(raw); return; }
-        if (/^(voluntariado|voluntario|voluntaria)$/.test(t)) { formVol(raw); return; }
-        if (/^(donar|donacion|donaciones|teaming|bizum|material|cuota)$/.test(t)) { formDonar(); return; }
-        if (/^(socio|socia|socios|socias)$/.test(t)) { formSocio(); return; }
-        if (/^(contacto|contactar|escribir|consulta)$/.test(t)) { formContact(); return; }
+        if (/^(adoptar|adopcion|adopciones)$/.test(t)) { appendMsg('Te muestro los animales disponibles para adopcion. Si no encuentras el que buscas, puedo abrirte la solicitud.', ''); doSearch('', ''); return; }
+        if (/^(acoger|acogida|acogidas)$/.test(t)) { appendMsg('Estas son las fichas en acogida. Si quieres ofrecer acogida, te abro el formulario al final.', ''); doSearch('', 'acogida'); return; }
+        if (/^(voluntariado|voluntario|voluntaria)$/.test(t)) { appendMsg('El voluntariado nos ayuda en colonias, rescates, traslados y eventos. Te dejo el formulario por si quieres apuntarte:', ''); formVol(raw); return; }
+        if (/^(donar|donacion|donaciones|teaming|bizum|material|cuota)$/.test(t)) { appendMsg('Gracias por tu interes en colaborar. Te explico las opciones y te abro la consulta:', ''); formDonar(); return; }
+        if (/^(socio|socia|socios|socias)$/.test(t)) { appendMsg('Hacerte socio/a nos ayuda a seguir rescatando. Te dejo el formulario:', ''); formSocio(); return; }
+        if (/^(eventos)$/.test(t)) { appendMsg('Estos son los eventos y actividades proximos:', ''); doSearch('', 'eventos'); return; }
+        if (/^(historias)$/.test(t)) { appendMsg('Aqui tienes nuestras historias:', ''); doSearch('', 'historias'); return; }
+        if (/^(contacto|contactar|escribir|consulta)$/.test(t)) { appendMsg('Escribenos y te responderemos lo antes posible:', ''); formContact(); return; }
       }
 
       doSearch(raw, '');
