@@ -711,7 +711,11 @@
     function appendMsg(html, role) {
       var msg = document.createElement('div');
       msg.className = 'chat-msg' + (role === 'user' ? ' user' : '');
-      msg.innerHTML = html;
+      if (role !== 'user') {
+        msg.innerHTML = '<span class="chat-avatar-mini" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></span><span class="chat-msg-body">' + html + '</span>';
+      } else {
+        msg.innerHTML = html;
+      }
       _insertBeforeComposer(msg);
       try { body.scrollTop = body.scrollHeight; } catch (e) {}
       return msg;
@@ -732,7 +736,7 @@
       body.innerHTML = '';
       var welcome = document.createElement('div');
       welcome.className = 'chat-msg';
-      welcome.innerHTML = '<strong>Hola, soy Nebi 👋</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.';
+      welcome.innerHTML = '<span class="chat-avatar-mini" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></span><span class="chat-msg-body"><strong>Hola, soy Nebi \ud83d\udc4b</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.</span>';
       body.appendChild(welcome);
       var hint = document.createElement('p');
       hint.className = 'chat-hint';
