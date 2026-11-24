@@ -1,6 +1,6 @@
 # Pendientes para dejar `main` al 100% — todas las fases cerradas
 
-> Última actualización: 2026-11-23. Todas las fases del port de `main` están implementadas y verificadas con fixtures locales. Queda solo el despliegue operativo del lote `.gs` en el backend (ver § Pendiente operativo).
+> Última actualización: 2026-11-24. Todas las fases del port de `main` están implementadas y verificadas con fixtures locales y en producción. El despliegue por Actions está operativo (build_type=workflow, sitemap/robots/fichas publicados). Queda solo el despliegue operativo del lote `.gs` en el backend (ver § Pendiente operativo) y la activación de apadrinamiento (decisión D2).
 
 1. [x] Fixture `caso-externo-gate` retirado y actualizado en `main` (lápida 410, `noindex`, fuera del sitemap).
 2. [x] Media/Drive y ciclo publicar/ocultar/retirar/restaurar verificados en producción; el primer cambio disparó deploy y el resto se agrupó en cola.
@@ -9,7 +9,7 @@
 5. [x] Mantener `scripts/exportar-datos.js` con `--soft` en el deploy. El workflow `.github/workflows/pages.yml` ya ejecuta `node scripts/exportar-datos.js --soft` (línea 39) antes del prerender. Verificado con `--dry --fixture`: 7 publicaciones, sin errores.
 6. [x] Verificar que el cliente lea JSON local y use GAS solo como fallback. `js/data-source.js` tiene `staticMode: true`; `publicaciones-api.js` lee `data/publicaciones.json` primero (`loadStatic`) y cae al canal solo si falla (`loadRealSection`). Prerender y check-links verificados con fixtures.
 7. [x] Revisar caché/SW y TTL para no saturar GitHub Pages ni GAS. `main` no tiene service worker propio; el cliente usa `cache: 'no-store'` y el canal de GAS gestiona su propia caché (~60 s con invalidación por versión al guardar). No hay SW que invalidar.
-8. [x] Revisar sitemap/SEO con el dominio final `https://gn-admin.github.io/main`. `sitemap.xml` y `robots.txt` existen en la raíz y `scripts/prerender.js` los regenera en cada deploy (F3). El dominio ya está configurado en `SITE_URL` del workflow y en `prerender.js` (`SITE_POR_DEFECTO`). `check-links.js`: 45 HTML sin enlaces rotos.
+8. [x] Revisar sitemap/SEO con el dominio final `https://gn-admin.github.io/main`. Verificado el 2026-11-24 en vivo: `sitemap.xml` (15 URLs: 8 fijas + 7 fichas indexables), `robots.txt` apuntando a él, fichas con canonical único, OG/Twitter y JSON-LD, lápidas `noindex,nofollow` fuera del sitemap. Bloqueo anterior (Pages en modo legacy) corregido: `build_type` cambiado a `workflow` y artefacto fijado a `upload-pages-artifact@v3` + `enablement: true`. Deploy `pages.yml` en verde y sitio servido por Actions.
 
 ## Pendiente operativo (backend GAS, fuera de este repo)
 
