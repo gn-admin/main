@@ -831,7 +831,7 @@
         b.addEventListener('click', function () { doSearch('', b.getAttribute('data-chat-filter') || ''); });
       });
       $$('[data-chat-form]', body).forEach(function (b) {
-        b.addEventListener('click', function () { chatForm(b.getAttribute('data-chat-form') || ''); });
+        b.addEventListener('click', function () { appendMsg(escHtml(b.textContent || ''), 'user'); chatForm(b.getAttribute('data-chat-form') || ''); });
       });
     }
 
