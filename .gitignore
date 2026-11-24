@@ -2,3 +2,6 @@
 publicaciones/
 sitemap.xml
 robots.txt
+
+# Espacio de trabajo de herramientas locales
+.freebuff/
