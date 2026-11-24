@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   window.__nebakImgFallback = function (el) { el.onerror = null; el.src = raizRelativa() + 'assets/images/logo.jpg'; };
   'use strict';
   document.documentElement.classList.add('js');
@@ -706,12 +706,41 @@
     function normalize(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
     function imgPath(p){ if(!p) return ''; var s=String(p); if(s.indexOf('http://')===0 || s.indexOf('https://')===0 || s.indexOf('../')===0 || s.charAt(0)==='/') return s; return raizRelativa()+s; }
 
+    function _composer() { return body.querySelector('.chat-composer'); }
+    function _insertBeforeComposer(node) { var c = _composer(); if (c) body.insertBefore(node, c); else body.appendChild(node); }
+    function appendMsg(html, role) {
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg' + (role === 'user' ? ' user' : '');
+      msg.innerHTML = html;
+      _insertBeforeComposer(msg);
+      try { body.scrollTop = body.scrollHeight; } catch (e) {}
+      return msg;
+    }
+    function showTyping() {
+      var t = document.createElement('div');
+      t.className = 'chat-msg chat-typing';
+      t.innerHTML = '<span class="chat-dots" aria-label="Escribiendo"><span></span><span></span><span></span></span>';
+      _insertBeforeComposer(t);
+      try { body.scrollTop = body.scrollHeight; } catch (e) {}
+      return t;
+    }
+    function scrollToBottom() { try { body.scrollTop = body.scrollHeight; } catch (e) {} }
+
     function homeView() {
       lastSearch = { query: '', filter: '' };
       setStatus('Listo para ayudarte');
-      body.innerHTML = ''+
-        '<div class="chat-msg"><strong>Hola, soy Nebi 🐾</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.</div>'+
-        '<p class="chat-hint">Prueba con “Trufa”, “perro senior”, “evento”, “acogida” o “voluntariado”.</p>'+
+      body.innerHTML = '';
+      var welcome = document.createElement('div');
+      welcome.className = 'chat-msg';
+      welcome.innerHTML = '<strong>Hola, soy Nebi 👋</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.';
+      body.appendChild(welcome);
+      var hint = document.createElement('p');
+      hint.className = 'chat-hint';
+      hint.textContent = 'Prueba con "Trufa", "perro senior", "evento", "acogida" o "voluntariado".';
+      body.appendChild(hint);
+      var composer = document.createElement('div');
+      composer.className = 'chat-composer';
+      composer.innerHTML =
         '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>'+
         '<div class="chat-quick">'+
           '<button type="button" data-quick="adoptar">Adoptar</button>'+
@@ -722,20 +751,19 @@
           '<button type="button" data-quick="eventos">Eventos</button>'+
           '<button type="button" data-quick="historias">Historias</button>'+
         '</div>'+
-        '<div id="chatResults" aria-live="polite"></div>'+
         '<div class="chat-opts">'+
-          '<button class="chat-opt" type="button" data-view="form-adopt">Solicitud de adopción</button>'+
+          '<button class="chat-opt" type="button" data-view="form-adopt">Solicitud de adopci\u00f3n</button>'+
           '<button class="chat-opt" type="button" data-view="form-acoge">Solicitud de acogida</button>'+
           '<button class="chat-opt" type="button" data-view="form-vol">Formulario de voluntariado</button>'+
           '<button class="chat-opt" type="button" data-view="form-donar">Consulta sobre donaciones</button>'+
           '<button class="chat-opt" type="button" data-view="form-socio">Hacerme socio/a</button>'+
           '<button class="chat-opt" type="button" data-view="form-contact">Formulario de contacto</button>'+
         '</div>';
+      body.appendChild(composer);
       wireHome();
-      scrollChatTop();
+      scrollToBottom();
       if (panel.classList.contains('is-open')) focusPanel();
     }
-
     function escHtml(v) {
       return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
@@ -755,14 +783,14 @@
     function routeIntent(q) {
       var raw = (q || '').trim();
       var t = normalize(raw);
+      if (raw) appendMsg(escHtml(raw), 'user');
       if (!t) {
         var emptyInput = $('#chatAnimalSearch');
         if (emptyInput) try { emptyInput.focus(); } catch (e) {}
         chatOut('<div class="chat-msg chat-empty">Escribe un nombre, una especie o un tipo de publicación; por ejemplo “Trufa”, “gato”, “evento” o “acogida”.</div>');
         return;
       }
-      var res = $('#chatResults');
-      if (res) res.innerHTML = '<div class="chat-msg user">' + escHtml(raw) + '</div><div class="chat-out"></div>';
+      appendMsg(escHtml(raw), 'user');
 
       var wantsForm = /\b(formulario|solicitud|rellenar|inscrib|apuntarme|apuntar)\b/.test(t);
       var wantsTo = /(quiero|me gustaria|me interesa|necesito)\s+(adoptar|acoger|ser voluntari|ser socio|ser socia|colaborar|donar|hacerme socio)/.test(t);
@@ -787,9 +815,12 @@
     }
 
     function chatOut(html) {
-      var out = $('#chatResults .chat-out') || $('#chatResults');
-      if (out) out.innerHTML = html;
-      return out;
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg';
+      msg.innerHTML = html;
+      _insertBeforeComposer(msg);
+      try { body.scrollTop = body.scrollHeight; } catch (e) {}
+      return msg;
     }
 
     function wireSearchSuggestions() {
@@ -839,7 +870,7 @@
           '</div>' + chips);
         wireFilterChips();
         setStatus('Listo para ayudarte');
-        scrollChatTop();
+        scrollToBottom();
         return;
       }
       var rows = items.map(function (item) {
@@ -855,13 +886,14 @@
       chatOut('<div class="chat-msg">' + count + (q ? ' para “' + escHtml(q) + '”' : '') + ':</div>' + chips + '<div class="chat-results">' + rows + '</div>');
       wireFilterChips();
       setStatus('Listo para ayudarte');
-      scrollChatTop();
+      scrollToBottom();
     }
 
     function doSearch(q, filtro) {
       lastSearch = { query: q || '', filter: filtro || '' };
       setStatus('Buscando…');
-      chatOut('<div class="chat-msg">Buscando coincidencias…</div>');
+      var typing = showTyping();
+      if (typing && typing.parentNode) typing.remove();
       loadPosts(function (posts) {
         if (!posts || !posts.length) {
           chatOut('<div class="chat-msg chat-empty">No he podido cargar las publicaciones ahora mismo. Puedes reintentar o abrir un formulario: ' +
@@ -899,6 +931,7 @@
       });
       $$('[data-view]', body).forEach(function (b) {
         b.addEventListener('click', function () {
+          appendMsg(escHtml(b.textContent || ''), 'user');
           var v = b.getAttribute('data-view');
           if (v === 'form-adopt') formAdopt();
           else if (v === 'form-acoge') formAcoge();
@@ -916,15 +949,21 @@
     function renderForm(title, intro, fieldsHtml, successText, meta) {
       meta = meta || {};
       setStatus('Formulario abierto');
-      body.innerHTML = backBtn() + '<div class="chat-msg"><strong>'+escHtml(title)+'</strong><br>'+intro+'</div>' +
-        '<form class="chat-form-inline" data-chat-inline-form>' +
+      var introMsg = document.createElement('div');
+      introMsg.className = 'chat-msg';
+      introMsg.innerHTML = '<strong>'+escHtml(title)+'</strong><br>'+intro;
+      _insertBeforeComposer(introMsg);
+      var formWrap = document.createElement('div');
+      formWrap.innerHTML = '<form class="chat-form-inline" data-chat-inline-form>' +
         '<input type="hidden" name="form_type" value="'+escAttr(meta.form_type||'chat')+'">' +
         '<input type="hidden" name="concepto" value="'+escAttr(meta.concepto||title)+'">' +
         '<input type="hidden" name="origen_pagina" value="'+escAttr(document.title||'main')+'">' +
         fieldsHtml +
         '<div class="chat-actions-row"><button class="chat-btn" type="submit">Enviar</button><button class="chat-btn chat-btn-ghost" type="button" data-back>Cancelar</button></div>' +
         '<p class="form-note">Formulario de contacto: incluimos el tipo de consulta para clasificar tu mensaje.</p></form>';
-      scrollChatTop();
+      var formEl = formWrap.querySelector('form');
+      _insertBeforeComposer(formWrap);
+      scrollToBottom();
       $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
       var f = $('[data-chat-inline-form]', body);
       if (f && window.NebakFormsTransport && typeof window.NebakFormsTransport.installHoneypots === 'function') {
@@ -948,10 +987,10 @@
         if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
         f.setAttribute('aria-busy', 'true');
         submitFormPayload(payload).then(function () {
-          body.innerHTML = backBtn() + successMsg(successText) + '<div class="chat-actions-row" style="margin-top:.5rem"><button class="chat-btn" type="button" data-back>Volver al inicio</button></div>';
+          appendMsg(successText, ''); var backWrap = document.createElement('div'); backWrap.className = 'chat-actions-row'; backWrap.style.marginTop = '.5rem'; backWrap.innerHTML = '<button class="chat-btn" type="button" data-back>Volver al inicio</button>'; _insertBeforeComposer(backWrap); backWrap.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', homeView); });
           $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
           setStatus('Mensaje enviado');
-          scrollChatTop();
+          scrollToBottom();
           var statusMsg = $('.chat-msg[role="status"]', body);
           if (statusMsg) { statusMsg.tabIndex = -1; try { statusMsg.focus(); } catch (e) {} }
         }, function (err) {

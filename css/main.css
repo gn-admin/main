@@ -866,3 +866,10 @@ body.modal-open { overflow: hidden; }
 .post-share-fallback input { width: 100%; padding: .55rem .65rem; border: 1px solid rgba(0,0,0,.18); border-radius: .5rem; font: inherit; }
 
 .post-share-toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 10000; background: #1b3a2a; color: #fff; padding: .7rem 1rem; border-radius: .6rem; box-shadow: 0 10px 24px rgba(0,0,0,.22); font-size: .9rem; max-width: 92vw; text-align: center; }
+.chat-composer { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(249,252,250,0), #fff 40%); padding-top: .5rem; }
+.chat-typing { display: inline-flex; align-items: center; gap: .35rem; }
+.chat-dots { display: inline-flex; gap: 4px; }
+.chat-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-deep, #158a43); animation: chatDot 1.2s infinite ease-in-out; }
+.chat-dots span:nth-child(2) { animation-delay: .15s; }
+.chat-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes chatDot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-4px); opacity: 1; } }
