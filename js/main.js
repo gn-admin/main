@@ -738,27 +738,30 @@
       hint.className = 'chat-hint';
       hint.textContent = 'Prueba con "Trufa", "perro senior", "evento", "acogida" o "voluntariado".';
       body.appendChild(hint);
+      var quicks = document.createElement('div');
+      quicks.className = 'chat-quick';
+      quicks.innerHTML =
+        '<button type="button" data-quick="adoptar">Adoptar</button>'+
+        '<button type="button" data-quick="acoger">Acoger</button>'+
+        '<button type="button" data-quick="voluntariado">Voluntariado</button>'+
+        '<button type="button" data-quick="donar">Donar</button>'+
+        '<button type="button" data-quick="socio">Socio/a</button>'+
+        '<button type="button" data-quick="eventos">Eventos</button>'+
+        '<button type="button" data-quick="historias">Historias</button>';
+      body.appendChild(quicks);
+      var opts = document.createElement('div');
+      opts.className = 'chat-opts';
+      opts.innerHTML =
+        '<button class="chat-opt" type="button" data-view="form-adopt">Solicitud de adopci\u00f3n</button>'+
+        '<button class="chat-opt" type="button" data-view="form-acoge">Solicitud de acogida</button>'+
+        '<button class="chat-opt" type="button" data-view="form-vol">Formulario de voluntariado</button>'+
+        '<button class="chat-opt" type="button" data-view="form-donar">Consulta sobre donaciones</button>'+
+        '<button class="chat-opt" type="button" data-view="form-socio">Hacerme socio/a</button>'+
+        '<button class="chat-opt" type="button" data-view="form-contact">Formulario de contacto</button>';
+      body.appendChild(opts);
       var composer = document.createElement('div');
       composer.className = 'chat-composer';
-      composer.innerHTML =
-        '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>'+
-        '<div class="chat-quick">'+
-          '<button type="button" data-quick="adoptar">Adoptar</button>'+
-          '<button type="button" data-quick="acoger">Acoger</button>'+
-          '<button type="button" data-quick="voluntariado">Voluntariado</button>'+
-          '<button type="button" data-quick="donar">Donar</button>'+
-          '<button type="button" data-quick="socio">Socio/a</button>'+
-          '<button type="button" data-quick="eventos">Eventos</button>'+
-          '<button type="button" data-quick="historias">Historias</button>'+
-        '</div>'+
-        '<div class="chat-opts">'+
-          '<button class="chat-opt" type="button" data-view="form-adopt">Solicitud de adopci\u00f3n</button>'+
-          '<button class="chat-opt" type="button" data-view="form-acoge">Solicitud de acogida</button>'+
-          '<button class="chat-opt" type="button" data-view="form-vol">Formulario de voluntariado</button>'+
-          '<button class="chat-opt" type="button" data-view="form-donar">Consulta sobre donaciones</button>'+
-          '<button class="chat-opt" type="button" data-view="form-socio">Hacerme socio/a</button>'+
-          '<button class="chat-opt" type="button" data-view="form-contact">Formulario de contacto</button>'+
-        '</div>';
+      composer.innerHTML = '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>';
       body.appendChild(composer);
       wireHome();
       scrollToBottom();
