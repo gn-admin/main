@@ -749,16 +749,6 @@
         '<button type="button" data-quick="eventos">Eventos</button>'+
         '<button type="button" data-quick="historias">Historias</button>';
       body.appendChild(quicks);
-      var opts = document.createElement('div');
-      opts.className = 'chat-opts';
-      opts.innerHTML =
-        '<button class="chat-opt" type="button" data-view="form-adopt">Solicitud de adopci\u00f3n</button>'+
-        '<button class="chat-opt" type="button" data-view="form-acoge">Solicitud de acogida</button>'+
-        '<button class="chat-opt" type="button" data-view="form-vol">Formulario de voluntariado</button>'+
-        '<button class="chat-opt" type="button" data-view="form-donar">Consulta sobre donaciones</button>'+
-        '<button class="chat-opt" type="button" data-view="form-socio">Hacerme socio/a</button>'+
-        '<button class="chat-opt" type="button" data-view="form-contact">Formulario de contacto</button>';
-      body.appendChild(opts);
       var composer = document.createElement('div');
       composer.className = 'chat-composer';
       composer.innerHTML = '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>';
@@ -869,9 +859,23 @@
       lastSearch.filter = filtro || '';
       var chips = filterChips(filtro);
       if (!items.length) {
-        chatOut('<div class="chat-msg chat-empty">No he encontrado “' + escHtml(q || '') + '”. Puedes probar con otro nombre, una especie o cambiar el filtro:' +
-          '</div>' + chips);
+        var sugerencia = '';
+        var t = normalize(q || '');
+        if (/acog/.test(t) || filtro === 'acogida') sugerencia = 'acogida';
+        else if (/volunt|colabor/.test(t)) sugerencia = 'voluntariado';
+        else if (/donar|donacion/.test(t)) sugerencia = 'donaciones';
+        else if (/socio/.test(t)) sugerencia = 'socio';
+        else if (/contact|consulta/.test(t)) sugerencia = 'contacto';
+        else sugerencia = 'adopcion-animal';
+        chatOut('<div class="chat-msg chat-empty">No he encontrado "' + escHtml(q || '') + '". Puedes probar con otro nombre, una especie o cambiar el filtro:' +
+          '</div>' + chips +
+          '<div class="chat-msg">Si buscabas ayuda con esto, puedo abrirte el formulario correspondiente:</div>' +
+          '<div class="chat-opts">' +
+            '<button class="chat-opt" type="button" data-chat-form="' + sugerencia + '">Abrir formulario</button>' +
+            '<button class="chat-opt" type="button" data-chat-form="contacto-general">Contacto</button>' +
+          '</div>');
         wireFilterChips();
+        wireSearchSuggestions();
         setStatus('Listo para ayudarte');
         scrollToBottom();
         return;
