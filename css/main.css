@@ -592,9 +592,10 @@ body.has-cookie .chat-widget { bottom: 6.5rem; }
 .chat-status::before { content:""; width:7px; height:7px; border-radius:50%; background:#1fbf5b; box-shadow:0 0 0 4px rgba(31,191,91,.12); }
 .chat-close { background: #fff; width: 36px; height: 36px; border-radius: 12px; font-size: 1.2rem; cursor: pointer; color: var(--muted); border: 1px solid var(--border); }
 .chat-body { padding: .95rem; display: grid; gap: .7rem; overflow: auto; flex: 1; background: linear-gradient(180deg,#f9fcfa,#fff 30%); align-content:start; }
-.chat-msg { background: #f1f9f4; border: 1px solid #dfeee5; border-radius: 18px 18px 18px 8px; padding: .8rem .9rem; font-size: .93rem; color: var(--ink-soft); line-height: 1.55; }
+/* Contenedor de la fila (avatar + burbuja): el estilo vive en .chat-msg-body. */
+.chat-msg { align-self: flex-start; font-size: .93rem; color: var(--ink-soft); line-height: 1.55; }
 .chat-msg strong { color: var(--ink); }
-.chat-msg.user { background:#102018; color:#fff; border-color:#102018; border-radius:18px 18px 8px 18px; justify-self:end; max-width: 92%; }
+.chat-msg.user { align-self: flex-end; max-width: 92%; }
 .chat-msg.user strong { color:#fff; }
 .chat-hint { font-size:.84rem; color: var(--muted); margin: -.1rem 0 .1rem; }
 .chat-quick { display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -889,12 +890,13 @@ body.modal-open { overflow: hidden; }
 .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; max-width: 85%; }
 @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .chat-avatar-mini { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#1fbf5b,#158a43); display: grid; place-items: center; color: #fff; flex-shrink: 0; margin-top: 2px; box-shadow: 0 2px 6px rgba(31,191,91,.3); }
-.chat-avatar-mini svg { width: 18px; height: 18px; }
+.chat-avatar-mini svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.chat-avatar-mini svg .fill-soft { fill: currentColor; opacity: .22; stroke: none; }
 .chat-msg-body { background: #f1f9f4; border: 1px solid #dfeee5; border-radius: 18px 18px 18px 8px; padding: .7rem .85rem; font-size: .93rem; color: var(--ink-soft); line-height: 1.55; box-shadow: 0 2px 6px rgba(15,23,42,.04); }
 .chat-msg.user .chat-msg-body { background: #102018; color: #fff; border-color: #102018; border-radius: 18px 18px 8px 18px; }
 .chat-msg.user strong { color: #fff; }
 .chat-msg-body strong { color: var(--ink); }
-.chat-msg.chat-empty { background: #fff7ed; border-color: #fde68a; color: #7a4a00; }
+.chat-msg.chat-empty .chat-msg-body { background: #fff7ed; border-color: #fde68a; color: #7a4a00; }
 .chat-msg.chat-typing .chat-msg-body { padding: .55rem .85rem; }
 .chat-dots { display: inline-flex; gap: 4px; align-items: center; }
 .chat-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-deep, #158a43); animation: chatDot 1.2s infinite ease-in-out; }
@@ -923,7 +925,8 @@ body.modal-open { overflow: hidden; }
 .chat-result h4 { margin: 0; font-size: .95rem; color: var(--ink); }
 .chat-result p { margin: .15rem 0 0; font-size: .84rem; color: var(--muted); }
 .chat-result a { font-size: .9rem; font-weight: 600; color: var(--brand-deep); }
-.chat-form-inline { display: grid; gap: .6rem; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: .85rem; box-shadow: 0 4px 14px rgba(15,23,42,.06); }
+.chat-form-inline { display: grid; gap: .6rem; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: .85rem; box-shadow: 0 4px 14px rgba(15,23,42,.06); transition: opacity .2s; }
+.chat-form-inline.is-closed { opacity: .55; pointer-events: none; }
 .chat-form-inline label { font-weight: 500; font-size: .9rem; display: grid; gap: .32rem; color: var(--ink-soft); }
 .chat-form-inline input, .chat-form-inline textarea, .chat-form-inline select { width: 100%; padding: .68rem .75rem; border: 1.5px solid #d9e2dc; border-radius: 12px; font-size: .95rem; transition: border-color .15s; }
 .chat-form-inline input:focus, .chat-form-inline textarea:focus, .chat-form-inline select:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px rgba(31,191,91,.12); }

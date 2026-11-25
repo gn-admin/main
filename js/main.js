@@ -681,7 +681,6 @@
     var lastSearch = { query: '', filter: '' };
 
     function setStatus(text) { if (statusEl) statusEl.textContent = text; }
-    function scrollChatTop() { try { body.scrollTop = 0; } catch (e) {} }
     function focusPanel() {
       window.setTimeout(function () {
         var target = panel.querySelector('#chatAnimalSearch');
@@ -708,65 +707,73 @@
 
     function _composer() { return body.querySelector('.chat-composer'); }
     function _insertBeforeComposer(node) { var c = _composer(); if (c) body.insertBefore(node, c); else body.appendChild(node); }
-    function appendMsg(html, role) {
-      var msg = document.createElement('div');
-      msg.className = 'chat-msg' + (role === 'user' ? ' user' : '');
-      if (role !== 'user') {
-        msg.innerHTML = '<span class="chat-avatar-mini" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></span><span class="chat-msg-body">' + html + '</span>';
-      } else {
-        msg.innerHTML = html;
-      }
-      _insertBeforeComposer(msg);
-      try { body.scrollTop = body.scrollHeight; } catch (e) {}
-      return msg;
-    }
-    function showTyping() {
-      var t = document.createElement('div');
-      t.className = 'chat-msg chat-typing';
-      t.innerHTML = '<span class="chat-dots" aria-label="Escribiendo"><span></span><span></span><span></span></span>';
-      _insertBeforeComposer(t);
-      try { body.scrollTop = body.scrollHeight; } catch (e) {}
-      return t;
-    }
-    function scrollToBottom() { try { body.scrollTop = body.scrollHeight; } catch (e) {} }
+    var AVATAR_MINI = '<span class="chat-avatar-mini" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></span>';
 
-    function homeView() {
-      lastSearch = { query: '', filter: '' };
-      setStatus('Listo para ayudarte');
-      body.innerHTML = '';
-      var welcome = document.createElement('div');
-      welcome.className = 'chat-msg';
-      welcome.innerHTML = '<span class="chat-avatar-mini" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></span><span class="chat-msg-body"><strong>Hola, soy Nebi \ud83d\udc4b</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.</span>';
-      body.appendChild(welcome);
-      var hint = document.createElement('p');
-      hint.className = 'chat-hint';
-      hint.textContent = 'Prueba con "Trufa", "perro senior", "evento", "acogida" o "voluntariado".';
-      body.appendChild(hint);
-      var quicks = document.createElement('div');
-      quicks.className = 'chat-quick';
-      quicks.innerHTML =
-        '<button type="button" data-quick="adoptar">Adoptar</button>'+
-        '<button type="button" data-quick="acoger">Acoger</button>'+
-        '<button type="button" data-quick="voluntariado">Voluntariado</button>'+
-        '<button type="button" data-quick="donar">Donar</button>'+
-        '<button type="button" data-quick="socio">Socio/a</button>'+
-        '<button type="button" data-quick="eventos">Eventos</button>'+
-        '<button type="button" data-quick="historias">Historias</button>';
-      body.appendChild(quicks);
-      var composer = document.createElement('div');
-      composer.className = 'chat-composer';
-      composer.innerHTML = '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Busca un animal, evento o historia..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>';
-      body.appendChild(composer);
-      wireHome();
-      scrollToBottom();
-      if (panel.classList.contains('is-open')) focusPanel();
-    }
+    function scrollToBottom() { try { body.scrollTop = body.scrollHeight; } catch (e) {} }
     function escHtml(v) {
       return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
-
     // Para valores dentro de atributos HTML (comillas simples y dobles).
     function escAttr(v) { return escHtml(v).replace(/'/g, '&#39;'); }
+
+    // Mensaje del hilo: burbuja con avatar del asistente o burbuja del usuario.
+    function appendMsg(html, role) {
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg' + (role === 'user' ? ' user' : '');
+      msg.innerHTML = (role === 'user' ? '' : AVATAR_MINI) + '<span class="chat-msg-body">' + html + '</span>';
+      _insertBeforeComposer(msg);
+      scrollToBottom();
+      return msg;
+    }
+
+    // Bloque suelto (chips, resultados, opciones) alineado bajo la burbuja.
+    function appendBlock(html) {
+      var wrap = document.createElement('div');
+      wrap.innerHTML = html;
+      while (wrap.firstChild) _insertBeforeComposer(wrap.firstChild);
+      scrollToBottom();
+    }
+
+    function setComposerBusy(busy) {
+      var btn = $('#chatSearchBtn');
+      var inp = $('#chatAnimalSearch');
+      if (btn) btn.disabled = !!busy;
+      if (inp) inp.disabled = !!busy;
+    }
+
+    // Indicador "escribiendo…": cada respuesta posee su propio nodo para que
+    // las respuestas solapadas no dejen el hilo bloqueado.
+    var pendingReplies = 0;
+    function beginReply(busy) {
+      pendingReplies++;
+      if (busy !== false) setComposerBusy(true);
+      var node = document.createElement('div');
+      node.className = 'chat-msg chat-typing';
+      node.innerHTML = AVATAR_MINI + '<span class="chat-msg-body"><span class="chat-dots" aria-label="Escribiendo"><span></span><span></span><span></span></span></span>';
+      _insertBeforeComposer(node);
+      scrollToBottom();
+      return node;
+    }
+    function endReply(node) {
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      pendingReplies = Math.max(0, pendingReplies - 1);
+      if (!pendingReplies) setComposerBusy(false);
+    }
+
+    // Respuesta del asistente con retardo: da sensación de conversación real.
+    function botSay(html, opts) {
+      opts = opts || {};
+      var node = beginReply(opts.busy);
+      setStatus('Escribiendo…');
+      var delay = opts.delay || Math.min(1350, 450 + String(html || '').length * 6);
+      window.setTimeout(function () {
+        endReply(node);
+        if (html) appendMsg(html, opts.role || '');
+        setStatus(opts.status || 'Listo para ayudarte');
+        if (opts.then) opts.then();
+        scrollToBottom();
+      }, delay);
+    }
 
     function chatForm(type) {
       if (type === 'adopcion-animal') formAdopt();
@@ -777,61 +784,135 @@
       else formContact();
     }
 
+    function quicksHtml() {
+      return '<div class="chat-quick">' +
+        '<button type="button" data-quick="adoptar">Adoptar</button>' +
+        '<button type="button" data-quick="acoger">Acoger</button>' +
+        '<button type="button" data-quick="voluntariado">Voluntariado</button>' +
+        '<button type="button" data-quick="donar">Donar</button>' +
+        '<button type="button" data-quick="socio">Socio/a</button>' +
+        '<button type="button" data-quick="eventos">Eventos</button>' +
+        '<button type="button" data-quick="historias">Historias</button>' +
+      '</div>';
+    }
+    function pushQuicks() { appendBlock(quicksHtml()); }
+
+    // Menú completo de formularios: se ofrece cuando la petición es ambigua.
+    function pushFormQuicks() {
+      appendBlock('<div class="chat-opts">' +
+        '<button class="chat-opt" type="button" data-chat-form="adopcion-animal">Solicitud de adopción</button>' +
+        '<button class="chat-opt" type="button" data-chat-form="acogida">Solicitud de acogida</button>' +
+        '<button class="chat-opt" type="button" data-chat-form="voluntariado">Formulario de voluntariado</button>' +
+        '<button class="chat-opt" type="button" data-chat-form="donaciones">Consulta sobre donaciones</button>' +
+        '<button class="chat-opt" type="button" data-chat-form="socio">Hacerme socio/a</button>' +
+        '<button class="chat-opt" type="button" data-chat-form="contacto-general">Contacto</button>' +
+      '</div>');
+    }
+
+    function ensureComposer() {
+      if (_composer()) return;
+      var composer = document.createElement('div');
+      composer.className = 'chat-composer';
+      composer.innerHTML = '<div class="chat-search"><input id="chatAnimalSearch" type="text" placeholder="Escribe tu consulta: un nombre, una especie o un tipo..." aria-label="Buscar publicaciones o escribir consulta" autocomplete="off"><button type="button" id="chatSearchBtn">Enviar</button></div>';
+      body.appendChild(composer);
+      var btn = $('#chatSearchBtn');
+      var inp = $('#chatAnimalSearch');
+      if (btn) btn.addEventListener('click', function () { routeIntent(inp ? inp.value : ''); });
+      if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); routeIntent(inp.value || ''); } });
+    }
+
+    function homeView() {
+      lastSearch = { query: '', filter: '' };
+      setStatus('Listo para ayudarte');
+      body.innerHTML = '';
+      pendingReplies = 0;
+      ensureComposer();
+      appendMsg('<strong>Hola, soy Nebi \ud83d\udc4b</strong><br>Busco fichas de animales, grupos y casos, eventos e historias, y te abro el formulario que necesites.', '');
+      // Segunda frase entrando con "escribiendo…": el asistente se presenta por pasos.
+      var node = beginReply(false);
+      setStatus('Escribiendo…');
+      window.setTimeout(function () {
+        endReply(node);
+        appendMsg('Prueba con <strong>"Trufa"</strong>, <strong>"perro senior"</strong>, <strong>"evento"</strong>, <strong>"acogida"</strong> o <strong>"voluntariado"</strong>. Dime qué necesitas.', '');
+        pushQuicks();
+        setStatus('Listo para ayudarte');
+        scrollToBottom();
+      }, 850);
+      scrollToBottom();
+      if (panel.classList.contains('is-open')) focusPanel();
+    }
+
     function routeIntent(q) {
       var raw = (q || '').trim();
       var t = normalize(raw);
+      var inp = $('#chatAnimalSearch');
+      if (inp) inp.value = '';
       if (raw) appendMsg(escHtml(raw), 'user');
       if (!t) {
-        var emptyInput = $('#chatAnimalSearch');
-        if (emptyInput) try { emptyInput.focus(); } catch (e) {}
-        chatOut('<div class="chat-msg chat-empty">Escribe un nombre, una especie o un tipo de publicación; por ejemplo “Trufa”, “gato”, “evento” o “acogida”.</div>');
+        if (inp) try { inp.focus(); } catch (e) {}
+        botSay('Escribe un nombre, una especie o un tipo de publicación; por ejemplo <strong>"Trufa"</strong>, <strong>"gato"</strong>, <strong>"evento"</strong> o <strong>"acogida"</strong>.');
         return;
       }
-      appendMsg(escHtml(raw), 'user');
+
+      // Conversación natural: saludos, cortesía y "no sé qué buscar".
+      if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|holi|que tal)$/.test(t)) {
+        botSay('¡Hola! 👋 Soy Nebi, el asistente de Grupo Nebak. Puedo buscar animales en adopción o acogida, enseñarte eventos e historias, y abrirte los formularios que necesites. ¿Qué te apetece?', { then: pushQuicks });
+        return;
+      }
+      if (/^(gracias|grax|genial|perfecto|vale|de nada|muy bien)$/.test(t)) {
+        botSay('¡A ti! Aquí sigo por si necesitas algo más.', { then: pushQuicks });
+        return;
+      }
+      if (/^(adios|hasta luego|chao|nos vemos|bye)$/.test(t)) {
+        botSay('¡Hasta luego! Cuando quieras, aquí estaré para ayudarte. 🐾');
+        return;
+      }
+      if (/^(no se|nose|ayuda|ayudame|duda|dudas|informacion|info|que puedo hacer|que haces|para que sirves)$/.test(t)) {
+        botSay('Puedo buscar animales en adopción o acogida, enseñarte eventos e historias, y abrirte el formulario que necesites: adopción, acogida, voluntariado, donaciones, socio/a o contacto. Dime qué te interesa.', { then: pushQuicks });
+        return;
+      }
 
       var wantsForm = /\b(formulario|solicitud|rellenar|inscrib|apuntarme|apuntar)\b/.test(t);
       var wantsTo = /(quiero|me gustaria|me interesa|necesito)\s+(adoptar|acoger|ser voluntari|ser socio|ser socia|colaborar|donar|hacerme socio)/.test(t);
 
-      if (/adop/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la solicitud de adopci\\u00f3n.', ''); formAdopt(raw); return; }
-      if (/acog/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la solicitud de acogida.', ''); formAcoge(raw); return; }
-      if (/(volunt|colabor)/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro el formulario de voluntariado.', ''); formVol(raw); return; }
-      if (/\b(socio|socia|socios|socias)\b/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro el formulario de socio/a.', ''); formSocio(raw); return; }
-      if (/\b(donar|donacion|donaciones|donativo|donativos|teaming|bizum|material|cuota)\b/.test(t) && (wantsForm || wantsTo)) { appendMsg('Perfecto, te abro la consulta sobre donaciones.', ''); formDonar(raw); return; }
+      if (/adop/.test(t) && (wantsForm || wantsTo)) { botSay('Perfecto, te abro la solicitud de adopción.', { delay: 550, then: function () { formAdopt(raw); } }); return; }
+      if (/acog/.test(t) && (wantsForm || wantsTo)) { botSay('Perfecto, te abro la solicitud de acogida.', { delay: 550, then: function () { formAcoge(); } }); return; }
+      if (/(volunt|colabor)/.test(t) && (wantsForm || wantsTo)) { botSay('Perfecto, te abro el formulario de voluntariado.', { delay: 550, then: function () { formVol(raw); } }); return; }
+      if (/\b(socio|socia|socios|socias)\b/.test(t) && (wantsForm || wantsTo)) { botSay('Perfecto, te abro el formulario de socio/a.', { delay: 550, then: function () { formSocio(); } }); return; }
+      if (/\b(donar|donacion|donaciones|donativo|donativos|teaming|bizum|material|cuota)\b/.test(t) && (wantsForm || wantsTo)) { botSay('Perfecto, te abro la consulta sobre donaciones.', { delay: 550, then: function () { formDonar(); } }); return; }
 
-      // Palabra suelta de intención: atajo directo al formulario.
+      // Palabra suelta de intención: primero se busca/ayuda, y solo si no hay
+      // resultados (o el usuario lo pide) se sugiere el formulario.
       if (t.split(/\s+/).filter(Boolean).length === 1) {
-        if (/^(adoptar|adopcion|adopciones)$/.test(t)) { appendMsg('Te muestro los animales disponibles para adopcion. Si no encuentras el que buscas, puedo abrirte la solicitud.', ''); doSearch('', ''); return; }
-        if (/^(acoger|acogida|acogidas)$/.test(t)) { appendMsg('Estas son las fichas en acogida. Si quieres ofrecer acogida, te abro el formulario al final.', ''); doSearch('', 'acogida'); return; }
-        if (/^(voluntariado|voluntario|voluntaria)$/.test(t)) { appendMsg('El voluntariado nos ayuda en colonias, rescates, traslados y eventos. Te dejo el formulario por si quieres apuntarte:', ''); formVol(raw); return; }
-        if (/^(donar|donacion|donaciones|teaming|bizum|material|cuota)$/.test(t)) { appendMsg('Gracias por tu interes en colaborar. Te explico las opciones y te abro la consulta:', ''); formDonar(); return; }
-        if (/^(socio|socia|socios|socias)$/.test(t)) { appendMsg('Hacerte socio/a nos ayuda a seguir rescatando. Te dejo el formulario:', ''); formSocio(); return; }
-        if (/^(eventos)$/.test(t)) { appendMsg('Estos son los eventos y actividades proximos:', ''); doSearch('', 'eventos'); return; }
-        if (/^(historias)$/.test(t)) { appendMsg('Aqui tienes nuestras historias:', ''); doSearch('', 'historias'); return; }
-        if (/^(contacto|contactar|escribir|consulta)$/.test(t)) { appendMsg('Escribenos y te responderemos lo antes posible:', ''); formContact(); return; }
+        if (/^(adoptar|adopcion|adopciones|adoptados)$/.test(t)) { doSearch('', 'adopcion', 'Te muestro los animales disponibles para adopción. Si no encuentras el que buscas, puedo abrirte la solicitud.'); return; }
+        if (/^(acoger|acogida|acogidas)$/.test(t)) { doSearch('', 'acogida', 'Estas son las fichas en acogida. Si quieres ofrecer acogida, te abro el formulario al final.'); return; }
+        if (/^(voluntariado|voluntario|voluntaria)$/.test(t)) { botSay('El voluntariado nos ayuda en colonias, rescates, traslados y eventos. Te dejo el formulario por si quieres apuntarte:', { then: function () { formVol(raw); } }); return; }
+        if (/^(donar|donacion|donaciones|teaming|bizum|material|cuota)$/.test(t)) { botSay('Gracias por tu interés en colaborar. Te explico las opciones y te abro la consulta:', { then: function () { formDonar(); } }); return; }
+        if (/^(socio|socia|socios|socias)$/.test(t)) { botSay('Hacerte socio/a nos ayuda a seguir rescatando. Te dejo el formulario:', { then: function () { formSocio(); } }); return; }
+        if (/^eventos$/.test(t)) { doSearch('', 'eventos', 'Estos son los eventos y actividades próximos:'); return; }
+        if (/^historias$/.test(t)) { doSearch('', 'historias', 'Aquí tienes nuestras historias:'); return; }
+        if (/^(contacto|contactar|escribir|consulta)$/.test(t)) { botSay('Escríbenos y te responderemos lo antes posible:', { then: function () { formContact(); } }); return; }
+      }
+
+      // El usuario pide un formulario pero no queda claro cuál: se preguntan las opciones.
+      if (wantsForm || wantsTo) {
+        botSay('¿Qué formulario necesitas? Puedo abrirte el de adopción, acogida, voluntariado, donaciones, socio/a o contacto:', { then: pushFormQuicks });
+        return;
       }
 
       doSearch(raw, '');
     }
 
-    function chatOut(html) {
-      var msg = document.createElement('div');
-      msg.className = 'chat-msg';
-      msg.innerHTML = html;
-      _insertBeforeComposer(msg);
-      try { body.scrollTop = body.scrollHeight; } catch (e) {}
-      return msg;
-    }
-
-    function wireSearchSuggestions() {
-      $$('[data-chat-search]', body).forEach(function (b) {
-        b.addEventListener('click', function () { doSearch(b.getAttribute('data-chat-search') || '', ''); });
-      });
-      $$('[data-chat-filter]', body).forEach(function (b) {
-        b.addEventListener('click', function () { doSearch('', b.getAttribute('data-chat-filter') || ''); });
-      });
-      $$('[data-chat-form]', body).forEach(function (b) {
-        b.addEventListener('click', function () { appendMsg(escHtml(b.textContent || ''), 'user'); chatForm(b.getAttribute('data-chat-form') || ''); });
-      });
+    // Contexto de la consulta: qué formulario encaja mejor con lo que busca.
+    function sugerenciaForm(q, filtro) {
+      var t = normalize(q || '');
+      if (/acog/.test(t) || filtro === 'acogida') return { type: 'acogida', label: 'Solicitud de acogida' };
+      if (/volunt|colabor/.test(t)) return { type: 'voluntariado', label: 'Formulario de voluntariado' };
+      if (/socio/.test(t)) return { type: 'socio', label: 'Hacerme socio/a' };
+      if (/donar|donacion|donativo|teaming|bizum|cuota|material/.test(t)) return { type: 'donaciones', label: 'Consulta sobre donaciones' };
+      if (/contact|consulta|duda|pregunta/.test(t)) return { type: 'contacto-general', label: 'Contacto' };
+      if (filtro === 'eventos' || filtro === 'historias') return { type: 'contacto-general', label: 'Contacto' };
+      return { type: 'adopcion-animal', label: 'Solicitud de adopción' };
     }
 
     function resultUrl(post) {
@@ -845,43 +926,29 @@
     }
 
     function filterChips(active) {
-      var options = [['', 'Todos'], ['gatos', 'Gatos'], ['perros', 'Perros'], ['acogida', 'Acogida'], ['eventos', 'Eventos'], ['historias', 'Historias']];
+      var options = [['', 'Todos'], ['adopcion', 'Adopción'], ['gatos', 'Gatos'], ['perros', 'Perros'], ['acogida', 'Acogida'], ['eventos', 'Eventos'], ['historias', 'Historias']];
       return '<div class="chat-quick chat-filters">' + options.map(function (o) {
         var on = (active || '') === o[0];
         return '<button type="button" data-chat-refilter="' + o[0] + '" class="' + (on ? 'is-active' : '') + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + o[1] + '</button>';
       }).join('') + '</div>';
     }
 
-    function wireFilterChips() {
-      $$('[data-chat-refilter]', body).forEach(function (b) {
-        b.addEventListener('click', function () {
-          doSearch(lastSearch.query, b.getAttribute('data-chat-refilter') || '');
-        });
-      });
-    }
-
     function renderSearchResults(items, q, filtro) {
       lastSearch.query = q || '';
       lastSearch.filter = filtro || '';
-      var chips = filterChips(filtro);
+      var s = sugerenciaForm(q, filtro);
       if (!items.length) {
-        var sugerencia = '';
-        var t = normalize(q || '');
-        if (/acog/.test(t) || filtro === 'acogida') sugerencia = 'acogida';
-        else if (/volunt|colabor/.test(t)) sugerencia = 'voluntariado';
-        else if (/donar|donacion/.test(t)) sugerencia = 'donaciones';
-        else if (/socio/.test(t)) sugerencia = 'socio';
-        else if (/contact|consulta/.test(t)) sugerencia = 'contacto';
-        else sugerencia = 'adopcion-animal';
-        chatOut('<div class="chat-msg chat-empty">No he encontrado "' + escHtml(q || '') + '". Puedes probar con otro nombre, una especie o cambiar el filtro:' +
-          '</div>' + chips +
-          '<div class="chat-msg">Si buscabas ayuda con esto, puedo abrirte el formulario correspondiente:</div>' +
-          '<div class="chat-opts">' +
-            '<button class="chat-opt" type="button" data-chat-form="' + sugerencia + '">Abrir formulario</button>' +
-            '<button class="chat-opt" type="button" data-chat-form="contacto-general">Contacto</button>' +
-          '</div>');
-        wireFilterChips();
-        wireSearchSuggestions();
+        var vacio = q
+          ? 'No he encontrado <strong>"' + escHtml(q) + '"</strong>. Puedes probar con otro nombre, una especie o cambiar el filtro:'
+          : 'No hay publicaciones en este apartado ahora mismo. Puedes cambiar el filtro o probar con otra consulta:';
+        var empty = appendMsg(vacio, '');
+        empty.classList.add('chat-empty');
+        appendBlock(filterChips(filtro));
+        appendMsg('Si buscabas ayuda con esto, puedo abrirte el formulario correspondiente:', '');
+        appendBlock('<div class="chat-opts">' +
+          '<button class="chat-opt" type="button" data-chat-form="' + s.type + '">' + escHtml(s.label) + '</button>' +
+          '<button class="chat-opt" type="button" data-chat-form="contacto-general">Contacto</button>' +
+        '</div>');
         setStatus('Listo para ayudarte');
         scrollToBottom();
         return;
@@ -896,76 +963,87 @@
         '</div>';
       }).join('');
       var count = items.length === 1 ? 'Mostrando 1 coincidencia' : 'Mostrando ' + items.length + ' coincidencias';
-      chatOut('<div class="chat-msg">' + count + (q ? ' para “' + escHtml(q) + '”' : '') + ':</div>' + chips + '<div class="chat-results">' + rows + '</div>');
-      wireFilterChips();
+      appendMsg(count + (q ? ' para <strong>"' + escHtml(q) + '"</strong>' : '') + ':', '');
+      appendBlock(filterChips(filtro));
+      appendBlock('<div class="chat-results">' + rows + '</div>');
+      // Seguimiento: el asistente propone el siguiente paso en vez de dejar la conversación en blanco.
+      appendMsg('¿Te interesa alguno? Si buscabas otra cosa, puedo abrirte el formulario correspondiente.', '');
+      appendBlock('<div class="chat-opts">' +
+        '<button class="chat-opt" type="button" data-chat-form="' + s.type + '">' + escHtml(s.label) + '</button>' +
+      '</div>');
       setStatus('Listo para ayudarte');
       scrollToBottom();
     }
 
-    function doSearch(q, filtro) {
+    function doSearch(q, filtro, intro) {
       lastSearch = { query: q || '', filter: filtro || '' };
+      var node = beginReply();
       setStatus('Buscando…');
-      var typing = showTyping();
-      if (typing && typing.parentNode) typing.remove();
+      var t0 = Date.now();
       loadPosts(function (posts) {
-        if (!posts || !posts.length) {
-          chatOut('<div class="chat-msg chat-empty">No he podido cargar las publicaciones ahora mismo. Puedes reintentar o abrir un formulario: ' +
-            '<button class="chat-back" type="button" data-chat-retry>Reintentar</button> ' +
-            '<button class="chat-back" type="button" data-chat-form="adopcion-animal">adopción</button> ' +
-            '<button class="chat-back" type="button" data-chat-form="acogida">acogida</button> ' +
-            '<button class="chat-back" type="button" data-chat-form="voluntariado">voluntariado</button>.</div>');
-          $$('[data-chat-retry]', body).forEach(function (b) {
-            b.addEventListener('click', function () { doSearch(lastSearch.query, lastSearch.filter); });
-          });
-          wireSearchSuggestions();
-          setStatus('Sin conexión');
-          return;
-        }
-        var items = [];
-        if (window.NebakBusqueda && typeof window.NebakBusqueda.buscar === 'function') {
-          items = window.NebakBusqueda.buscar(posts, q, filtro);
-        } else {
-          // Respaldo mínimo si no se cargó js/busqueda-publicaciones.js.
-          var nq = normalize(q);
-          items = posts.filter(function (p) {
-            return !nq || (normalize(p.title) + ' ' + normalize(p.excerpt) + ' ' + normalize(p.category)).indexOf(nq) !== -1;
-          }).slice(0, 8).map(function (p) { return { post: p, etiqueta: p.category || '' }; });
-        }
-        renderSearchResults(items, q, filtro);
+        // Retardo mínimo: el indicador "escribiendo…" se ve siempre un instante.
+        var wait = Math.max(0, 650 - (Date.now() - t0));
+        window.setTimeout(function () {
+          endReply(node);
+          if (intro) appendMsg(intro, '');
+          if (!posts || !posts.length) {
+            var err = appendMsg('No he podido cargar las publicaciones ahora mismo. Puedes reintentar o abrir un formulario:', '');
+            err.classList.add('chat-empty');
+            appendBlock('<div class="chat-opts">' +
+              '<button class="chat-opt" type="button" data-chat-retry>Reintentar la búsqueda</button>' +
+              '<button class="chat-opt" type="button" data-chat-form="adopcion-animal">Solicitud de adopción</button>' +
+              '<button class="chat-opt" type="button" data-chat-form="acogida">Solicitud de acogida</button>' +
+              '<button class="chat-opt" type="button" data-chat-form="voluntariado">Formulario de voluntariado</button>' +
+            '</div>');
+            setStatus('Sin conexión');
+            scrollToBottom();
+            return;
+          }
+          var items = [];
+          if (window.NebakBusqueda && typeof window.NebakBusqueda.buscar === 'function') {
+            items = window.NebakBusqueda.buscar(posts, q, filtro);
+          } else {
+            // Respaldo mínimo si no se cargó js/busqueda-publicaciones.js.
+            var nq = normalize(q);
+            items = posts.filter(function (p) {
+              return !nq || (normalize(p.title) + ' ' + normalize(p.excerpt) + ' ' + normalize(p.category)).indexOf(nq) !== -1;
+            }).slice(0, 8).map(function (p) { return { post: p, etiqueta: p.category || '' }; });
+          }
+          renderSearchResults(items, q, filtro);
+        }, wait);
       });
     }
 
-    function wireHome() {
-      var btn = $('#chatSearchBtn'); var inp = $('#chatAnimalSearch');
-      if (btn) btn.addEventListener('click', function(){ routeIntent(inp ? inp.value : ''); });
-      if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); routeIntent(inp.value || ''); }});
-      $$('[data-quick]', body).forEach(function (b) {
-        b.addEventListener('click', function(){ routeIntent(b.getAttribute('data-quick') || ''); });
-      });
-      $$('[data-view]', body).forEach(function (b) {
-        b.addEventListener('click', function () {
-          appendMsg(escHtml(b.textContent || ''), 'user');
-          var v = b.getAttribute('data-view');
-          if (v === 'form-adopt') formAdopt();
-          else if (v === 'form-acoge') formAcoge();
-          else if (v === 'form-vol') formVol();
-          else if (v === 'form-donar') formDonar();
-          else if (v === 'form-socio') formSocio();
-          else if (v === 'form-contact') formContact();
-        });
-      });
-    }
+    // Un solo oyente delegado: evita listeners duplicados al repintar el hilo.
+    body.addEventListener('click', function (e) {
+      var el = e.target && e.target.closest ? e.target.closest('[data-quick],[data-chat-form],[data-chat-refilter],[data-chat-retry],[data-back]') : null;
+      if (!el || !body.contains(el)) return;
+      var v;
+      if (el.hasAttribute('data-back')) {
+        var form = el.closest('[data-chat-inline-form]');
+        if (form) {
+          $$('input, textarea, select, button', form).forEach(function (n) { n.disabled = true; });
+          form.classList.add('is-closed');
+        }
+        botSay('Sin problema. ¿En qué más puedo ayudarte?', { then: pushQuicks });
+        return;
+      }
+      if ((v = el.getAttribute('data-quick')) !== null) { routeIntent(v); return; }
+      if ((v = el.getAttribute('data-chat-form')) !== null) {
+        appendMsg(escHtml(el.textContent || ''), 'user');
+        var tipo = v;
+        botSay('', { delay: 550, then: function () { chatForm(tipo); } });
+        return;
+      }
+      if ((v = el.getAttribute('data-chat-refilter')) !== null) { doSearch(lastSearch.query, v); return; }
+      if (el.hasAttribute('data-chat-retry')) { doSearch(lastSearch.query, lastSearch.filter); return; }
+    });
 
-    function backBtn() { return '<button class="chat-back" type="button" data-back>← Volver</button>'; }
-    function successMsg(text) { return '<div class="chat-msg" role="status">'+text+'</div>'; }
 
     function renderForm(title, intro, fieldsHtml, successText, meta) {
       meta = meta || {};
       setStatus('Formulario abierto');
-      var introMsg = document.createElement('div');
-      introMsg.className = 'chat-msg';
-      introMsg.innerHTML = '<strong>'+escHtml(title)+'</strong><br>'+intro;
-      _insertBeforeComposer(introMsg);
+      appendMsg('<strong>'+escHtml(title)+'</strong><br>'+intro, '');
       var formWrap = document.createElement('div');
       formWrap.innerHTML = '<form class="chat-form-inline" data-chat-inline-form>' +
         '<input type="hidden" name="form_type" value="'+escAttr(meta.form_type||'chat')+'">' +
@@ -975,10 +1053,14 @@
         '<div class="chat-actions-row"><button class="chat-btn" type="submit">Enviar</button><button class="chat-btn chat-btn-ghost" type="button" data-back>Cancelar</button></div>' +
         '<p class="form-note">Formulario de contacto: incluimos el tipo de consulta para clasificar tu mensaje.</p></form>';
       var formEl = formWrap.querySelector('form');
+      // Si ya había otro formulario abierto, se cierra para que solo haya uno activo.
+      $$('[data-chat-inline-form]', body).forEach(function (old) {
+        $$('input, textarea, select, button', old).forEach(function (n) { n.disabled = true; });
+        old.classList.add('is-closed');
+      });
       _insertBeforeComposer(formWrap);
       scrollToBottom();
-      $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
-      var f = $('[data-chat-inline-form]', body);
+      var f = formEl;
       if (f && window.NebakFormsTransport && typeof window.NebakFormsTransport.installHoneypots === 'function') {
         window.NebakFormsTransport.installHoneypots(f);
       }
@@ -1000,12 +1082,15 @@
         if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
         f.setAttribute('aria-busy', 'true');
         submitFormPayload(payload).then(function () {
-          appendMsg(successText, ''); var backWrap = document.createElement('div'); backWrap.className = 'chat-actions-row'; backWrap.style.marginTop = '.5rem'; backWrap.innerHTML = '<button class="chat-btn" type="button" data-back>Volver al inicio</button>'; _insertBeforeComposer(backWrap); backWrap.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', homeView); });
-          $$('[data-back]', body).forEach(function (b){ b.addEventListener('click', homeView); });
+          $$('input, textarea, select, button', f).forEach(function (n) { n.disabled = true; });
+          f.classList.add('is-closed');
+          var ok = appendMsg(successText, '');
+          ok.setAttribute('role', 'status');
+          pushQuicks();
           setStatus('Mensaje enviado');
           scrollToBottom();
-          var statusMsg = $('.chat-msg[role="status"]', body);
-          if (statusMsg) { statusMsg.tabIndex = -1; try { statusMsg.focus(); } catch (e) {} }
+          ok.tabIndex = -1;
+          try { ok.focus(); } catch (e) {}
         }, function (err) {
           if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; }
           f.removeAttribute('aria-busy');
@@ -1109,7 +1194,7 @@
       if (!e.target || e.target.isConnected === false) return;
       if (panel.contains(e.target) || toggle.contains(e.target)) return;
       // No cerrar con un clic fuera si hay un formulario abierto: se perderían los datos.
-      if (panel.querySelector('[data-chat-inline-form]')) return;
+      if (panel.querySelector('[data-chat-inline-form]:not(.is-closed)')) return;
       closeChat();
     });
   })();
