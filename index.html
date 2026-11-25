@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=7">
+  <link rel="stylesheet" href="css/main.css?v=13">
 <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon"></head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -307,11 +307,14 @@
     <div class="chat-head">
       <div class="chat-head-main">
         <div class="chat-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse class="fill-soft" cx="12" cy="15.2" rx="4.6" ry="3.7"/><circle cx="7.8" cy="9.2" r="1.5"/><circle cx="12" cy="8" r="1.6"/><circle cx="16.2" cy="9.2" r="1.5"/><path d="M7.5 15c0-2.6 2.1-4.3 4.5-4.3s4.5 1.7 4.5 4.3c0 2.1-2 3.8-4.5 3.8s-4.5-1.7-4.5-3.8Z"/></svg></div>
-        <div><h3>Asistente Nebak</h3><p>Adopciones, acogidas y ayuda</p><span class="chat-status">Listo para ayudarte</span></div>
+        <div class="chat-head-txt"><h3>Nebi</h3><p>Asistente de Grupo Nebak</p><span class="chat-status">En línea</span></div>
       </div>
-      <button class="chat-close" type="button" id="chatClose" aria-label="Cerrar asistente">&times;</button>
+      <div class="chat-head-actions">
+        <button class="chat-reset" type="button" id="chatReset" aria-label="Empezar una conversación nueva" title="Nueva conversación"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+        <button class="chat-close" type="button" id="chatClose" aria-label="Cerrar asistente">&times;</button>
+      </div>
     </div>
-    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-body" id="chatBody" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversación con Nebi"></div>
   </div>
   <button class="chat-toggle" type="button" id="chatToggle" aria-expanded="false" aria-controls="chatPanel" aria-label="Abrir asistente de Nebak"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse class="fill-soft" cx="12" cy="15.3" rx="4.4" ry="3.5"/><circle cx="8" cy="9.4" r="1.4"/><circle cx="12" cy="8.2" r="1.5"/><circle cx="16" cy="9.4" r="1.4"/><path d="M7.8 15.1c0-2.5 2-4.1 4.2-4.1s4.2 1.6 4.2 4.1c0 2-1.9 3.6-4.2 3.6s-4.2-1.6-4.2-3.6Z"/><path d="M5.2 6.2c1.2-1.2 3-1.8 4.8-1.8"/></svg></button>
 </div>
@@ -321,7 +324,7 @@
 <script src="js/busqueda-publicaciones.js?v=2"></script>
 <script src="js/forms-config.js?v=4"></script>
 <script src="js/forms-transport.js?v=4"></script>
-<script src="js/main.js?v=19"></script>
+<script src="js/main.js?v=27"></script>
 <script src="js/home.js?v=3"></script>
 </body>
 </html>
